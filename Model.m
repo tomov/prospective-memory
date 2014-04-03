@@ -30,21 +30,21 @@ classdef Model < handle
         ATTENTION_TO_PERCEPTION = 2;
         PERCEPTION_TO_RESPONSE = 2;
         PERCEPTION_TO_RESPONSE_INHIBITION = -2;
-        TARGET_TO_TASK = 10;
+        TARGET_TO_TASK = 5;
         TASK_TO_RESPONSE = 0.5;
         TASK_TO_RESPONSE_INHIBITION = 0;
-        TARGET_TO_PERCEPTION = 0;
+        TARGET_TO_PERCEPTION = 0.5;
         RESPONSE_TO_OUTPUT = 4;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
         TASK_INHIBITION = -1;
-        TARGET_INHIBITION = 0;
+        TARGET_INHIBITION = -0.1;
         ATTENTION_INHIBITION = -1;
         RESPONSE_INHIBITION = 0;
         OUTPUT_INHIBITION = 0;
         
         TASK_SELF = 5;
-        TARGET_SELF = 0;
+        TARGET_SELF = 5;
         ATTENTION_SELF = 5;
         
         % EM parameters

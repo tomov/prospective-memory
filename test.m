@@ -27,7 +27,7 @@ for i = 1:20
 end
 %}
 
-sim.wm_capacity = 1;
+sim.wm_capacity = 2;
 sim.instruction('See 7', 'Parity', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
@@ -35,7 +35,7 @@ sim.print_EM
 
 subplot(3, 2, 1);
 plot(act(:, sim.output_ids));
-legend(sim.units(sim.output_ids));
+%legend(sim.units(sim.output_ids));
 title('Outputs');
 
 subplot(3, 2, 3);
@@ -55,7 +55,7 @@ title('Feature Perception');
 
 subplot(3, 2, 2);
 plot(act(:, sim.task_ids));
-legend(sim.units(sim.task_ids));
+%legend(sim.units(sim.task_ids));
 title('Task Monitoring');
 
 subplot(3, 2, 4);

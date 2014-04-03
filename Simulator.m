@@ -76,10 +76,11 @@ classdef Simulator < Model
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
                 activation(self.task_ids) = -1;
-                %activation(self.target_ids) = 0;
+                activation(self.target_ids) = -1;
+                activation(self.attention_ids) = -1;
                 activation(self.unit_id('Magnitude')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Attend Number')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                %activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
+                activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
