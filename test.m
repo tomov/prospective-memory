@@ -66,7 +66,7 @@ title('Target Monitoring');
 subplot(3, 2, 6);
 plot(act(:, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
-title('Stimulus Inputs');
+title('Feature Attention');
 
 %subplot(3, 2, 6);
 %plot(act(:, sim.unit_id('Super Inhibition')));

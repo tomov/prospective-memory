@@ -26,8 +26,12 @@ classdef Simulator < Model
             from = zeros(1, self.N);
             from(target_ids) = self.MAXIMUM_ACTIVATION;
             to = zeros(1, self.N);
+            to(self.task_ids) = self.MINIMUM_ACTIVATION;
             to(monitor_ids) = self.MAXIMUM_ACTIVATION;
             duration = secs * self.CYCLES_PER_SEC;
+            % TODO duration doesn't really matter here, except for exponential
+            % unlearning (b/c we scale everything in the end of each
+            % cycle... which is also a bit inefficient but whatevs...
             for cycle=1:duration
                 % hebbian learning
                 delta_w = self.LEARNING_RATE * from' * to;
@@ -39,7 +43,6 @@ classdef Simulator < Model
                 self.weights(self.perception_ids, self.task_ids) = sub;                
             end
             % TODO -- formalize this somehow; EM with learning inhibition,
-            % also 2 is hardcoded....
             self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids);
         end
         
@@ -72,10 +75,10 @@ classdef Simulator < Model
                 activation(self.perception_ids) = 0;
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
-                %activation(self.task_ids) = 0;
+                activation(self.task_ids) = -1;
                 %activation(self.target_ids) = 0;
-                activation(self.unit_id('Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Attend Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Magnitude')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Attend Number')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 %activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout

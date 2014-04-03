@@ -30,11 +30,11 @@ classdef Model < handle
         ATTENTION_TO_PERCEPTION = 2;
         PERCEPTION_TO_RESPONSE = 2;
         PERCEPTION_TO_RESPONSE_INHIBITION = -2;
-        TARGET_TO_TASK = 0;
+        TARGET_TO_TASK = 10;
         TASK_TO_RESPONSE = 0.5;
         TASK_TO_RESPONSE_INHIBITION = 0;
         TARGET_TO_PERCEPTION = 0;
-        RESPONSE_TO_OUTPUT = 10;
+        RESPONSE_TO_OUTPUT = 4;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
         TASK_INHIBITION = -1;
@@ -49,7 +49,7 @@ classdef Model < handle
         
         % EM parameters
         
-        LEARNING_RATE = 0.01;
+        LEARNING_RATE = 0.1;
                 
         % variables
         
