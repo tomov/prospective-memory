@@ -74,8 +74,8 @@ classdef Simulator < Model
                 activation(self.output_ids) = 0;
                 %activation(self.task_ids) = 0;
                 %activation(self.target_ids) = 0;
-                activation(self.unit_id('Magnitude')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Attend Number')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Attend Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 %activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout
@@ -96,6 +96,10 @@ classdef Simulator < Model
                     kwta = self.k_winner_take_all(self.wm_capacity, net_input(self.wm_ids));
                     %net_input(self.wm_ids) = net_input(self.wm_ids) + kwta;
 
+                    % add k-winner-take-all inhibition to responses
+                    kwta = self.k_winner_take_all(1, net_input(self.response_ids));
+                    %net_input(self.response_ids) = net_input(self.response_ids) + kwta;
+                    
                     % add k-winner-take-all inhibition to outputs
                     kwta = self.k_winner_take_all(1, net_input(self.output_ids));
                     net_input(self.output_ids) = net_input(self.output_ids) + kwta;

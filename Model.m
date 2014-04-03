@@ -26,14 +26,14 @@ classdef Model < handle
         BIAS_FOR_TASK_MONITORING = 0;
         BIAS_FOR_TARGET_MONITORING = 0;
         
-        INPUT_TO_PERCEPTION = 10;
+        INPUT_TO_PERCEPTION = 2;
+        ATTENTION_TO_PERCEPTION = 2;
         PERCEPTION_TO_RESPONSE = 2;
-        PERCEPTION_TO_RESPONSE_INHIBITION = 0;
+        PERCEPTION_TO_RESPONSE_INHIBITION = -2;
         TARGET_TO_TASK = 0;
-        TASK_TO_RESPONSE = 1;
+        TASK_TO_RESPONSE = 0.5;
         TASK_TO_RESPONSE_INHIBITION = 0;
         TARGET_TO_PERCEPTION = 0;
-        ATTENTION_TO_PERCEPTION = 0;
         RESPONSE_TO_OUTPUT = 10;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
@@ -84,8 +84,20 @@ classdef Model < handle
                 end
             end
         end
-        
+
         function forward_connections(self, from, to, weight)
+            assert(size(from, 2) == size(to, 2));
+            for i=1:size(from, 2)
+                self.connections = [self.connections;
+                    from(i), to(i), weight];
+                fprintf('%s -> %s: %d\n', self.units{from(i)}, self.units{to(i)}, weight);
+            end
+        end
+        
+        function forward_all_to_all(self, from, to, weight, normalize)
+            if normalize
+                weight = weight / size(to, 2);
+            end
             for i=1:size(from, 2)
                 for j=1:size(to, 2)
                     if ~ismember([from(i), to(j)], self.connections(:,1:2), 'rows')
@@ -123,6 +135,7 @@ classdef Model < handle
             self.N = size(self.units, 2);
             self.unit_id = containers.Map(self.units, 1:self.N);
 
+            % IMPORTANT NOTE: these must be in order
             self.input_ids = [
                 self.unit_id('1'), self.unit_id('2'), self.unit_id('3'), ...
                 self.unit_id('4'), self.unit_id('6'), self.unit_id('7'), ...
@@ -142,27 +155,16 @@ classdef Model < handle
                 self.unit_id('button < 5'), self.unit_id('button > 5'), ...
                 self.unit_id('button red'), self.unit_id('button green')];
             self.task_ids = [self.unit_id('Magnitude'), self.unit_id('Parity'), self.unit_id('Color')];
-            self.target_ids = [self.unit_id('Monitor R'), self.unit_id('Monitor G'), ...
-                self.unit_id('Monitor 1'), self.unit_id('Monitor 2'), self.unit_id('Monitor 3'), self.unit_id('Monitor 4'), ...
-                self.unit_id('Monitor 6'), self.unit_id('Monitor 7'), self.unit_id('Monitor 8'), self.unit_id('Monitor 9')];
+            self.target_ids = [
+                self.unit_id('Monitor 1'), self.unit_id('Monitor 2'), self.unit_id('Monitor 3'), ...
+                self.unit_id('Monitor 4'), self.unit_id('Monitor 6'), self.unit_id('Monitor 7'), ...
+                self.unit_id('Monitor 8'), self.unit_id('Monitor 9'), ...
+                self.unit_id('Monitor R'), self.unit_id('Monitor G')];
             self.attention_ids = [self.unit_id('Attend Number'), self.unit_id('Attend Color')];
             self.wm_ids = [self.task_ids self.target_ids, self.attention_ids];
 
             self.connections = [
-                % raw inputs to seen inputs
-                self.unit_id('1')  , self.unit_id('See 1')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('2')  , self.unit_id('See 2')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('3')  , self.unit_id('See 3')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('4')  , self.unit_id('See 4')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('6')  , self.unit_id('See 6')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('7')  , self.unit_id('See 7')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('8')  , self.unit_id('See 8')            , self.INPUT_TO_PERCEPTION;
-                self.unit_id('9')  , self.unit_id('See 9')            , self.INPUT_TO_PERCEPTION;
-                
-                self.unit_id('R')  , self.unit_id('See R')            , self.INPUT_TO_PERCEPTION;   % TODO focal/nonfocal is hardcoded
-                self.unit_id('G')  , self.unit_id('See G')            , self.INPUT_TO_PERCEPTION;
-
-                % seen inputs to outputs
+                % perception to responses
                 self.unit_id('See 1')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('See 2')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('See 3')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
@@ -184,29 +186,18 @@ classdef Model < handle
                 self.unit_id('See R')          , self.unit_id('red')          , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('See G')          , self.unit_id('green')        , self.PERCEPTION_TO_RESPONSE;
 
-                % target monitoring to perception
-                self.unit_id('Monitor 1')  , self.unit_id('See 1')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 2')  , self.unit_id('See 2')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 3')  , self.unit_id('See 3')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 4')  , self.unit_id('See 4')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 6')  , self.unit_id('See 6')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 7')  , self.unit_id('See 7')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 8')  , self.unit_id('See 8')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor 9')  , self.unit_id('See 9')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor R')  , self.unit_id('See R')            , self.TARGET_TO_PERCEPTION;
-                self.unit_id('Monitor G')  , self.unit_id('See G')            , self.TARGET_TO_PERCEPTION;
-                
                 % attention to perception
-                self.unit_id('Attend Number')  , self.unit_id('See 1')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 2')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 3')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 4')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 6')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 7')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 8')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Number')  , self.unit_id('See 9')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Color')   , self.unit_id('See R')            , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Attend Color')   , self.unit_id('See G')            , self.ATTENTION_TO_PERCEPTION;
+                self.unit_id('Attend Number')  , self.unit_id('See 1')            , self.ATTENTION_TO_PERCEPTION / 8; % TODO hardcoded normalization...
+                self.unit_id('Attend Number')  , self.unit_id('See 2')            , self.ATTENTION_TO_PERCEPTION / 8;
+                self.unit_id('Attend Number')  , self.unit_id('See 3')            , self.ATTENTION_TO_PERCEPTION / 8; % perhaps do something like
+                self.unit_id('Attend Number')  , self.unit_id('See 4')            , self.ATTENTION_TO_PERCEPTION / 8; % dimensions ?
+                self.unit_id('Attend Number')  , self.unit_id('See 6')            , self.ATTENTION_TO_PERCEPTION / 8; % and discrete values in each dimension?
+                self.unit_id('Attend Number')  , self.unit_id('See 7')            , self.ATTENTION_TO_PERCEPTION / 8; % ...also it doesn't really work like this...
+                self.unit_id('Attend Number')  , self.unit_id('See 8')            , self.ATTENTION_TO_PERCEPTION / 8;
+                self.unit_id('Attend Number')  , self.unit_id('See 9')            , self.ATTENTION_TO_PERCEPTION / 8;
+                
+                self.unit_id('Attend Color')   , self.unit_id('See R')            , self.ATTENTION_TO_PERCEPTION / 2;
+                self.unit_id('Attend Color')   , self.unit_id('See G')            , self.ATTENTION_TO_PERCEPTION / 2;
                 
                 % task monitoring to responses
                 self.unit_id('Magnitude')           , self.unit_id('< 5')         , self.TASK_TO_RESPONSE;
@@ -215,34 +206,42 @@ classdef Model < handle
                 self.unit_id('Parity')              , self.unit_id('even')        , self.TASK_TO_RESPONSE;
                 self.unit_id('Color')               , self.unit_id('red')         , self.TASK_TO_RESPONSE;
                 self.unit_id('Color')               , self.unit_id('green')       , self.TASK_TO_RESPONSE;
-
-                % responses to outputs
-                self.unit_id('odd')                 , self.unit_id('button odd')    , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('even')                , self.unit_id('button even')   , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('< 5')                 , self.unit_id('button < 5')    , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('> 5')                 , self.unit_id('button > 5')    , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('red')                 , self.unit_id('button red')    , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('green')               , self.unit_id('button green')  , self.RESPONSE_TO_OUTPUT;
             ];
+
+            % raw inputs to perception
+            self.forward_connections(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);
+
+            % target monitoring to perception
+            self.forward_connections(self.target_ids, self.perception_ids, self.TARGET_TO_PERCEPTION);
+
+            % responses to outputs
+            self.forward_connections(self.response_ids, self.output_ids, self.RESPONSE_TO_OUTPUT);
             
-            self.forward_connections(self.perception_ids, self.task_ids, 0); % inputs to EM-based prospective memory triggers
-            self.forward_connections(self.perception_ids, self.response_ids, self.PERCEPTION_TO_RESPONSE_INHIBITION);
-            self.forward_connections(self.task_ids, self.response_ids, self.TASK_TO_RESPONSE_INHIBITION);
-            self.forward_connections(self.response_ids, self.response_ids, self.RESPONSE_TO_OUTPUT_INHIBITION);
+            % episodic memory
+            self.forward_all_to_all(self.perception_ids, self.task_ids, 0, false);
             
+            % forward inhibitions
+            self.forward_all_to_all(self.perception_ids, self.response_ids, self.PERCEPTION_TO_RESPONSE_INHIBITION, false);
+            self.forward_all_to_all(self.task_ids, self.response_ids, self.TASK_TO_RESPONSE_INHIBITION, false);
+            self.forward_all_to_all(self.response_ids, self.response_ids, self.RESPONSE_TO_OUTPUT_INHIBITION, false);
+            
+            % lateral inhibitions
             self.lateral_inhibition(self.task_ids, self.TASK_INHIBITION);
             self.lateral_inhibition(self.target_ids, self.TARGET_INHIBITION);
             self.lateral_inhibition(self.response_ids, self.RESPONSE_INHIBITION);
             self.lateral_inhibition(self.output_ids, self.OUTPUT_INHIBITION);
             self.lateral_inhibition(self.attention_ids, self.ATTENTION_INHIBITION);
             
+            % self excitations
             self.self_excitation(self.task_ids, self.TASK_SELF);
             self.self_excitation(self.target_ids, self.TARGET_SELF);
             self.self_excitation(self.attention_ids, self.ATTENTION_SELF);
             
+            % generate weight matrix from defined connections
             self.weights = sparse(self.connections(:,1), self.connections(:,2), self.connections(:,3), ...
                 self.N, self.N); 
 
+            % biases
             self.bias = zeros(1, self.N);
             self.bias(self.perception_ids) = self.BIAS_FOR_SEEN;
             self.bias(self.response_ids) = self.BIAS_FOR_RESPONSES;
