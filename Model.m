@@ -43,7 +43,7 @@ classdef Model < handle
         % top-down (feedback?) excitatory
         
         TASK_TO_RESPONSE = 1;
-        TARGET_TO_PERCEPTION = 9; % 9;
+        TARGET_TO_PERCEPTION = 7; % 9;
         ATTENTION_TO_PERCEPTION = 9;
         
         % top-down (feedback?) inhibitory
