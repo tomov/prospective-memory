@@ -27,7 +27,7 @@ for i = 1:20
 end
 %}
 
-sim.wm_capacity = 2;
+sim.wm_capacity = 1;
 sim.instruction('See 7', 'Parity', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
@@ -44,24 +44,29 @@ legend(sim.units(sim.response_ids));
 title('Responses');
 
 subplot(3, 2, 5);
-plot(act(:, sim.seen_ids));
-legend(sim.units(sim.seen_ids));
+plot(act(:, sim.perception_ids));
+legend(sim.units(sim.perception_ids));
 title('Feature Perception');
 
-subplot(3, 2, 6);
-plot(act(:, sim.input_ids));
-legend(sim.units(sim.input_ids));
-title('Stimulus Inputs');
+%subplot(3, 2, 6);
+%plot(act(:, sim.input_ids));
+%legend(sim.units(sim.input_ids));
+%title('Stimulus Inputs');
 
 subplot(3, 2, 2);
-plot(act(:, sim.task_monitor_ids));
-legend(sim.units(sim.task_monitor_ids));
+plot(act(:, sim.task_ids));
+legend(sim.units(sim.task_ids));
 title('Task Monitoring');
 
 subplot(3, 2, 4);
-plot(act(:, sim.target_monitor_ids));
-legend(sim.units(sim.target_monitor_ids));
+plot(act(:, sim.target_ids));
+legend(sim.units(sim.target_ids));
 title('Target Monitoring');
+
+subplot(3, 2, 6);
+plot(act(:, sim.attention_ids));
+legend(sim.units(sim.attention_ids));
+title('Stimulus Inputs');
 
 %subplot(3, 2, 6);
 %plot(act(:, sim.unit_id('Super Inhibition')));

@@ -34,13 +34,13 @@ classdef Simulator < Model
                 self.weights = self.weights + delta_w;
                 
                 % scale weights to fit model constraints
-                sub = self.weights(self.seen_ids, self.task_monitor_ids);
-                sub = sub * self.TARGET_TO_TASK_MONITORING / max(sub(:));
-                self.weights(self.seen_ids, self.task_monitor_ids) = sub;                
+                sub = self.weights(self.perception_ids, self.task_ids);
+                sub = sub * self.TARGET_TO_TASK / max(sub(:));
+                self.weights(self.perception_ids, self.task_ids) = sub;                
             end
             % TODO -- formalize this somehow; EM with learning inhibition,
             % also 2 is hardcoded....
-            self.weights(self.seen_ids, self.task_monitor_ids) = self.weights(self.seen_ids, self.task_monitor_ids) - 2;
+            self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids);
         end
         
         function bias = k_winner_take_all(self, k, net_inputs)
@@ -69,12 +69,13 @@ classdef Simulator < Model
                 timeout = stimuli{ord, 2} * self.CYCLES_PER_SEC;
                 
                 % reset response, output, and monitoring activations
-                activation(self.seen_ids) = 0;
+                activation(self.perception_ids) = 0;
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
-                activation(self.task_monitor_ids) = 0;
-                %activation(self.target_monitor_ids) = 0;
+                %activation(self.task_ids) = 0;
+                %activation(self.target_ids) = 0;
                 activation(self.unit_id('Magnitude')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Attend Number')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 %activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout
@@ -91,16 +92,22 @@ classdef Simulator < Model
                     % calculate net inputs for all units
                     net_input = activation * self.weights + self.bias;
                     
-                    % add k-winner-take-all inhibition
+                    % add k-winner-take-all inhibition to WM
                     kwta = self.k_winner_take_all(self.wm_capacity, net_input(self.wm_ids));
-                    net_input(self.wm_ids) = net_input(self.wm_ids) + kwta;
+                    %net_input(self.wm_ids) = net_input(self.wm_ids) + kwta;
+
+                    % add k-winner-take-all inhibition to outputs
+                    kwta = self.k_winner_take_all(1, net_input(self.output_ids));
+                    net_input(self.output_ids) = net_input(self.output_ids) + kwta;
 
                     % update activation levels
                     for i=1:self.N
                         if net_input(i) >= 0
-                            delta_act = self.STEP_SIZE * net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i));
+                            delta_act = self.EXCITATION_STEP_SIZE * net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i)) ...
+                                - self.DECAY_STEP_SIZE * activation(i);
                         else
-                            delta_act = self.STEP_SIZE * net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION);
+                            delta_act = self.EXCITATION_STEP_SIZE * net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION) ...
+                                - self.DECAY_STEP_SIZE * activation(i);
                         end
                         activation(i) = activation(i) + delta_act;
                     end
