@@ -34,13 +34,13 @@ classdef Simulator < Model
                 self.weights = self.weights + delta_w;
                 
                 % scale weights to fit model constraints
-                sub = self.weights(self.seen_ids, self.task_monitor_ids);
-                sub = sub * self.TARGET_TO_TASK_MONITORING / max(sub(:));
-                self.weights(self.seen_ids, self.task_monitor_ids) = sub;                
+                sub = self.weights(self.perception_ids, self.task_ids);
+                sub = sub * self.PERCEPTION_TO_TASK / max(sub(:));
+                self.weights(self.perception_ids, self.task_ids) = sub;                
             end
             % TODO -- formalize this somehow; EM with learning inhibition,
             % also 2 is hardcoded....
-            self.weights(self.seen_ids, self.task_monitor_ids) = self.weights(self.seen_ids, self.task_monitor_ids) - 2;
+            self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids) - 2;
         end
         
         function bias = k_winner_take_all(self, k, net_inputs)
@@ -69,11 +69,11 @@ classdef Simulator < Model
                 timeout = stimuli{ord, 2} * self.CYCLES_PER_SEC;
                 
                 % reset response, output, and monitoring activations
-                activation(self.seen_ids) = 0;
+                activation(self.perception_ids) = 0;
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
-                activation(self.task_monitor_ids) = 0;
-                %activation(self.target_monitor_ids) = 0;
+                activation(self.task_ids) = 0;
+                %activation(self.target_ids) = 0;
                 activation(self.unit_id('Magnitude')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 %activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
