@@ -25,6 +25,7 @@ classdef Model < handle
         BIAS_FOR_OUTPUTS = -0.5;
         BIAS_FOR_TASK = 0;
         BIAS_FOR_TARGET = 0;
+        BIAS_FOR_ATTENTION = -1;
         
         % feedforward excitatory
         
@@ -42,26 +43,27 @@ classdef Model < handle
         % top-down (feedback?) excitatory
         
         TASK_TO_RESPONSE = 1;
-        TARGET_TO_PERCEPTION = 9;
-        ATTENTION_TO_PERCEPTION = 0;
+        TARGET_TO_PERCEPTION = 9; % 9;
+        ATTENTION_TO_PERCEPTION = 9;
         
         % top-down (feedback?) inhibitory
         
         TASK_TO_RESPONSE_INHIBITION = 0;
 
         % lateral intralayer inhibitory
-        
-        TASK_INHIBITION = -3;
-        TARGET_INHIBITION = -1;
+
+        PERCEPTION_INHIBITION = 0;
         RESPONSE_INHIBITION = -2;
         OUTPUT_INHIBITION = -1;
+        TASK_INHIBITION = -3;
+        TARGET_INHIBITION = -0.5; %  -1;
         ATTENTION_INHIBITION = -1;
         
         % self-excitatory
         
         TASK_SELF = 3;
         TARGET_SELF = 0;
-        ATTENTION_SELF = 0;
+        ATTENTION_SELF = 3;
         
         % --- end of connection weights ---
         
@@ -244,10 +246,11 @@ classdef Model < handle
             self.forward_all_to_all(self.response_ids, self.response_ids, self.RESPONSE_TO_OUTPUT_INHIBITION);
 
             % lateral inhibitions
-            self.lateral_inhibition(self.task_ids, self.TASK_INHIBITION);
-            self.lateral_inhibition(self.target_ids, self.TARGET_INHIBITION);
+            self.lateral_inhibition(self.perception_ids, self.PERCEPTION_INHIBITION);
             self.lateral_inhibition(self.response_ids, self.RESPONSE_INHIBITION);
             self.lateral_inhibition(self.output_ids, self.OUTPUT_INHIBITION);
+            self.lateral_inhibition(self.task_ids, self.TASK_INHIBITION);
+            self.lateral_inhibition(self.target_ids, self.TARGET_INHIBITION);
             self.lateral_inhibition(self.attention_ids, self.ATTENTION_INHIBITION);
 
             % self excitations
@@ -266,6 +269,7 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.target_ids) = self.BIAS_FOR_TARGET;
+            self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
         end
         
         function EM = print_EM(self)

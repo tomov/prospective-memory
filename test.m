@@ -27,7 +27,7 @@ for i = 1:20
 end
 %}
 
-sim.wm_capacity = 2;
+sim.wm_capacity = 3;
 sim.instruction('See 7', 'Parity', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
@@ -35,7 +35,7 @@ sim.print_EM
 
 subplot(3, 2, 1);
 plot(act(:, sim.output_ids));
-legend(sim.units(sim.output_ids));
+%legend(sim.units(sim.output_ids));
 title('Outputs');
 
 subplot(3, 2, 3);
@@ -66,7 +66,7 @@ title('Target Monitoring');
 subplot(3, 2, 6);
 plot(act(:, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
-title('Perception Attention');
+title('Ongoing Monitoring');
 
 %subplot(3, 2, 6);
 %plot(act(:, sim.unit_id('Super Inhibition')));
