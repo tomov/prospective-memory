@@ -62,7 +62,7 @@ classdef Model < handle
         % self-excitatory
         
         TASK_SELF = 3;
-        TARGET_SELF = 0;
+        TARGET_SELF = 3;
         ATTENTION_SELF = 3;
         
         % --- end of connection weights ---
