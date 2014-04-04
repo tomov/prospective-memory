@@ -16,7 +16,8 @@ stimuli = [
     {'gnaw'}, 1;
     ];
 
-     
+stimuli = [stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli]
+
      
 %{
 RTtot = []
@@ -28,7 +29,7 @@ end
 %}
 
 sim.wm_capacity = 2;
-sim.instruction('see:jaw', 'Lexical Category', 2);
+sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'PM Task', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 

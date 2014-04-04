@@ -91,7 +91,7 @@ classdef Simulator < Model
                 activation(self.perception_ids) = 0;
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
-                %activation(self.task_ids) = 0;
+                activation(self.task_ids) = 0;
                 activation(self.target_ids) = 0;
                 activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
@@ -112,8 +112,10 @@ classdef Simulator < Model
                     self.net_input = activation * self.weights + self.bias;
                     
                     % add k-winner-take-all inhibition
+                    self.kWTA_basic(1, self.output_ids);
+                    self.kWTA_basic(1, self.response_ids);
                     self.kWTA_basic(1, self.task_ids);
-                    self.kWTA_basic(1, self.target_ids);
+                    %self.kWTA_basic(1, self.target_ids);
                     self.kWTA_basic(1, self.attention_ids);
                     %self.kWTA_average(self.wm_capacity, self.wm_ids);
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);

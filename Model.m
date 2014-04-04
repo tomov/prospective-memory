@@ -24,7 +24,7 @@ classdef Model < handle
         BIAS_FOR_RESPONSES = -1;
         BIAS_FOR_OUTPUTS = -0.5;
         BIAS_FOR_TASK = 0;
-        BIAS_FOR_TARGET = 0;
+        BIAS_FOR_TARGET = -10;
         BIAS_FOR_ATTENTION = -1;
         
         % feedforward excitatory
@@ -53,8 +53,8 @@ classdef Model < handle
         % lateral intralayer inhibitory
 
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = -2;
-        OUTPUT_INHIBITION = -1;
+        RESPONSE_INHIBITION = 0;
+        OUTPUT_INHIBITION = 0;
         TASK_INHIBITION = 0;
         TARGET_INHIBITION = 0;
         ATTENTION_INHIBITION = 0;
@@ -152,11 +152,11 @@ classdef Model < handle
                 };
             self.perception_units = strcat('see:', self.input_units')';
             self.response_units = {
-                'noun', 'verb', '1 vowel', '2 vowels'
+                'noun', 'verb', '1 vowel', '2 vowels', 'PM'
                 };
             self.output_units = strcat('say:', self.response_units')';
             self.task_units = {
-                'Lexical Category', 'Number of Vowels'
+                'Lexical Category', 'Number of Vowels', 'PM Task'
                 };
             self.target_units = strcat('lookfor:', self.input_units')';
             self.attention_units = {
@@ -195,6 +195,7 @@ classdef Model < handle
                 self.unit_id('Lexical Category')           , self.unit_id('verb')         , self.TASK_TO_RESPONSE;
                 self.unit_id('Number of Vowels')           , self.unit_id('1 vowel')      , self.TASK_TO_RESPONSE;
                 self.unit_id('Number of Vowels')           , self.unit_id('2 vowels')     , self.TASK_TO_RESPONSE;
+                self.unit_id('PM Task')                    , self.unit_id('PM')           , self.TASK_TO_RESPONSE;
             ];
             
             % perception to response mappings
@@ -224,6 +225,8 @@ classdef Model < handle
                 }')');
             to = self.unit_id('2 vowels');
             self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
+            
+            self.forward_all_to_all(self.perception_ids, self.unit_id('PM'), self.PERCEPTION_TO_RESPONSE);
             
             % attention to perception
             from = self.unit_id('Attend Word');
