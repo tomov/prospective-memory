@@ -77,3 +77,5 @@ title('Ongoing Monitoring');
 
 RTs
 responses
+
+mean(RTs)
