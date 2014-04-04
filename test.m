@@ -6,14 +6,14 @@ Simulator
 sim = Simulator();
 
 stimuli = [
-    {'1,R'}, 1;
-    {'2,G'}, 1;
-    {'3,R'}, 1;
-    {'4,G'}, 1;
-    {'6,R'}, 1;
-    {'7,G'}, 1;
-    {'8,R'}, 1;
-    {'9,G'}, 1;
+    {'church'}, 1;
+    {'fight'}, 1;
+    {'jail'}, 1;
+    {'herb'}, 1;
+    {'goal'}, 1;
+    {'jaw'}, 1;
+    {'cite'}, 1;
+    {'gnaw'}, 1;
     ];
 
      
@@ -27,8 +27,8 @@ for i = 1:20
 end
 %}
 
-sim.wm_capacity = 3;
-sim.instruction('See 7', 'Parity', 2);
+sim.wm_capacity = 2;
+sim.instruction('see:jaw', 'Lexical Category', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 

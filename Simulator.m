@@ -47,13 +47,19 @@ classdef Simulator < Model
         % from http://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Networks/kWTA_Equations
         function kWTA_basic(self, k, ids)
             act = sort(self.net_input(ids), 'descend');
-            q = 0.6;
+            if size(act, 2) <= k
+                return
+            end
+            q = 0.5;
             threshold = act(k+1) + q*(act(k) - act(k+1));
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
 
         function kWTA_average(self, k, ids)
             act = sort(self.net_input(ids), 'descend');
+            if size(act, 2) <= k
+                return
+            end
             top = mean(act(1:k));
             bottom = mean(act(k+1:end));
             q = 0.5;
@@ -86,10 +92,10 @@ classdef Simulator < Model
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
                 %activation(self.task_ids) = 0;
-                %activation(self.target_ids) = 0;
-                activation(self.unit_id('Attend Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
+                activation(self.target_ids) = 0;
+                activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                %activation(self.unit_id('see:jaw')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
@@ -109,7 +115,7 @@ classdef Simulator < Model
                     self.kWTA_basic(1, self.task_ids);
                     self.kWTA_basic(1, self.target_ids);
                     self.kWTA_basic(1, self.attention_ids);
-                    self.kWTA_average(self.wm_capacity, self.wm_ids);
+                    %self.kWTA_average(self.wm_capacity, self.wm_ids);
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);
 

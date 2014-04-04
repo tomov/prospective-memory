@@ -77,6 +77,14 @@ classdef Model < handle
         N
         unit_id
         
+        input_units
+        perception_units
+        response_units
+        output_units
+        task_units
+        target_units
+        attention_units
+        
         input_ids
         perception_ids
         response_ids        
@@ -136,97 +144,95 @@ classdef Model < handle
         end
         
         function self = Model()
-            self.units = {
-                '1', '2', '3', '4', '6', '7', '8', '9', 'R', 'G', ...                       % raw inputs
-                'See 1', 'See 2', 'See 3', 'See 4', 'See 6', ...
-                'See 7', 'See 8', 'See 9', 'See R', 'See G', ...                            % seen (conscious) inputs
-                'odd', 'even', '> 5', '< 5', 'red', 'green', ...                            % responses
-                'button odd', 'button even', 'button < 5', 'button > 5', ...
-                'button red', 'button green', 'timeout' ...                                 % outputs
-                'Magnitude', 'Parity', 'Color' ...                                          % task monitoring
-                'Monitor 1', 'Monitor 2', 'Monitor 3', 'Monitor 4', ...
-                'Monitor 6', 'Monitor 7', 'Monitor 8', 'Monitor 9', ...
-                'Monitor R', 'Monitor G', ...                                               % target monitoring
-                'Attend Number', 'Attend Color', ...                                        % attention to perception
-                'Super Inhibition'
+            % specify unit names in each layer
+            self.input_units = {
+                'rate', 'fight', 'jail', 'herb', 'goal', ...
+                'jaw', 'cite', 'gnaw', 'pluck', 'scarf', ...
+                'seed', 'boost', 'halt', 'sphere', 'streak', 'church'
                 };
+            self.perception_units = strcat('see:', self.input_units')';
+            self.response_units = {
+                'noun', 'verb', '1 vowel', '2 vowels'
+                };
+            self.output_units = strcat('say:', self.response_units')';
+            self.task_units = {
+                'Lexical Category', 'Number of Vowels'
+                };
+            self.target_units = strcat('lookfor:', self.input_units')';
+            self.attention_units = {
+                'Attend Word'
+                };
+            self.units = [
+                self.input_units, ...
+                self.perception_units, ...
+                self.response_units, ...
+                self.output_units, ...
+                self.task_units, ...
+                self.target_units, ...
+                self.attention_units, ...
+                {'timeout'}
+                ];
             
+            % generate indices (for convenience)
             self.N = size(self.units, 2);
             self.unit_id = containers.Map(self.units, 1:self.N);
 
-            self.input_ids = [
-                self.unit_id('1'), self.unit_id('2'), self.unit_id('3'), ...
-                self.unit_id('4'), self.unit_id('6'), self.unit_id('7'), ...
-                self.unit_id('8'), self.unit_id('9'), ...
-                self.unit_id('R'), self.unit_id('G')];
-            self.perception_ids = [
-                self.unit_id('See 1'), self.unit_id('See 2'), self.unit_id('See 3'), ...
-                self.unit_id('See 4'), self.unit_id('See 6'), self.unit_id('See 7'), ...
-                self.unit_id('See 8'), self.unit_id('See 9'), ...
-                self.unit_id('See R'), self.unit_id('See G')];
-            self.response_ids = [
-                self.unit_id('odd'), self.unit_id('even'), ...
-                self.unit_id('< 5'), self.unit_id('> 5'), ...
-                self.unit_id('red'), self.unit_id('green')];
-            self.output_ids = [
-                self.unit_id('button odd'), self.unit_id('button even'), ...
-                self.unit_id('button < 5'), self.unit_id('button > 5'), ...
-                self.unit_id('button red'), self.unit_id('button green')];
-            self.task_ids = [self.unit_id('Magnitude'), self.unit_id('Parity'), self.unit_id('Color')];
-            self.target_ids = [
-                self.unit_id('Monitor 1'), self.unit_id('Monitor 2'), self.unit_id('Monitor 3'), ... 
-                self.unit_id('Monitor 4'), self.unit_id('Monitor 6'), self.unit_id('Monitor 7'), ...
-                self.unit_id('Monitor 8'), self.unit_id('Monitor 9'), ...
-                self.unit_id('Monitor R'), self.unit_id('Monitor G')];
-            self.attention_ids = [
-                self.unit_id('Attend Number'), self.unit_id('Attend Color')
-                ];
+            self.input_ids = cellfun(@self.unit_id, self.input_units);
+            self.perception_ids = cellfun(@self.unit_id, self.perception_units);
+            self.response_ids = cellfun(@self.unit_id, self.response_units);
+            self.output_ids = cellfun(@self.unit_id, self.output_units);
+            self.task_ids = cellfun(@self.unit_id, self.task_units);
+            self.target_ids = cellfun(@self.unit_id, self.target_units);
+            self.attention_ids = cellfun(@self.unit_id, self.attention_units);
+            
             self.wm_ids = [self.task_ids self.target_ids self.attention_ids];
 
+            % specify connections between units
+            
             self.connections = [
-                % perception to responses mappings
-                self.unit_id('See 1')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 2')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 3')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 4')          , self.unit_id('< 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 6')          , self.unit_id('> 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 7')          , self.unit_id('> 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 8')          , self.unit_id('> 5')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 9')          , self.unit_id('> 5')          , self.PERCEPTION_TO_RESPONSE;
-
-                self.unit_id('See 1')          , self.unit_id('odd')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 2')          , self.unit_id('even')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 3')          , self.unit_id('odd')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 4')          , self.unit_id('even')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 6')          , self.unit_id('even')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 7')          , self.unit_id('odd')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 8')          , self.unit_id('even')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See 9')          , self.unit_id('odd')          , self.PERCEPTION_TO_RESPONSE;
-
-                self.unit_id('See R')          , self.unit_id('red')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('See G')          , self.unit_id('green')        , self.PERCEPTION_TO_RESPONSE;
-
-                % attention to perception
-                self.unit_id('Attend Number')  , self.unit_id('See 1')            , self.ATTENTION_TO_PERCEPTION / 8; % TODO hardcoded normalization...
-                self.unit_id('Attend Number')  , self.unit_id('See 2')            , self.ATTENTION_TO_PERCEPTION / 8;
-                self.unit_id('Attend Number')  , self.unit_id('See 3')            , self.ATTENTION_TO_PERCEPTION / 8; % perhaps do something like
-                self.unit_id('Attend Number')  , self.unit_id('See 4')            , self.ATTENTION_TO_PERCEPTION / 8; % dimensions ?
-                self.unit_id('Attend Number')  , self.unit_id('See 6')            , self.ATTENTION_TO_PERCEPTION / 8; % and discrete values in each dimension?
-                self.unit_id('Attend Number')  , self.unit_id('See 7')            , self.ATTENTION_TO_PERCEPTION / 8; % ...also it doesn't really work like this...
-                self.unit_id('Attend Number')  , self.unit_id('See 8')            , self.ATTENTION_TO_PERCEPTION / 8;
-                self.unit_id('Attend Number')  , self.unit_id('See 9')            , self.ATTENTION_TO_PERCEPTION / 8;
-
-                self.unit_id('Attend Color')   , self.unit_id('See R')            , self.ATTENTION_TO_PERCEPTION / 2;
-                self.unit_id('Attend Color')   , self.unit_id('See G')            , self.ATTENTION_TO_PERCEPTION / 2;
-
                 % task monitoring to responses
-                self.unit_id('Magnitude')           , self.unit_id('< 5')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Magnitude')           , self.unit_id('> 5')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Parity')              , self.unit_id('odd')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Parity')              , self.unit_id('even')        , self.TASK_TO_RESPONSE;
-                self.unit_id('Color')               , self.unit_id('red')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Color')               , self.unit_id('green')       , self.TASK_TO_RESPONSE;
+                self.unit_id('Lexical Category')           , self.unit_id('noun')         , self.TASK_TO_RESPONSE;
+                self.unit_id('Lexical Category')           , self.unit_id('verb')         , self.TASK_TO_RESPONSE;
+                self.unit_id('Number of Vowels')           , self.unit_id('1 vowel')      , self.TASK_TO_RESPONSE;
+                self.unit_id('Number of Vowels')           , self.unit_id('2 vowels')     , self.TASK_TO_RESPONSE;
             ];
+            
+            % perception to response mappings
+            from = cellfun(@self.unit_id, strcat('see:', {
+                'jail', 'herb', 'goal', 'jaw', 'scarf', ...
+                'seed', 'sphere', 'streak', 'church'
+                }')');
+            to = self.unit_id('noun');
+            self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
+            
+            from = cellfun(@self.unit_id, strcat('see:', {
+                'rate', 'fight', 'cite', 'gnaw', 'pluck', 'boost', 'halt'
+                }')');
+            to = self.unit_id('verb');
+            self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
+
+            from = cellfun(@self.unit_id, strcat('see:', {
+                'fight', 'herb', 'jaw', 'gnaw', 'pluck', 'scarf', ...
+                 'halt',  'church'
+                }')');
+            to = self.unit_id('1 vowel');
+            self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
+            
+            from = cellfun(@self.unit_id, strcat('see:', {
+                'rate', 'jail', 'goal', 'cite',  ...
+                'seed', 'boost', 'sphere', 'streak'
+                }')');
+            to = self.unit_id('2 vowels');
+            self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
+            
+            % attention to perception
+            from = self.unit_id('Attend Word');
+            to = cellfun(@self.unit_id, strcat('see:', {
+                'rate', 'fight', 'jail', 'herb', 'goal', ...
+                'jaw', 'cite', 'gnaw', 'pluck', 'scarf', ...
+                'seed', 'boost', 'halt', 'sphere', 'streak', 'church'
+                }')');
+            self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             % raw inputs to perception
             self.forward_connections(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);
