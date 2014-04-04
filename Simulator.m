@@ -5,6 +5,7 @@ classdef Simulator < Model
     
     properties (Access = public)
         wm_capacity = 2;
+        net_input;
     end
     
     methods
@@ -43,11 +44,23 @@ classdef Simulator < Model
             self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids);
         end
         
-        function bias = k_winner_take_all(self, k, net_inputs)
-            arr = sort(net_inputs, 'descend');
-            bias = - mean(arr(k:k+1));
+        % from http://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Networks/kWTA_Equations
+        function kWTA_basic(self, k, ids)
+            act = sort(self.net_input(ids), 'descend');
+            q = 0.6;
+            threshold = act(k+1) + q*(act(k) - act(k+1));
+            self.net_input(ids) = self.net_input(ids) - threshold;
         end
-        
+
+        function kWTA_average(self, k, ids)
+            act = sort(self.net_input(ids), 'descend');
+            top = mean(act(1:k));
+            bottom = mean(act(k+1:end));
+            q = 0.5;
+            threshold = bottom + q*(top - bottom);
+            self.net_input(ids) = self.net_input(ids) - threshold;
+        end
+
         function [responses, RTs, activation_log] = trial(self, stimuli, do_log)
             % initialize activations and outputs
             activation = zeros(1, self.N);
@@ -72,10 +85,10 @@ classdef Simulator < Model
                 activation(self.perception_ids) = 0;
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
-                activation(self.task_ids) = 0;
+                %activation(self.task_ids) = 0;
                 %activation(self.target_ids) = 0;
-                activation(self.unit_id('Attend Number')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Magnitude')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Attend Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Color')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Monitor 7')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout
@@ -90,18 +103,22 @@ classdef Simulator < Model
                     activation(active_ids) = self.INPUT_ACTIVATION;
 
                     % calculate net inputs for all units
-                    net_input = activation * self.weights + self.bias;
+                    self.net_input = activation * self.weights + self.bias;
                     
                     % add k-winner-take-all inhibition
-                    kwta = self.k_winner_take_all(self.wm_capacity, net_input(self.wm_ids));
-                    net_input(self.wm_ids) = net_input(self.wm_ids) + kwta;
+                    self.kWTA_basic(1, self.task_ids);
+                    self.kWTA_basic(1, self.target_ids);
+                    self.kWTA_basic(1, self.attention_ids);
+                    self.kWTA_average(self.wm_capacity, self.wm_ids);
+%                    self.kWTA_average(self.wm_capacity, self.wm_ids);
+%                    self.kWTA_average(self.wm_capacity, self.wm_ids);
 
                     % update activation levels
                     for i=1:self.N
-                        if net_input(i) >= 0
-                            delta_act = self.STEP_SIZE * net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i));
+                        if self.net_input(i) >= 0
+                            delta_act = self.STEP_SIZE * self.net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i));
                         else
-                            delta_act = self.STEP_SIZE * net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION);
+                            delta_act = self.STEP_SIZE * self.net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION);
                         end
                         activation(i) = activation(i) + delta_act;
                     end

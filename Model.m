@@ -55,9 +55,9 @@ classdef Model < handle
         PERCEPTION_INHIBITION = 0;
         RESPONSE_INHIBITION = -2;
         OUTPUT_INHIBITION = -1;
-        TASK_INHIBITION = -3;
-        TARGET_INHIBITION = -0.5; %  -1;
-        ATTENTION_INHIBITION = -1;
+        TASK_INHIBITION = 0;
+        TARGET_INHIBITION = 0;
+        ATTENTION_INHIBITION = 0;
         
         % self-excitatory
         
