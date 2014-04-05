@@ -226,7 +226,7 @@ classdef Model < handle
             to = self.unit_id('2 vowels');
             self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
             
-            %self.forward_all_to_all(self.perception_ids, self.unit_id('PM'), self.PERCEPTION_TO_RESPONSE);
+            self.forward_all_to_all(self.perception_ids, self.unit_id('PM'), self.PERCEPTION_TO_RESPONSE);
             
             % attention to perception
             from = self.unit_id('Attend Word');

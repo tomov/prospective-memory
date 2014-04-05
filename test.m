@@ -14,9 +14,10 @@ stimuli = [
     {'jaw'}, 1;
     {'cite'}, 1;
     {'gnaw'}, 1;
+    {'boost'}, 1;
     ];
 
-stimuli = [stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli]
+%stimuli = [stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli]
 
      
 %{
@@ -29,7 +30,7 @@ end
 %}
 
 sim.wm_capacity = 2;
-%sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'PM Task', 2);
+sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'PM Task', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 

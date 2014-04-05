@@ -1,0 +1,40 @@
+perception = input + attention + target - bias
+
+-bias => nothing (no input)
+input - bias => OG randomly/rarely, no PM (not paying attention)
+attention + input - bias => focal: OG, PM; nonfocal: OG, rarely PM
+target + input - bias => nonfocal PM (this only applies in nonfocal condition, the definition of focal is that you're paying attention to the dimension of the target)
+target + attention + input - bias => nonfocal: PM
+
+target + input - bias >= attention + input - bias 
+
+
+in PM condition, 
+
+= Trigger task switch:
+
+attention + input - bias    (focal)
+target + input - bias       (nonfocal)
+target + attention + input - bias
+
+= do NOT trigger task switch:
+
+input - bias
+attention - bias
+target - bias
+attention + target - bias
+
+
+=> GOVERNING EQUATIONS FOR PERCEPTION INPUT WEIGHTS:
+
+input <= bias
+attention < bias
+target < bias
+attention + target < bias
+
+input + attention > bias
+input + target > bias
+
+target >= attention ( perhaps strictly > to elicit shorter RT's for PM misses)
+
+
