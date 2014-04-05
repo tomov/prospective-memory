@@ -20,7 +20,7 @@ classdef Model < handle
         % --- begin connection weights ---
         
         % biases = leaks
-        BIAS_FOR_PERCEPTION = -9;
+        BIAS_FOR_PERCEPTION = -10;
         BIAS_FOR_RESPONSES = -1;
         BIAS_FOR_OUTPUTS = -0.5;
         BIAS_FOR_TASK = 0;
@@ -29,7 +29,7 @@ classdef Model < handle
         
         % feedforward excitatory
         
-        INPUT_TO_PERCEPTION = 9;
+        INPUT_TO_PERCEPTION = 10;
         PERCEPTION_TO_RESPONSE = 1;
         RESPONSE_TO_OUTPUT = 2;
 
@@ -43,8 +43,8 @@ classdef Model < handle
         % top-down (feedback?) excitatory
         
         TASK_TO_RESPONSE = 1;
-        TARGET_TO_PERCEPTION = 7; % 9;
-        ATTENTION_TO_PERCEPTION = 9;
+        TARGET_TO_PERCEPTION = 5; % 9;
+        ATTENTION_TO_PERCEPTION = 5;
         
         % top-down (feedback?) inhibitory
         
@@ -55,7 +55,7 @@ classdef Model < handle
         PERCEPTION_INHIBITION = 0;
         RESPONSE_INHIBITION = 0;
         OUTPUT_INHIBITION = 0;
-        TASK_INHIBITION = 0;
+        TASK_INHIBITION = -3;
         TARGET_INHIBITION = 0;
         ATTENTION_INHIBITION = 0;
         
@@ -226,7 +226,7 @@ classdef Model < handle
             to = self.unit_id('2 vowels');
             self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
             
-            self.forward_all_to_all(self.perception_ids, self.unit_id('PM'), self.PERCEPTION_TO_RESPONSE);
+            %self.forward_all_to_all(self.perception_ids, self.unit_id('PM'), self.PERCEPTION_TO_RESPONSE);
             
             % attention to perception
             from = self.unit_id('Attend Word');

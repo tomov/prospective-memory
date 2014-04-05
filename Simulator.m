@@ -43,8 +43,8 @@ classdef Simulator < Model
             % add noise
             % ... TODO a little artificial at the end but whatever
             % also noise sigma is hardcoded and made up
-            self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids) ...
-                + normrnd(0, self.NOISE_SIGMA * 50, size(self.perception_ids, 2), size(self.task_ids, 2));
+            %self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids) ...
+            %    + normrnd(0, self.NOISE_SIGMA * 50, size(self.perception_ids, 2), size(self.task_ids, 2));
         end
         
         % from http://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Networks/kWTA_Equations
@@ -98,7 +98,7 @@ classdef Simulator < Model
                 activation(self.target_ids) = 0;
                 activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                %activation(self.unit_id('see:jaw')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
+                %activation(self.unit_id('lookfor:jaw')) = self.MAXIMUM_ACTIVATION; % TODO target is hardcoded
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
@@ -110,6 +110,10 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
+                    %activation(self.unit_id('lookfor:boost')) = 1;
+                    %activation(self.unit_id('lookfor:halt')) = 1;
+                    %activation(self.unit_id('lookfor:sphere')) = 1;
+                    %activation(self.unit_id('lookfor:seed')) = 1;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;

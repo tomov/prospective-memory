@@ -16,7 +16,7 @@ stimuli = [
     {'gnaw'}, 1;
     ];
 
-stimuli = [stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli]
+stimuli = [stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli]
 
      
 %{
@@ -29,42 +29,42 @@ end
 %}
 
 sim.wm_capacity = 2;
-sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'PM Task', 2);
+%sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'PM Task', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 
 
-subplot(3, 2, 1);
+subplot(4, 2, 1);
 plot(act(:, sim.output_ids));
 %legend(sim.units(sim.output_ids));
 title('Outputs');
 
-subplot(3, 2, 3);
+subplot(4, 2, 3);
 plot(act(:, sim.response_ids));
 legend(sim.units(sim.response_ids));
 title('Responses');
 
-subplot(3, 2, 5);
+subplot(4, 2, 5);
 plot(act(:, sim.perception_ids));
 legend(sim.units(sim.perception_ids));
 title('Feature Perception');
 
-%subplot(3, 2, 6);
-%plot(act(:, sim.input_ids));
-%legend(sim.units(sim.input_ids));
-%title('Stimulus Inputs');
+subplot(4, 2, 7);
+plot(act(:, sim.input_ids));
+legend(sim.units(sim.input_ids));
+title('Stimulus Inputs');
 
-subplot(3, 2, 2);
+subplot(4, 2, 2);
 plot(act(:, sim.task_ids));
-legend(sim.units(sim.task_ids));
+%legend(sim.units(sim.task_ids));
 title('Task Monitoring');
 
-subplot(3, 2, 4);
+subplot(4, 2, 4);
 plot(act(:, sim.target_ids));
 legend(sim.units(sim.target_ids));
 title('Target Monitoring');
 
-subplot(3, 2, 6);
+subplot(4, 2, 8);
 plot(act(:, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
 title('Ongoing Monitoring');
