@@ -15,10 +15,47 @@ stimuli = [
     {'cite'}, 1;
     {'gnaw'}, 1;
     {'boost'}, 1;
+    {'halt'}, 1;
+    {'sphere'}, 1;
+    {'seed'}, 1;
     ];
 
-%stimuli = [stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli; stimuli]
+is_target = [
+    0;
+    0;
+    0;
+    0;
+    0;
+    0;
+    0;
+    0;
+    true;
+    true;
+    true;
+    true;
+    ];
 
+correct = {
+    'say:1 vowel';
+    'say:1 vowel';
+    'say:2 vowels';
+    'say:1 vowel';
+    'say:2 vowels';
+    'say:1 vowel';
+    'say:2 vowels';
+    'say:1 vowel';
+    'say:PM';    
+    'say:PM';    
+    'say:PM';    
+    'say:PM';    
+    };
+
+
+reps = 20;
+stimuli = repmat(stimuli, reps);
+is_target = repmat(is_target, reps);
+correct = repmat(correct, reps);
+    
      
 %{
 RTtot = []
@@ -35,48 +72,4 @@ sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 
 
-subplot(4, 2, 1);
-plot(act(:, sim.output_ids));
-%legend(sim.units(sim.output_ids));
-title('Outputs');
-
-subplot(4, 2, 3);
-plot(act(:, sim.response_ids));
-legend(sim.units(sim.response_ids));
-title('Responses');
-
-subplot(4, 2, 5);
-plot(act(:, sim.perception_ids));
-legend(sim.units(sim.perception_ids));
-title('Feature Perception');
-
-subplot(4, 2, 7);
-plot(act(:, sim.input_ids));
-legend(sim.units(sim.input_ids));
-title('Stimulus Inputs');
-
-subplot(4, 2, 2);
-plot(act(:, sim.task_ids));
-%legend(sim.units(sim.task_ids));
-title('Task Monitoring');
-
-subplot(4, 2, 4);
-plot(act(:, sim.target_ids));
-legend(sim.units(sim.target_ids));
-title('Target Monitoring');
-
-subplot(4, 2, 8);
-plot(act(:, sim.attention_ids));
-legend(sim.units(sim.attention_ids));
-title('Ongoing Monitoring');
-
-%subplot(3, 2, 6);
-%plot(act(:, sim.unit_id('Super Inhibition')));
-%legend(sim.units(sim.unit_id('Super Inhibition')));
-%title('Super Inhibition');
-
-
-RTs
-responses
-
-mean(RTs)
+figures;

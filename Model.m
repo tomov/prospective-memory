@@ -33,7 +33,7 @@ classdef Model < handle
         PERCEPTION_TO_RESPONSE = 1;
         RESPONSE_TO_OUTPUT = 2;
 
-        PERCEPTION_TO_TASK = 7;
+        PERCEPTION_TO_TASK = 6;
 
         % feedforward inhibitory
 
