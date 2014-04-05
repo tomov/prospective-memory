@@ -48,7 +48,7 @@ classdef Model < handle
         
         % top-down (feedback?) inhibitory
         
-        TASK_TO_RESPONSE_INHIBITION = 0;
+        TASK_TO_RESPONSE_INHIBITION = -0.5;
 
         % lateral intralayer inhibitory
 
