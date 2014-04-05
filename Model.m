@@ -30,7 +30,7 @@ classdef Model < handle
         % feedforward excitatory
         
         INPUT_TO_PERCEPTION = 10;
-        PERCEPTION_TO_RESPONSE = 1;
+        PERCEPTION_TO_RESPONSE = 1;            % up => faster OG RT (no PM): 1 => 250, 2 => 190, 0.5 => 310
         RESPONSE_TO_OUTPUT = 2;
 
         PERCEPTION_TO_TASK = 6;
@@ -48,7 +48,7 @@ classdef Model < handle
         
         % top-down (feedback?) inhibitory
         
-        TASK_TO_RESPONSE_INHIBITION = -0.5;
+        TASK_TO_RESPONSE_INHIBITION = 0;       % up => slightly OG RT (no PM), very small effect though
 
         % lateral intralayer inhibitory
 

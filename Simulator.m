@@ -109,10 +109,10 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    %activation(self.unit_id('lookfor:boost')) = 1;
-                    %activation(self.unit_id('lookfor:halt')) = 1;
-                    %activation(self.unit_id('lookfor:sphere')) = 1;
-                    %activation(self.unit_id('lookfor:seed')) = 1;
+                    activation(self.unit_id('lookfor:boost')) = 1;
+                    activation(self.unit_id('lookfor:halt')) = 1;
+                    activation(self.unit_id('lookfor:sphere')) = 1;
+                    activation(self.unit_id('lookfor:seed')) = 1;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
@@ -155,6 +155,7 @@ classdef Simulator < Model
                         output_id = self.output_ids(ix(1));
                         RT = cycle;
                         responded = true;
+                        break;
                     end
                 end
 
