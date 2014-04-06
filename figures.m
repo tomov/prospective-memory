@@ -124,6 +124,7 @@ bar([mean(OG_correct_RTs), mean(PM_hit_RTs), ...
     mean(false_alarm_RTs), mean(OG_wrong_RTs), mean(PM_miss_RTs), ...
     mean(OG_timeout_RTs), mean(PM_timeout_RTs)]);
 set(gca, 'XTickLabel', bar_names);
+ylim([0 sim.CYCLES_PER_SEC]);
 title('RT (cycles)', 'FontWeight','bold');
 
 subplot(1, 2, 2);
@@ -131,5 +132,12 @@ bar(100 * [size(OG_correct_RTs, 1) / OG_count, size(PM_hit_RTs, 1) / PM_count, .
     size(false_alarm_RTs, 1) / OG_count, size(OG_wrong_RTs, 1) / OG_count, size(PM_miss_RTs, 1) / PM_count, ...
     size(OG_timeout_RTs, 1) / OG_count, size(PM_timeout_RTs, 1) / PM_count]);
 set(gca, 'XTickLabel', bar_names);
+ylim([0 100]);
 title('Fraction of responses (%)', 'FontWeight','bold');
 ylim([0 100]);
+
+
+mean(OG_correct_RTs)
+mean(PM_hit_RTs)
+size(OG_correct_RTs, 1) / OG_count
+size(PM_hit_RTs, 1) / PM_count

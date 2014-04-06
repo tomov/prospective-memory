@@ -55,7 +55,7 @@ correct = {
     };
 
 
-reps = 1;
+reps = 30;
 stimuli = repmat(stimuli, reps);
 is_target = repmat(is_target, reps);
 correct = repmat(correct, reps);
