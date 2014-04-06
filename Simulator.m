@@ -96,7 +96,7 @@ classdef Simulator < Model
                 activation(self.output_ids) = 0;
                 activation(self.task_ids) = 0;
                 activation(self.monitor_ids) = 0;
-                %activation(self.target_ids) = 0;
+                activation(self.target_ids) = activation(self.target_ids) / 2; % TODO DISCUSS WITH JON!!!
                 activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 
@@ -110,7 +110,7 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    activation(self.unit_id('Monitor')) = 0;
+                    activation(self.unit_id('Monitor')) = 1;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;

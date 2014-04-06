@@ -37,7 +37,7 @@ classdef Model < handle
         
         TARGET_TO_RESPONSE = 5;
         TARGET_TO_TASK = 0;
-        PERCEPTION_TO_TARGET = 1;
+        PERCEPTION_TO_TARGET = 4;
 
         % feedforward inhibitory
 
@@ -49,7 +49,7 @@ classdef Model < handle
         
         TASK_TO_RESPONSE = 1;
         ATTENTION_TO_PERCEPTION = 9;
-        MONITOR_TO_TARGET = 1.2;
+        MONITOR_TO_TARGET = 2; % 2
         
         % top-down inhibitory
         
@@ -58,7 +58,7 @@ classdef Model < handle
         % lateral intralayer inhibitory
 
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = -3; % 0.5 ?
+        RESPONSE_INHIBITION = -3;
         OUTPUT_INHIBITION = 0;
         TASK_INHIBITION = -3;
         MONITOR_INHIBITION = 0;
@@ -73,7 +73,7 @@ classdef Model < handle
         % self-inhibitory
         
         OUTPUT_TO_SELF = -3; % makes response->output more like copying rather than integration
-        TARGET_TO_SELF = -1;
+        TARGET_TO_SELF = -3; % -2;
         
         % --- end of connection weights ---
         

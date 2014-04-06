@@ -44,6 +44,10 @@ correct = {
     'say:1 vowel';
     'say:2 vowels';
     'say:1 vowel';
+    %'say:PM';
+    %'say:PM';
+    %'say:PM';
+    %'say:PM';
     'say:2 vowels';
     'say:1 vowel';
     'say:2 vowels';

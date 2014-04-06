@@ -18,6 +18,30 @@ Target monitoring in the same dimension as the OG stimuli =>
 
 resolved!!!
 
+
+------------------------ TARGET DETECTION LAYER ---------------
+
+target = monitor + perception - bias - ACT * self
+
+...so, in the absence of perception, 
+
+target = monitor - bias - act * self
+
+in the equilibrium,
+0 = monitor - bias - act * self
+
+act = (monitor - bias) / self
+
+Also, we want to keep act less than 0.5 b/c otherwise it pushes too much into the response and we get too many false alarms. A good set of values is
+
+monitoring weight = 2
+self = 3 (-3 in the code)
+bias = 1 (-1 in the code)
+
+That way we get equilibrium activation = 1/3 which is perfect, gets OG accuracy = 80% and OG RT = 144 for monitor level = 1
+Note that this is when at the beginning of each trial, we set activation for targets = x 1/2 (i.e. we havle it rather than set it to 0)
+
+
 ------------------------- RESPONSE LAYER --------------------------
 
 response = perception + task - bias
