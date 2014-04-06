@@ -43,8 +43,8 @@ classdef Simulator < Model
             % add noise
             % ... TODO a little artificial at the end but whatever
             % also noise sigma is hardcoded and made up
-            %self.weights(self.perception_ids, self.target_ids) = self.weights(self.perception_ids, self.target_ids) ...
-            %    + normrnd(0, self.NOISE_SIGMA * 50, size(self.perception_ids, 2), size(self.target_ids, 2));
+            self.weights(self.perception_ids, self.target_ids) = self.weights(self.perception_ids, self.target_ids) ...
+                + normrnd(0, 3, size(self.perception_ids, 2), size(self.target_ids, 2));
         end
         
         % from http://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Networks/kWTA_Equations
@@ -110,7 +110,7 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    activation(self.unit_id('Monitor')) = 0.2;
+                    %activation(self.unit_id('Monitor')) = 1;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
