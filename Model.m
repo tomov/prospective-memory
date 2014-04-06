@@ -25,18 +25,18 @@ classdef Model < handle
         BIAS_FOR_OUTPUTS = -0.5;
         BIAS_FOR_TASK = 0;
         BIAS_FOR_MONITOR = -10;
-        BIAS_FOR_TARGET = 0; % TODO
+        BIAS_FOR_TARGET = -1;
         BIAS_FOR_ATTENTION = -1;
         
         % feedforward excitatory
         
         INPUT_TO_PERCEPTION = 10;
-        PERCEPTION_TO_RESPONSE = 1;            % up => faster OG RT (no PM): 1 => 250, 2 => 190, 0.5 => 310
+        PERCEPTION_TO_RESPONSE = 1.5;
         RESPONSE_TO_OUTPUT = 2;
         
-        TARGET_TO_RESPONSE = 1; % TODO
-        TARGET_TO_TASK = 3.14; % TODO
-        PERCEPTION_TO_TARGET = 3.14; % TODO
+        TARGET_TO_RESPONSE = 7;
+        TARGET_TO_TASK = 0;
+        PERCEPTION_TO_TARGET = 1;
 
         % feedforward inhibitory
 
@@ -46,17 +46,17 @@ classdef Model < handle
         % top-down excitatory
         
         TASK_TO_RESPONSE = 1;
-        ATTENTION_TO_PERCEPTION = 5;
-        MONITOR_TO_TARGET = 0; % TODO
+        ATTENTION_TO_PERCEPTION = 9;
+        MONITOR_TO_TARGET = 1;
         
         % top-down inhibitory
         
-        TASK_TO_RESPONSE_INHIBITION = 0;       % up => slightly OG RT (no PM), very small effect though
+        TASK_TO_RESPONSE_INHIBITION = 0;
 
         % lateral intralayer inhibitory
 
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = 0;
+        RESPONSE_INHIBITION = -3;
         OUTPUT_INHIBITION = 0;
         TASK_INHIBITION = -3;
         MONITOR_INHIBITION = 0;
@@ -297,7 +297,7 @@ classdef Model < handle
         end
         
         function EM = print_EM(self)
-            EM = full(self.weights(self.perception_ids, self.task_ids));
+            EM = full(self.weights(self.perception_ids, self.target_ids));
             EM = EM';
         end
         

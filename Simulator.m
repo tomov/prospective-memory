@@ -21,14 +21,14 @@ classdef Simulator < Model
             end
         end
         
-        function instruction(self, targets, monitors, secs)
-            target_ids = self.string_to_ids(targets);
-            monitor_ids = self.string_to_ids(monitors);
+        function instruction(self, perceptions, targets, secs)
+            from_ids = self.string_to_ids(perceptions);
+            to_ids = self.string_to_ids(targets);
             from = zeros(1, self.N);
-            from(target_ids) = self.MAXIMUM_ACTIVATION;
+            from(from_ids) = self.MAXIMUM_ACTIVATION;
             to = zeros(1, self.N);
-            to(self.task_ids) = -self.MAXIMUM_ACTIVATION;
-            to(monitor_ids) = self.MAXIMUM_ACTIVATION;
+            to(self.target_ids) = -self.MAXIMUM_ACTIVATION;
+            to(to_ids) = self.MAXIMUM_ACTIVATION;
             duration = secs * self.CYCLES_PER_SEC;
             for cycle=1:duration
                 % hebbian learning
@@ -36,15 +36,15 @@ classdef Simulator < Model
                 self.weights = self.weights + delta_w;
                 
                 % scale weights to fit model constraints
-                sub = self.weights(self.perception_ids, self.task_ids);
-                sub = sub * self.PERCEPTION_TO_TASK / max(sub(:));
-                self.weights(self.perception_ids, self.task_ids) = sub;                
+                sub = self.weights(self.perception_ids, self.target_ids);
+                sub = sub * self.PERCEPTION_TO_TARGET / max(sub(:));
+                self.weights(self.perception_ids, self.target_ids) = sub;                
             end
             % add noise
             % ... TODO a little artificial at the end but whatever
             % also noise sigma is hardcoded and made up
-            %self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids) ...
-            %    + normrnd(0, self.NOISE_SIGMA * 50, size(self.perception_ids, 2), size(self.task_ids, 2));
+            %self.weights(self.perception_ids, self.target_ids) = self.weights(self.perception_ids, self.target_ids) ...
+            %    + normrnd(0, self.NOISE_SIGMA * 50, size(self.perception_ids, 2), size(self.target_ids, 2));
         end
         
         % from http://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Networks/kWTA_Equations
@@ -110,14 +110,14 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    activation(self.unit_id('Target')) = 1;
+                    activation(self.unit_id('Monitor')) = 1;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
                     
                     % add k-winner-take-all inhibition
                     self.kWTA_basic(1, self.output_ids);
-                    self.kWTA_basic(1, self.response_ids);
+                    %self.kWTA_basic(1, self.response_ids);
                     self.kWTA_basic(1, self.task_ids);
                     %self.kWTA_basic(1, self.monitor_ids);
                     self.kWTA_basic(1, self.attention_ids);

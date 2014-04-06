@@ -29,10 +29,10 @@ is_target = [
     0;
     0;
     0;
-    0;
-    0;
-    0;
-    0;
+    true;
+    true;
+    true;
+    true;
     ];
 
 correct = {
@@ -44,14 +44,14 @@ correct = {
     'say:1 vowel';
     'say:2 vowels';
     'say:1 vowel';
-    'say:2 vowels';    
-    'say:1 vowel';    
-    'say:2 vowels';    
-    'say:2 vowels';    
+    'say:PM';
+    'say:PM';
+    'say:PM';
+    'say:PM';
     };
 
 
-reps = 20;
+reps = 30;
 stimuli = repmat(stimuli, reps);
 is_target = repmat(is_target, reps);
 correct = repmat(correct, reps);
@@ -67,7 +67,7 @@ end
 %}
 
 sim.wm_capacity = 2;
-%sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'PM Task', 2);
+sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'Target', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 

@@ -15,9 +15,8 @@ Target monitoring in the same dimension as the OG stimuli =>
 
 response = perception + task - bias
 
-task - bias = 0
-perception - bias <= 0
-
+task - bias <= 0
+perception - bias <= 0, or at least close to it
 
 ------------------------- PERCEPTION LAYER ------------------------
 
