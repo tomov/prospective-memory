@@ -32,9 +32,15 @@ title('Task Monitoring');
 ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
 subplot(4, 2, 4);
+plot(act(:, sim.monitor_ids));
+legend(sim.units(sim.monitor_ids));
+title('Target Monitoring');
+ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+
+subplot(4, 2, 6);
 plot(act(:, sim.target_ids));
 legend(sim.units(sim.target_ids));
-title('Target Monitoring');
+title('Target Detection');
 ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
 subplot(4, 2, 8);

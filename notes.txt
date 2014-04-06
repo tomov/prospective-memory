@@ -11,6 +11,15 @@ Target monitoring in the same dimension as the OG stimuli =>
    ===> THE TARGET DETECTION PATHWAY!!! DUH...
 
 
+------------------------- RESPONSE LAYER --------------------------
+
+response = perception + task - bias
+
+task - bias = 0
+perception - bias <= 0
+
+
+------------------------- PERCEPTION LAYER ------------------------
 
 perception = input + attention + target - bias
 
@@ -51,17 +60,3 @@ input + target > bias
 
 target >= attention ( perhaps strictly > to elicit shorter RT's for PM misses)
 
-
-FUCK... THINGS THAT ARE NOT WORKING NOW AND WE WANT TO WORK
-
-1. Activation in target perception should slow down / inhibit activation in OG responses!!!
-   --- you dumb fuck, of COURSE the way you've designed it, right now target monitoring excites the target units which ALSO excite the OG responses!!!!! fuck......
-
-2. Excitation in task unit should slow donw / inhibit OG responses
-
-
-
-the problem could be:
-- kWTA
-
-.... you ?

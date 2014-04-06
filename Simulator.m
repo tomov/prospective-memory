@@ -95,6 +95,7 @@ classdef Simulator < Model
                 activation(self.response_ids) = 0;
                 activation(self.output_ids) = 0;
                 activation(self.task_ids) = 0;
+                activation(self.monitor_ids) = 0;
                 activation(self.target_ids) = 0;
                 activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
@@ -109,10 +110,7 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    activation(self.unit_id('lookfor:boost')) = 1;
-                    activation(self.unit_id('lookfor:halt')) = 1;
-                    activation(self.unit_id('lookfor:sphere')) = 1;
-                    activation(self.unit_id('lookfor:seed')) = 1;
+                    activation(self.unit_id('Target')) = 1;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
@@ -121,7 +119,7 @@ classdef Simulator < Model
                     self.kWTA_basic(1, self.output_ids);
                     self.kWTA_basic(1, self.response_ids);
                     self.kWTA_basic(1, self.task_ids);
-                    %self.kWTA_basic(1, self.target_ids);
+                    %self.kWTA_basic(1, self.monitor_ids);
                     self.kWTA_basic(1, self.attention_ids);
                     %self.kWTA_average(self.wm_capacity, self.wm_ids);
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);
