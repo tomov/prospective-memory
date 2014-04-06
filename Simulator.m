@@ -96,7 +96,7 @@ classdef Simulator < Model
                 activation(self.output_ids) = 0;
                 activation(self.task_ids) = 0;
                 activation(self.monitor_ids) = 0;
-                activation(self.target_ids) = 0;
+                %activation(self.target_ids) = 0;
                 activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 
@@ -110,13 +110,13 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    activation(self.unit_id('Target')) = 0.25;
+                    activation(self.unit_id('Monitor')) = 0;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
                     
                     % add k-winner-take-all inhibition
-                    self.kWTA_basic(1, self.output_ids);
+                    %self.kWTA_basic(1, self.output_ids);
                     %self.kWTA_basic(1, self.response_ids);
                     self.kWTA_basic(1, self.task_ids);
                     %self.kWTA_basic(1, self.monitor_ids);
@@ -128,9 +128,11 @@ classdef Simulator < Model
                     % update activation levels
                     for i=1:self.N
                         if self.net_input(i) >= 0
-                            delta_act = self.STEP_SIZE * self.net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i));
+                            delta_act = self.STEP_SIZE * self.net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i));% ...
+                                %- self.DECAY * (activation(i) - 0);
                         else
-                            delta_act = self.STEP_SIZE * self.net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION);
+                            delta_act = self.STEP_SIZE * self.net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION);% ...
+                                %- self.DECAY * (activation(i) - 0);
                         end
                         activation(i) = activation(i) + delta_act;
                     end
@@ -147,7 +149,7 @@ classdef Simulator < Model
                     end
 
                     % check if activation threshold is met
-                    [outputs, ix] = sort(activation(self.response_ids), 'descend');
+                    [outputs, ix] = sort(activation(self.output_ids), 'descend');
                     if ~responded & outputs(1) - outputs(2) > self.RESPONSE_THRESHOLD
                         % save response and response time
                         output_id = self.output_ids(ix(1));
