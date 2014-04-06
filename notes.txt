@@ -1,6 +1,12 @@
-HALT!!!
+-- NEXT ISSUE:
 
-MAIN ISSUE:
+OG RT's with monitoring are proportional to the error rate
+- more monitoring => slower OG RT's but also more errors...
+
+
+
+
+-- MAIN ISSUE:
 
 Target monitoring in the same dimension as the OG stimuli =>
 
@@ -10,6 +16,7 @@ Target monitoring in the same dimension as the OG stimuli =>
 
    ===> THE TARGET DETECTION PATHWAY!!! DUH...
 
+resolved!!!
 
 ------------------------- RESPONSE LAYER --------------------------
 

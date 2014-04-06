@@ -7,6 +7,7 @@ classdef Model < handle
         
         NOISE_SIGMA = 0.015;
         STEP_SIZE = 0.01;
+        DECAY = 0.01;
         CYCLES_PER_SEC = 500;
         
         % activation levels
@@ -26,13 +27,13 @@ classdef Model < handle
         BIAS_FOR_TASK = 0;
         BIAS_FOR_MONITOR = -10;
         BIAS_FOR_TARGET = -1;
-        BIAS_FOR_ATTENTION = -1;
+        BIAS_FOR_ATTENTION = 0;
         
         % feedforward excitatory
         
         INPUT_TO_PERCEPTION = 10;
         PERCEPTION_TO_RESPONSE = 1;
-        RESPONSE_TO_OUTPUT = 1;
+        RESPONSE_TO_OUTPUT = 5;
         
         TARGET_TO_RESPONSE = 5;
         TARGET_TO_TASK = 0;
@@ -48,7 +49,7 @@ classdef Model < handle
         
         TASK_TO_RESPONSE = 1;
         ATTENTION_TO_PERCEPTION = 9;
-        MONITOR_TO_TARGET = 1.05;
+        MONITOR_TO_TARGET = 1.2;
         
         % top-down inhibitory
         
@@ -65,9 +66,14 @@ classdef Model < handle
         
         % self-excitatory
         
-        TASK_SELF = 3;
-        MONITOR_SELF = 3;
-        ATTENTION_SELF = 3;
+        TASK_SELF = 5;
+        MONITOR_SELF = 5;
+        ATTENTION_SELF = 5;
+        
+        % self-inhibitory
+        
+        OUTPUT_TO_SELF = -3; % makes response->output more like copying rather than integration
+        TARGET_TO_SELF = -1;
         
         % --- end of connection weights ---
         
@@ -282,6 +288,10 @@ classdef Model < handle
             self.self_excitation(self.task_ids, self.TASK_SELF);
             self.self_excitation(self.monitor_ids, self.MONITOR_SELF);
             self.self_excitation(self.attention_ids, self.ATTENTION_SELF);
+            
+            % self inibitions
+            self.self_excitation(self.output_ids, self.OUTPUT_TO_SELF);
+            self.self_excitation(self.target_ids, self.TARGET_TO_SELF);
 
             % generate weight matrix from defined connections
             self.weights = sparse(self.connections(:,1), self.connections(:,2), self.connections(:,3), ...
