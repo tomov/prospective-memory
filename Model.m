@@ -31,10 +31,10 @@ classdef Model < handle
         % feedforward excitatory
         
         INPUT_TO_PERCEPTION = 10;
-        PERCEPTION_TO_RESPONSE = 1.5;
-        RESPONSE_TO_OUTPUT = 2;
+        PERCEPTION_TO_RESPONSE = 1;
+        RESPONSE_TO_OUTPUT = 1;
         
-        TARGET_TO_RESPONSE = 7;
+        TARGET_TO_RESPONSE = 5;
         TARGET_TO_TASK = 0;
         PERCEPTION_TO_TARGET = 1;
 
@@ -42,12 +42,13 @@ classdef Model < handle
 
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
+        TARGET_TO_RESPONSE_INHIBITION = -0;
         
         % top-down excitatory
         
         TASK_TO_RESPONSE = 1;
         ATTENTION_TO_PERCEPTION = 9;
-        MONITOR_TO_TARGET = 1;
+        MONITOR_TO_TARGET = 1.05;
         
         % top-down inhibitory
         
@@ -56,7 +57,7 @@ classdef Model < handle
         % lateral intralayer inhibitory
 
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = -3;
+        RESPONSE_INHIBITION = -3; % 0.5 ?
         OUTPUT_INHIBITION = 0;
         TASK_INHIBITION = -3;
         MONITOR_INHIBITION = 0;
@@ -238,9 +239,10 @@ classdef Model < handle
             to = self.unit_id('2 vowels');
             self.forward_all_to_all(from, to, self.PERCEPTION_TO_RESPONSE);
             
-            % perception to response mappings (indirect PM pathway)
+            % perception to target detection to response mappings (indirect PM pathway)
             self.forward_all_to_all(self.perception_ids, self.unit_id('Target'), 0); % EM!!!
             self.forward_all_to_all(self.unit_id('Target'), self.unit_id('PM'), self.TARGET_TO_RESPONSE);
+            self.forward_all_to_all(self.unit_id('Target'), self.response_ids, self.TARGET_TO_RESPONSE_INHIBITION);
             
             % attention to perception
             from = self.unit_id('Attend Word');

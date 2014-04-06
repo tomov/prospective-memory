@@ -110,7 +110,7 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    activation(self.unit_id('Monitor')) = 1;
+                    activation(self.unit_id('Target')) = 0.25;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
@@ -147,7 +147,7 @@ classdef Simulator < Model
                     end
 
                     % check if activation threshold is met
-                    [outputs, ix] = sort(activation(self.output_ids), 'descend');
+                    [outputs, ix] = sort(activation(self.response_ids), 'descend');
                     if ~responded & outputs(1) - outputs(2) > self.RESPONSE_THRESHOLD
                         % save response and response time
                         output_id = self.output_ids(ix(1));
