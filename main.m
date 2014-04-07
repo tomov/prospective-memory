@@ -7,71 +7,86 @@ sim = Simulator();
 
 stimuli = [
     {'tortoise,an animal'}, 1;
-    {'tortoise,a subject'}, 1;
-    {'tortoise,a relative'}, 1;
-    {'tortoise,a sport'}, 1;
-    
     {'football,a sport'}, 1;
     {'football,an animal'}, 1;
     {'football,a subject'}, 1;
     {'football,a relative'}, 1;
     
-    {'history,a subject'}, 1;
-    {'history,an animal'}, 1;
-    {'history,a relative'}, 1;
-    {'history,a sport'}, 1;
-    
+    {'tortoise,a subject'}, 1;
     {'mother,a relative'}, 1;
     {'mother,an animal'}, 1;
     {'mother,a subject'}, 1;
     {'mother,a sport'}, 1;
     
+    {'tortoise,a sport'}, 1;
+    {'crocodile,an animal'}, 1;
+    {'crocodile,a relative'}, 1;
+    {'crocodile,a subject'}, 1;
+    {'crocodile,a sport'}, 1;
+
+    {'tortoise,a relative'}, 1;
+    {'sheep,an animal'}, 1;
+    {'sheep,a relative'}, 1;
+    {'sheep,a subject'}, 1;
+    {'sheep,a sport'}, 1;
     ];
 
-is_target = [
+% PM / no PM: change 1's to 0's
+is_target = [    
+        0;
     0;
     0;
     0;
     0;
     
+        0;
     0;
     0;
     0;
     0;
     
+        0;
     0;
     0;
     0;
     0;
     
+        0;
     0;
     0;
     0;
-    0;
-    
+    0;    
     ];
 
+% PM / no PM: uncomment and comment out respective responses
 correct = {
+            'Yes';
+%            'PM';
     'Yes';
     'No';
     'No';
     'No';
     
+            'No';
+%            'PM';
     'Yes';
     'No';
     'No';
     'No';
     
+            'No';
+%            'PM';
     'Yes';
     'No';
     'No';
     'No';
-    
+
+            'No';
+%            'PM';
     'Yes';
     'No';
     'No';
     'No';
-    
     };
 
 
@@ -91,7 +106,10 @@ end
 %}
 
 sim.wm_capacity = 2;
-%sim.instruction('see:boost,see:halt,see:sphere,see:seed', 'Target', 2);
+% Einstein 2005: focal
+%sim.instruction('see:tortoise', 'Target', 2);
+% Einstein 2005: nonfocal
+%sim.instruction('see:tor', 'Target', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 

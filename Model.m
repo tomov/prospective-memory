@@ -32,7 +32,7 @@ classdef Model < handle
         % feedforward excitatory
         
         INPUT_TO_PERCEPTION = 10;
-        PERCEPTION_TO_RESPONSE = 3;
+        PERCEPTION_TO_RESPONSE = 3.4;
         PERCEPTION_TO_RESPONSE_DOUBLE = 2;
         RESPONSE_TO_OUTPUT = 5;
         
@@ -59,7 +59,7 @@ classdef Model < handle
         % lateral intralayer inhibitory
 
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = -3;
+        RESPONSE_INHIBITION = -2;
         OUTPUT_INHIBITION = 0;
         TASK_INHIBITION = -3;
         MONITOR_INHIBITION = 0;

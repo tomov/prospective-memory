@@ -111,7 +111,8 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
-                    %activation(self.unit_id('Monitor')) = 1;
+                    % Einstein 2005: high emph / low emph
+                    activation(self.unit_id('Monitor')) = 0;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
