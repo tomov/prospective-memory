@@ -113,7 +113,7 @@ classdef Simulator < Model
                     activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
                     activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    % Einstein 2005: high emph (= 0.5) / low emph (= 0)
+                    % Einstein 2005: high emph (= 0.25) / low emph (= 0)
                     activation(self.unit_id('Monitor')) = 0.0;
 
                     % calculate net inputs for all units
