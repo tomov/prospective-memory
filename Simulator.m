@@ -111,10 +111,10 @@ classdef Simulator < Model
                     % TODO these should be moved outside
                     activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 4; % TODO ongoing task is hardcoded
+                    activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
                     activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph (= 0.5) / low emph (= 0)
-                    activation(self.unit_id('Monitor')) = 0.5;
+                    activation(self.unit_id('Monitor')) = 0.25;
 
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
