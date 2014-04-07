@@ -90,7 +90,7 @@ correct = {
     };
 
 
-reps = 20;
+reps = 10;
 stimuli = repmat(stimuli, reps);
 is_target = repmat(is_target, reps);
 correct = repmat(correct, reps);
@@ -107,9 +107,9 @@ end
 
 sim.wm_capacity = 3;
 % Einstein 2005: focal
-sim.instruction('see:tortoise', 'Target', 2);
+%sim.instruction('see:tortoise', 'Target', 2);
 % Einstein 2005: nonfocal
-%sim.instruction('see:tor', 'Target', 2);
+sim.instruction('see:tor', 'Target', 2);
 sim.print_EM
 [responses, RTs, act] = sim.trial(stimuli, true);
 
