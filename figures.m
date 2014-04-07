@@ -46,7 +46,7 @@ ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 subplot(4, 2, 8);
 plot(act(:, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
-title('Ongoing Monitoring');
+title('Attention');
 ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
 %subplot(3, 2, 6);

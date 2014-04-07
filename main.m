@@ -33,25 +33,25 @@ stimuli = [
 
 % PM / no PM: change 1's to 0's
 is_target = [    
-        0;
+        1;
     0;
     0;
     0;
     0;
     
-        0;
+        1;
     0;
     0;
     0;
     0;
     
-        0;
+        1;
     0;
     0;
     0;
     0;
     
-        0;
+        1;
     0;
     0;
     0;
@@ -60,29 +60,29 @@ is_target = [
 
 % PM / no PM: uncomment and comment out respective responses
 correct = {
-            'Yes';
-%            'PM';
+%            'Yes';
+            'PM';
     'Yes';
     'No';
     'No';
     'No';
     
-            'No';
-%            'PM';
+%            'No';
+            'PM';
     'Yes';
     'No';
     'No';
     'No';
     
-            'No';
-%            'PM';
+%            'No';
+            'PM';
     'Yes';
     'No';
     'No';
     'No';
 
-            'No';
-%            'PM';
+%            'No';
+            'PM';
     'Yes';
     'No';
     'No';
@@ -107,7 +107,7 @@ end
 
 sim.wm_capacity = 2;
 % Einstein 2005: focal
-%sim.instruction('see:tortoise', 'Target', 2);
+sim.instruction('see:tortoise', 'Target', 2);
 % Einstein 2005: nonfocal
 %sim.instruction('see:tor', 'Target', 2);
 sim.print_EM

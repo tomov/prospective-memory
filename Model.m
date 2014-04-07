@@ -264,7 +264,7 @@ classdef Model < handle
             
             % perception to target detection to response mappings (indirect PM pathway)
             self.forward_all_to_all(self.perception_ids, self.unit_id('Target'), 0); % EM!!!
-            self.forward_all_to_all(self.unit_id('Target'), self.unit_id('PM'), self.TARGET_TO_RESPONSE);
+            self.forward_all_to_all(self.unit_id('Target'), self.unit_id('PM Response'), self.TARGET_TO_RESPONSE);
             self.forward_all_to_all(self.unit_id('Target'), self.response_ids, self.TARGET_TO_RESPONSE_INHIBITION);
             
             % attention to perception
