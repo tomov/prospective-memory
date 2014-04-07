@@ -22,7 +22,7 @@ classdef Model < handle
         
         % biases = leaks
         BIAS_FOR_PERCEPTION = -10;
-        BIAS_FOR_RESPONSES = -1;
+        BIAS_FOR_RESPONSES = -3.5;
         BIAS_FOR_OUTPUTS = -0.5;
         BIAS_FOR_TASK = 0;
         BIAS_FOR_MONITOR = -10;
@@ -32,7 +32,8 @@ classdef Model < handle
         % feedforward excitatory
         
         INPUT_TO_PERCEPTION = 10;
-        PERCEPTION_TO_RESPONSE = 1;
+        PERCEPTION_TO_RESPONSE = 3;
+        PERCEPTION_TO_RESPONSE_DOUBLE = 2;
         RESPONSE_TO_OUTPUT = 5;
         
         TARGET_TO_RESPONSE = 5;
@@ -74,6 +75,7 @@ classdef Model < handle
         
         OUTPUT_TO_SELF = -3; % makes response->output more like copying rather than integration
         TARGET_TO_SELF = -3; % -2;
+        RESPONSE_TO_SELF = 0;
         
         % --- end of connection weights ---
         
@@ -224,18 +226,18 @@ classdef Model < handle
                 
                 % perception to response mapping (direct OG pathway)
                 % -- categories to categories
-                self.unit_id('see:a subject')                  , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:an animal')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:a sport')                    , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:a relative')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE * 0.6;
+                self.unit_id('see:a subject')                  , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:an animal')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:a sport')                    , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:a relative')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE_DOUBLE;
                 
                 % -- animals to matching categories
-                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:history')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:mother')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:football')               , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE * 0.6;
-                self.unit_id('see:sheep')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE * 0.6;
+                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:history')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:mother')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:football')               , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:sheep')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
                 
                 % -- default response is No Match
                 self.unit_id('see:tortoise')               , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
@@ -315,6 +317,7 @@ classdef Model < handle
             % self inibitions
             self.self_excitation(self.output_ids, self.OUTPUT_TO_SELF);
             self.self_excitation(self.target_ids, self.TARGET_TO_SELF);
+            self.self_excitation(self.response_ids, self.RESPONSE_TO_SELF);
 
             % generate weight matrix from defined connections
             self.weights = sparse(self.connections(:,1), self.connections(:,2), self.connections(:,3), ...

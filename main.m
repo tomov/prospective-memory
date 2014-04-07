@@ -11,21 +11,21 @@ stimuli = [
     {'tortoise,a relative'}, 1;
     {'tortoise,a sport'}, 1;
     
+    {'football,a sport'}, 1;
     {'football,an animal'}, 1;
     {'football,a subject'}, 1;
     {'football,a relative'}, 1;
-    {'football,a sport'}, 1;
-    %{
-    {'history,an animal'}, 1;
+    
     {'history,a subject'}, 1;
+    {'history,an animal'}, 1;
     {'history,a relative'}, 1;
     {'history,a sport'}, 1;
     
+    {'mother,a relative'}, 1;
     {'mother,an animal'}, 1;
     {'mother,a subject'}, 1;
-    {'mother,a relative'}, 1;
     {'mother,a sport'}, 1;
-    %}
+    
     ];
 
 is_target = [
@@ -38,7 +38,7 @@ is_target = [
     0;
     0;
     0;
-    %{
+    
     0;
     0;
     0;
@@ -48,7 +48,7 @@ is_target = [
     0;
     0;
     0;
-    %}
+    
     ];
 
 correct = {
@@ -57,21 +57,21 @@ correct = {
     'No';
     'No';
     
-    'No';
-    'No';
-    'No';
     'Yes';
-    %{
     'No';
-    'Yes';
     'No';
     'No';
     
-    'No';
-    'No';
     'Yes';
     'No';
-    %}
+    'No';
+    'No';
+    
+    'Yes';
+    'No';
+    'No';
+    'No';
+    
     };
 
 
