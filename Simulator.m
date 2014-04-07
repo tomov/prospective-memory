@@ -98,7 +98,8 @@ classdef Simulator < Model
                 activation(self.monitor_ids) = 0;
                 activation(self.target_ids) = activation(self.target_ids) / 2; % TODO DISCUSS WITH JON!!!
                 activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Number of Vowels')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
@@ -120,7 +121,7 @@ classdef Simulator < Model
                     %self.kWTA_basic(1, self.response_ids);
                     self.kWTA_basic(1, self.task_ids);
                     %self.kWTA_basic(1, self.monitor_ids);
-                    self.kWTA_basic(1, self.attention_ids);
+                    self.kWTA_basic(2, self.attention_ids);
                     %self.kWTA_average(self.wm_capacity, self.wm_ids);
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);
