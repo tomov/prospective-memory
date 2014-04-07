@@ -38,7 +38,7 @@ classdef Model < handle
         
         TARGET_TO_RESPONSE = 10;
         TARGET_TO_TASK = 0;
-        PERCEPTION_TO_TARGET = 3.7; % vary this between 3 and 5 to vary the PM hit rate (range applies mainly for monitor = 0)
+        PERCEPTION_TO_TARGET = 3.5; % vary this between 3 and 5 to vary the PM hit rate (range applies mainly for monitor = 0)
 
         % feedforward inhibitory
 
