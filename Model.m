@@ -36,7 +36,7 @@ classdef Model < handle
         PERCEPTION_TO_RESPONSE_DOUBLE = 2;
         RESPONSE_TO_OUTPUT = 5;
         
-        TARGET_TO_RESPONSE = 5;
+        TARGET_TO_RESPONSE = 10;
         TARGET_TO_TASK = 0;
         PERCEPTION_TO_TARGET = 3.7; % vary this between 3 and 5 to vary the PM hit rate (range applies mainly for monitor = 0)
 

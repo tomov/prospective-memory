@@ -97,9 +97,6 @@ classdef Simulator < Model
                 activation(self.task_ids) = 0;
                 activation(self.monitor_ids) = 0;
                 activation(self.target_ids) = activation(self.target_ids) / 2; % TODO DISCUSS WITH JON!!!
-                activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
@@ -111,6 +108,11 @@ classdef Simulator < Model
                     % set input activations
                     activation(self.input_ids) = 0;
                     activation(active_ids) = self.INPUT_ACTIVATION;
+                    % TODO these should be moved outside
+                    activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph / low emph
                     activation(self.unit_id('Monitor')) = 0;
 
