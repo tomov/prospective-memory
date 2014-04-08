@@ -6,10 +6,17 @@ classdef Simulator < Model
     properties (Access = public)
         wm_capacity = 2;
         net_input;
+        net_input_avg;
+        accumulators;
+        Nout;
     end
     
     methods
         function self = Simulator()
+            self.Nout = size(self.output_ids, 2);
+            self.accumulators = zeros(1, self.Nout);
+            self.net_input = zeros(1, self.N);
+            self.net_input_avg = zeros(1, self.N);
         end
         
         function ids = string_to_ids(self, stimulus)
@@ -19,6 +26,11 @@ classdef Simulator < Model
                 active_unit = units{i};
                 ids = [ids, self.unit_id(active_unit)];
             end
+        end
+        
+        % from Jon's 1990 Stroop paper
+        function act = logistic(self, net)
+            act = 1 ./ (1 + exp(-net));
         end
         
         function instruction(self, perceptions, targets, secs)
@@ -70,19 +82,20 @@ classdef Simulator < Model
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
 
-        function [responses, RTs, activation_log] = trial(self, stimuli, do_log)
+        function [responses, RTs, activation_log, accumulators_log] = trial(self, stimuli, do_log)
             % initialize activations and outputs
             activation = zeros(1, self.N);
             trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
             if do_log
                 activation_log = zeros(trial_duration, self.N);
+                accumulators_log = zeros(trial_duration, self.Nout);
             end
             responses = [];
             RTs = [];
             cycles = 0;
             
             % for each input from the time series
-            for ord=1:size(stimuli, 1)
+            for ord=1:1%size(stimuli, 1)
                 % get active input units for given stimulus
                 % each stimulus string must be a comma-separated list of names of
                 % input units
@@ -97,6 +110,7 @@ classdef Simulator < Model
                 activation(self.task_ids) = 0;
                 activation(self.monitor_ids) = 0;
                 activation(self.target_ids) = activation(self.target_ids) / 2; % TODO DISCUSS WITH JON!!!
+                %activation(:) = 0;
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
@@ -106,18 +120,25 @@ classdef Simulator < Model
                 responded = false;
                 for cycle=1:timeout
                     % set input activations
-                    activation(self.input_ids) = 0;
-                    activation(active_ids) = self.INPUT_ACTIVATION;
+                    %activation(self.input_ids) = 0;
+                    %activation(active_ids) = self.INPUT_ACTIVATION;
                     % TODO these should be moved outside
-                    activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
                     activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph (= 0.25) / low emph (= 0)
-                    activation(self.unit_id('Monitor')) = 0.3;
-
+                    %activation(self.unit_id('Monitor')) = 0.3;
+                    
+                    % log activation for plotting
+                    if do_log
+                        activation_log(cycles + cycle, :) = activation;
+                        accumulators_log(cycles + cycle, :) = self.accumulators;
+                    end
+                    
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
+                    self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
                     
                     % add k-winner-take-all inhibition
                     %self.kWTA_basic(1, self.output_ids);
@@ -130,27 +151,19 @@ classdef Simulator < Model
 %                    self.kWTA_average(self.wm_capacity, self.wm_ids);
 
                     % update activation levels
-                    for i=1:self.N
-                        if self.net_input(i) >= 0
-                            delta_act = self.STEP_SIZE * self.net_input(i) * (self.MAXIMUM_ACTIVATION - activation(i));% ...
-                                %- self.DECAY * (activation(i) - 0);
-                        else
-                            delta_act = self.STEP_SIZE * self.net_input(i) * (activation(i) - self.MINIMUM_ACTIVATION);% ...
-                                %- self.DECAY * (activation(i) - 0);
-                        end
-                        activation(i) = activation(i) + delta_act;
-                    end
-
+                    activation = self.logistic(self.net_input_avg);
+                    
+                    % update evidence accumulators
+                    act_max = max(activation(self.output_ids));
+                    mu = self.EVIDENCE_ACCUM_ALPHA * (activation(self.output_ids) - act_max);
+                    add = normrnd(0, self.EVIDENCE_ACCUM_SIGMA, 1, size(mu, 2));
+                    self.accumulators = self.accumulators + add;
+                    
                     % add noise to activations
                     noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
                     activation = activation + noise;
                     activation(activation > self.MAXIMUM_ACTIVATION) = self.MAXIMUM_ACTIVATION;
                     activation(activation < self.MINIMUM_ACTIVATION) = self.MINIMUM_ACTIVATION;
-
-                    % log activation for plotting
-                    if do_log
-                        activation_log(cycles + cycle, :) = activation;
-                    end
 
                     % check if activation threshold is met
                     [outputs, ix] = sort(activation(self.output_ids), 'descend');
@@ -172,6 +185,7 @@ classdef Simulator < Model
             
             if do_log
                 activation_log(cycles:end,:) = [];
+                accumulators_log(cycles:end,:) = [];
             end
         end
     end

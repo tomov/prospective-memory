@@ -11,7 +11,7 @@ stimuli = [
     {'football,an animal'}, 1;
     {'football,a subject'}, 1;
     {'football,a relative'}, 1;
-    
+    %{
     {'tortoise,a subject'}, 1;
     {'mother,a relative'}, 1;
     {'mother,an animal'}, 1;
@@ -29,6 +29,7 @@ stimuli = [
     {'sheep,a relative'}, 1;
     {'sheep,a subject'}, 1;
     {'sheep,a sport'}, 1;
+    %}
     ];
 
 % PM / no PM: change 1's to 0's
@@ -38,7 +39,7 @@ is_target = [
     0;
     0;
     0;
-    
+    %{
         1;
     0;
     0;
@@ -55,7 +56,8 @@ is_target = [
     0;
     0;
     0;
-    0;    
+    0;
+    %}
     ];
 
 % PM / no PM: uncomment and comment out respective responses
@@ -66,7 +68,7 @@ correct = {
     'No';
     'No';
     'No';
-    
+    %{
 %            'No';
             'PM';
     'Yes';
@@ -87,10 +89,11 @@ correct = {
     'No';
     'No';
     'No';
+    %}
     };
 
 
-reps = 10;
+reps = 1;
 stimuli = repmat(stimuli, reps);
 is_target = repmat(is_target, reps);
 correct = repmat(correct, reps);
@@ -111,7 +114,7 @@ sim.wm_capacity = 3;
 % Einstein 2005: nonfocal
 sim.instruction('see:tor', 'Target', 2);
 sim.print_EM
-[responses, RTs, act] = sim.trial(stimuli, true);
+[responses, RTs, act, acc] = sim.trial(stimuli, true);
 
 
 figures;

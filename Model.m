@@ -9,6 +9,9 @@ classdef Model < handle
         STEP_SIZE = 0.01;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
+        TAU = 0.05; % rate constant from Jon's paper
+        EVIDENCE_ACCUM_SIGMA = 0.1;
+        EVIDENCE_ACCUM_ALPHA = 0.1;
         
         % activation levels
 
@@ -21,24 +24,24 @@ classdef Model < handle
         % --- begin connection weights ---
         
         % biases = leaks
-        BIAS_FOR_PERCEPTION = -10;
-        BIAS_FOR_RESPONSES = -3.5;
-        BIAS_FOR_OUTPUTS = -0.5;
+        BIAS_FOR_PERCEPTION = 0; %-10;
+        BIAS_FOR_RESPONSES = -5; %-3.5;
+        BIAS_FOR_OUTPUTS = 0; %-0.5;
         BIAS_FOR_TASK = 0;
-        BIAS_FOR_MONITOR = -10;
-        BIAS_FOR_TARGET = -1;
+        BIAS_FOR_MONITOR = 0; %-10;
+        BIAS_FOR_TARGET = 0; %-1;
         BIAS_FOR_ATTENTION = 0;
         
         % feedforward excitatory
         
-        INPUT_TO_PERCEPTION = 10;
-        PERCEPTION_TO_RESPONSE = 3.4;
-        PERCEPTION_TO_RESPONSE_DOUBLE = 2;
-        RESPONSE_TO_OUTPUT = 5;
+        INPUT_TO_PERCEPTION = 0; %10;
+        PERCEPTION_TO_RESPONSE = 0; %3.4;
+        PERCEPTION_TO_RESPONSE_DOUBLE = 0; %2;
+        RESPONSE_TO_OUTPUT = 0; %5;
         
-        TARGET_TO_RESPONSE = 10;
+        TARGET_TO_RESPONSE = 0; %10;
         TARGET_TO_TASK = 0;
-        PERCEPTION_TO_TARGET = 3.5; % vary this between 3 and 5 to vary the PM hit rate (range applies mainly for monitor = 0)
+        PERCEPTION_TO_TARGET = 0; %3.5; % vary this between 3 and 5 to vary the PM hit rate (range applies mainly for monitor = 0)
 
         % feedforward inhibitory
 
@@ -48,9 +51,9 @@ classdef Model < handle
         
         % top-down excitatory
         
-        TASK_TO_RESPONSE = 1;
-        ATTENTION_TO_PERCEPTION = 9;
-        MONITOR_TO_TARGET = 2;
+        TASK_TO_RESPONSE = 5; %1;
+        ATTENTION_TO_PERCEPTION = 0; %9;
+        MONITOR_TO_TARGET = 0; %2;
         
         % top-down inhibitory
         
@@ -59,22 +62,22 @@ classdef Model < handle
         % lateral intralayer inhibitory
 
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = -2;
+        RESPONSE_INHIBITION = 0; %-2;
         OUTPUT_INHIBITION = 0;
-        TASK_INHIBITION = -3;
+        TASK_INHIBITION = 0; %-3;
         MONITOR_INHIBITION = 0;
         ATTENTION_INHIBITION = 0;
         
         % self-excitatory
         
-        TASK_SELF = 5;
-        MONITOR_SELF = 5;
-        ATTENTION_SELF = 5;
+        TASK_SELF = 0; %5;
+        MONITOR_SELF = 0; %5;
+        ATTENTION_SELF = 0; %5;
         
         % self-inhibitory
         
-        OUTPUT_TO_SELF = -3; % makes response->output more like copying rather than integration
-        TARGET_TO_SELF = -3; % -2;
+        OUTPUT_TO_SELF = 0; %-3; % makes response->output more like copying rather than integration
+        TARGET_TO_SELF = 0; %-3; % -2;
         RESPONSE_TO_SELF = 0;
         
         % --- end of connection weights ---

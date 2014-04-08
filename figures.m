@@ -38,10 +38,16 @@ title('Target Monitoring');
 ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
 subplot(4, 2, 6);
-plot(act(:, sim.target_ids));
-legend(sim.units(sim.target_ids));
-title('Target Detection');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+plot(acc(:, :));
+legend(sim.units(sim.output_ids));
+title('Evidence Accumulation');
+%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+
+%subplot(4, 2, 6);
+%plot(act(:, sim.target_ids));
+%legend(sim.units(sim.target_ids));
+%title('Target Detection');
+%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
 subplot(4, 2, 8);
 plot(act(:, sim.attention_ids));
