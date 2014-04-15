@@ -5,27 +5,28 @@ classdef Model < handle
     properties (Access = public)
         % PDP model parameters
         
-        NOISE_SIGMA = 0.015;
+        NOISE_SIGMA = 0.5; % TODO -- ??
         STEP_SIZE = 0.01;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
+        SETTLE_CYCLES = 100;
         TAU = 0.05; % rate constant from Jon's paper
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
+        EVIDENCE_ACCUM_THRESHOLD = 1;
         
         % activation levels
 
         MAXIMUM_ACTIVATION = 1;
-        MINIMUM_ACTIVATION = -0.1;
-        RESPONSE_THRESHOLD = 0.5;
+        MINIMUM_ACTIVATION = 0;
         
         INPUT_ACTIVATION = 1;
 
         % --- begin connection weights ---
         
         % biases = leaks
-        BIAS_FOR_PERCEPTION = 0; %-10;
-        BIAS_FOR_RESPONSES = -5; %-3.5;
+        BIAS_FOR_PERCEPTION = -2; %-10;
+        BIAS_FOR_RESPONSES = -4; %-3.5;
         BIAS_FOR_OUTPUTS = 0; %-0.5;
         BIAS_FOR_TASK = 0;
         BIAS_FOR_MONITOR = 0; %-10;
@@ -34,10 +35,10 @@ classdef Model < handle
         
         % feedforward excitatory
         
-        INPUT_TO_PERCEPTION = 0; %10;
-        PERCEPTION_TO_RESPONSE = 0; %3.4;
-        PERCEPTION_TO_RESPONSE_DOUBLE = 0; %2;
-        RESPONSE_TO_OUTPUT = 0; %5;
+        INPUT_TO_PERCEPTION = 2; %10;
+        PERCEPTION_TO_RESPONSE = 0.5; %0.5
+        PERCEPTION_TO_RESPONSE_DOUBLE = 1; %1;
+        RESPONSE_TO_OUTPUT = 1; %5;
         
         TARGET_TO_RESPONSE = 0; %10;
         TARGET_TO_TASK = 0;
@@ -45,14 +46,15 @@ classdef Model < handle
 
         % feedforward inhibitory
 
+        INPUT_TO_PERCEPTION_INHIBITION = 0; %10;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         TARGET_TO_RESPONSE_INHIBITION = 0;
         
         % top-down excitatory
         
-        TASK_TO_RESPONSE = 5; %1;
-        ATTENTION_TO_PERCEPTION = 0; %9;
+        TASK_TO_RESPONSE = 4; %1;
+        ATTENTION_TO_PERCEPTION = 2; %9;
         MONITOR_TO_TARGET = 0; %2;
         
         % top-down inhibitory
@@ -235,12 +237,12 @@ classdef Model < handle
                 self.unit_id('see:a relative')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE_DOUBLE;
                 
                 % -- animals to matching categories
-                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE / 3;
                 self.unit_id('see:history')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
                 self.unit_id('see:mother')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE / 3;
                 self.unit_id('see:football')               , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:sheep')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:sheep')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE / 3;
                 
                 % -- default response is No Match
                 self.unit_id('see:tortoise')               , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
@@ -253,14 +255,14 @@ classdef Model < handle
                 % raw inputs to perception
                 self.unit_id('tortoise')               , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
                 self.unit_id('history')                , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
-                self.unit_id('crocodile')              , self.unit_id('see:croc')         , self.INPUT_TO_PERCEPTION;
-                self.unit_id('football')               , self.unit_id('see:foot')         , self.INPUT_TO_PERCEPTION;
+                self.unit_id('crocodile')              , self.unit_id('see:croc')        , self.INPUT_TO_PERCEPTION;
+                self.unit_id('football')               , self.unit_id('see:foot')        , self.INPUT_TO_PERCEPTION;
                 
                 % responses to outputs                
-                self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('A Sport')             , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
-                self.unit_id('A Relative')          , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
+                self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
+                self.unit_id('A Sport')             , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
+                self.unit_id('A Relative')          , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
                 self.unit_id('No Match')            , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
             ];
@@ -286,7 +288,7 @@ classdef Model < handle
             
             from = self.unit_id('Attend Syllables');
             to = cellfun(@self.unit_id, strcat('see:', {
-                'tor', 'foot'
+                'tor', 'foot', 'croc'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
@@ -300,6 +302,7 @@ classdef Model < handle
             self.forward_all_to_all(self.target_ids, self.task_ids, 0); % EM!!!
             
             % forward inhibitions
+            self.forward_all_to_all(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION_INHIBITION);
             self.forward_all_to_all(self.perception_ids, self.response_ids, self.PERCEPTION_TO_RESPONSE_INHIBITION);
             self.forward_all_to_all(self.task_ids, self.response_ids, self.TASK_TO_RESPONSE_INHIBITION);
             self.forward_all_to_all(self.response_ids, self.response_ids, self.RESPONSE_TO_OUTPUT_INHIBITION);

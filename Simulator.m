@@ -85,7 +85,7 @@ classdef Simulator < Model
         function [responses, RTs, activation_log, accumulators_log] = trial(self, stimuli, do_log)
             % initialize activations and outputs
             activation = zeros(1, self.N);
-            trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
+            trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC + self.SETTLE_CYCLES;
             if do_log
                 activation_log = zeros(trial_duration, self.N);
                 accumulators_log = zeros(trial_duration, self.Nout);
@@ -118,14 +118,20 @@ classdef Simulator < Model
                 
                 % simulate response to stimulus
                 responded = false;
-                for cycle=1:timeout
+                for cycle=1:timeout + self.SETTLE_CYCLES
                     % set input activations
-                    %activation(self.input_ids) = 0;
-                    %activation(active_ids) = self.INPUT_ACTIVATION;
-                    % TODO these should be moved outside
-                    %activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    %activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    %activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
+                    activation(self.input_ids) = 0;
+                    if cycle >= self.SETTLE_CYCLES
+                        % only if the network has settled
+                        activation(active_ids) = self.INPUT_ACTIVATION;
+                    end
+                    % set feature attention activations
+                    activation(self.attention_ids) = 0;
+                    activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
+                    % set task attention activations
+                    activation(self.task_ids) = 0;
                     activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph (= 0.25) / low emph (= 0)
                     %activation(self.unit_id('Monitor')) = 0.3;
@@ -138,6 +144,13 @@ classdef Simulator < Model
                     
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
+                    
+                    % add noise to net inputs (except input units)
+                    noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
+                    noise(self.input_ids) = 0;
+                    self.net_input = self.net_input + noise;
+                    
+                    % average net inputs
                     self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
                     
                     % add k-winner-take-all inhibition
@@ -154,25 +167,23 @@ classdef Simulator < Model
                     activation = self.logistic(self.net_input_avg);
                     
                     % update evidence accumulators
-                    act_max = max(activation(self.output_ids));
+                    act_sorted = sort(activation(self.output_ids), 'descend');
+                    act_max = ones(1, size(self.output_ids, 2)) * act_sorted(1);
+                    act_max(activation(self.output_ids) == act_sorted(1)) = act_sorted(2);
                     mu = self.EVIDENCE_ACCUM_ALPHA * (activation(self.output_ids) - act_max);
-                    add = normrnd(0, self.EVIDENCE_ACCUM_SIGMA, 1, size(mu, 2));
+                    add = normrnd(mu, ones(size(mu)) * self.EVIDENCE_ACCUM_SIGMA);
                     self.accumulators = self.accumulators + add;
                     
-                    % add noise to activations
-                    noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
-                    activation = activation + noise;
-                    activation(activation > self.MAXIMUM_ACTIVATION) = self.MAXIMUM_ACTIVATION;
-                    activation(activation < self.MINIMUM_ACTIVATION) = self.MINIMUM_ACTIVATION;
-
                     % check if activation threshold is met
-                    [outputs, ix] = sort(activation(self.output_ids), 'descend');
-                    if ~responded & outputs(1) - outputs(2) > self.RESPONSE_THRESHOLD
+                    [v, id] = max(self.accumulators);
+                    if ~responded ...
+                            && v > self.EVIDENCE_ACCUM_THRESHOLD ...
+                            && cycle >= self.SETTLE_CYCLES
                         % save response and response time
-                        output_id = self.output_ids(ix(1));
+                        output_id = self.output_ids(id);
                         RT = cycle;
                         responded = true;
-                        break;
+                        %break;
                     end
                 end
 

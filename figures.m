@@ -5,39 +5,39 @@ subplot(4, 2, 1);
 plot(act(:, sim.output_ids));
 legend(sim.units(sim.output_ids));
 title('Outputs');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 3);
 plot(act(:, sim.response_ids));
 legend(sim.units(sim.response_ids));
 title('Responses');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 5);
 plot(act(:, sim.perception_ids));
 legend(sim.units(sim.perception_ids));
 title('Feature Perception');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 7);
 plot(act(:, sim.input_ids));
 legend(sim.units(sim.input_ids));
 title('Stimulus Inputs');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
-
-subplot(4, 2, 2);
-plot(act(:, sim.task_ids));
-legend(sim.units(sim.task_ids));
-title('Task Monitoring');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 4);
-plot(act(:, sim.monitor_ids));
-legend(sim.units(sim.monitor_ids));
-title('Target Monitoring');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+plot(act(:, sim.task_ids));
+legend(sim.units(sim.task_ids));
+title('Task Representation');
+ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
-subplot(4, 2, 6);
+%subplot(4, 2, 4);
+%plot(act(:, sim.monitor_ids));
+%legend(sim.units(sim.monitor_ids));
+%title('Target Monitoring');
+%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+
+subplot(4, 2, 2);
 plot(acc(:, :));
 legend(sim.units(sim.output_ids));
 title('Evidence Accumulation');
@@ -49,11 +49,11 @@ title('Evidence Accumulation');
 %title('Target Detection');
 %ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
-subplot(4, 2, 8);
+subplot(4, 2, 6);
 plot(act(:, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
-title('Attention');
-ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+title('Feature Attention');
+ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 %subplot(3, 2, 6);
 %plot(act(:, sim.unit_id('Super Inhibition')));
@@ -123,6 +123,7 @@ end
 OG_count
 PM_count
 
+%{
 figure;
 
 subplot(1, 2, 1);
@@ -147,3 +148,5 @@ mean(OG_correct_RTs)
 mean(PM_hit_RTs)
 size(OG_correct_RTs, 1) / OG_count
 size(PM_hit_RTs, 1) / PM_count
+
+%}
