@@ -39,7 +39,7 @@ classdef Simulator < Model
             from = zeros(1, self.N);
             from(from_ids) = self.MAXIMUM_ACTIVATION;
             to = zeros(1, self.N);
-            to(self.target_ids) = -self.MAXIMUM_ACTIVATION;
+            to(self.task_ids) = -self.MAXIMUM_ACTIVATION;
             to(to_ids) = self.MAXIMUM_ACTIVATION;
             duration = secs * self.CYCLES_PER_SEC;
             for cycle=1:duration
@@ -48,15 +48,15 @@ classdef Simulator < Model
                 self.weights = self.weights + delta_w;
                 
                 % scale weights to fit model constraints
-                sub = self.weights(self.perception_ids, self.target_ids);
-                sub = sub * self.PERCEPTION_TO_TARGET / max(sub(:));
-                self.weights(self.perception_ids, self.target_ids) = sub;                
+                sub = self.weights(self.perception_ids, self.task_ids);
+                sub = sub * self.PERCEPTION_TO_TASK / max(sub(:));
+                self.weights(self.perception_ids, self.task_ids) = sub;                
             end
             % add noise
             % ... TODO a little artificial at the end but whatever
             % also noise sigma is hardcoded and made up
-            %self.weights(self.perception_ids, self.target_ids) = self.weights(self.perception_ids, self.target_ids) ...
-            %    + normrnd(0, 3, size(self.perception_ids, 2), size(self.target_ids, 2));
+            %self.weights(self.perception_ids, self.task_ids) = self.weights(self.perception_ids, self.task_ids) ...
+            %    + normrnd(0, 3, size(self.perception_ids, 2), size(self.task_ids, 2));
         end
         
         % from http://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Networks/kWTA_Equations
@@ -84,7 +84,6 @@ classdef Simulator < Model
 
         function [responses, RTs, activation_log, accumulators_log] = trial(self, stimuli)
             % initialize activations and outputs
-            activation = zeros(1, self.N);
             trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
             activation_log = zeros(trial_duration, self.N);
             accumulators_log = zeros(trial_duration, self.Nout);
@@ -93,7 +92,7 @@ classdef Simulator < Model
             cycles = 0;
             
             % for each input from the time series
-            for ord=1:size(stimuli, 1)
+            for ord=1:1 % size(stimuli, 1)
                 % get active input units for given stimulus
                 % each stimulus string must be a comma-separated list of names of
                 % input units
@@ -102,13 +101,7 @@ classdef Simulator < Model
                 timeout = stimuli{ord, 2} * self.CYCLES_PER_SEC;
                 
                 % reset response, output, and monitoring activations
-                activation(self.perception_ids) = 0;
-                activation(self.response_ids) = 0;
-                activation(self.output_ids) = 0;
-                activation(self.task_ids) = 0;
-                activation(self.monitor_ids) = 0;
-                activation(self.target_ids) = activation(self.target_ids) / 2; % TODO DISCUSS WITH JON!!!
-                %activation(:) = 0;
+                activation = zeros(1, self.N);
                 self.net_input_avg = zeros(1, self.N);
                 self.accumulators = zeros(1, size(self.output_ids, 2));
                 
@@ -126,12 +119,12 @@ classdef Simulator < Model
                         activation(active_ids) = self.INPUT_ACTIVATION;
                     end
                     % set feature attention activations
-                    activation(self.attention_ids) = 0;
+                    %activation(self.attention_ids) = 0;
                     %activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     %activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     %activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % set task attention activations
-                    activation(self.task_ids) = 0;
+                    %activation(self.task_ids) = 0;
                     %activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph (= 0.25) / low emph (= 0)
                     %activation(self.unit_id('Monitor')) = 0.3;

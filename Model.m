@@ -25,62 +25,52 @@ classdef Model < handle
 
         % --- begin connection weights ---
         
-        % biases = leaks
-        BIAS_FOR_PERCEPTION = -5; %-10;
-        BIAS_FOR_RESPONSES = -9; %-3.5;
-        BIAS_FOR_OUTPUTS = 0; %-0.5;
-        BIAS_FOR_TASK = 0;
-        BIAS_FOR_MONITOR = 0; %-10;
-        BIAS_FOR_TARGET = 0; %-1;
-        BIAS_FOR_ATTENTION = 0;
+        % perception
         
-        % feedforward excitatory
-        
-        INPUT_TO_PERCEPTION = 10; %10;
-        PERCEPTION_TO_RESPONSE = 7; %0.5
-        RESPONSE_TO_OUTPUT = 2; %5;
-        
-        TARGET_TO_RESPONSE = 0; %10;
-        TARGET_TO_TASK = 0;
-        PERCEPTION_TO_TARGET = 0; %3.5; % vary this between 3 and 5 to vary the PM hit rate (range applies mainly for monitor = 0)
-
-        % feedforward inhibitory
-
-        INPUT_TO_PERCEPTION_INHIBITION = 0; %10;
-        PERCEPTION_TO_RESPONSE_INHIBITION = 0;
-        RESPONSE_TO_OUTPUT_INHIBITION = -2;
-        TARGET_TO_RESPONSE_INHIBITION = 0;
-        
-        % top-down excitatory
-        
-        TASK_TO_RESPONSE = 0; %1;
-        ATTENTION_TO_PERCEPTION = 0; %9;
-        MONITOR_TO_TARGET = 0; %2;
-        
-        % top-down inhibitory
-        
-        TASK_TO_RESPONSE_INHIBITION = 0;
-
-        % lateral intralayer inhibitory
-
+        BIAS_FOR_PERCEPTION = -5;
         PERCEPTION_INHIBITION = 0;
-        RESPONSE_INHIBITION = 0; %-2;
-        OUTPUT_INHIBITION = 0;
-        TASK_INHIBITION = 0; %-3;
-        MONITOR_INHIBITION = 0;
+        
+        INPUT_TO_PERCEPTION = 10;
+        INPUT_TO_PERCEPTION_INHIBITION = 0;
+        
+        ATTENTION_TO_PERCEPTION = 0;
+
+        % responses
+        
+        BIAS_FOR_RESPONSES = -2;
+        RESPONSE_INHIBITION = -3;
+        
+        PERCEPTION_TO_RESPONSE = 3;
+        PERCEPTION_TO_RESPONSE_INHIBITION = 0;
+
+        TASK_TO_RESPONSE = 0;
+        TASK_TO_RESPONSE_INHIBITION = 0;
+        
+        % outputs
+        
+        BIAS_FOR_OUTPUTS = 0;
+        OUTPUT_INHIBITION = -3;
+        
+        RESPONSE_TO_OUTPUT = 2;
+        RESPONSE_TO_OUTPUT_INHIBITION = 0;
+        
+        % feature attention
+        
+        BIAS_FOR_ATTENTION = 0;
         ATTENTION_INHIBITION = 0;
+        ATTENTION_SELF = 0;
         
-        % self-excitatory
+        % task representation
         
-        TASK_SELF = 0; %5;
-        MONITOR_SELF = 0; %5;
-        ATTENTION_SELF = 0; %5;
+        BIAS_FOR_TASK = 0;
+        TASK_INHIBITION = 0;
+        TASK_SELF = 0;
         
-        % self-inhibitory
+        PERCEPTION_TO_TASK = 0; % (EM)
         
-        OUTPUT_TO_SELF = 0; %-3; % makes response->output more like copying rather than integration
-        TARGET_TO_SELF = 0; %-3; % -2;
-        RESPONSE_TO_SELF = 0;
+
+        %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
+        %RESPONSE_TO_SELF = 0;
         
         % --- end of connection weights ---
         
@@ -99,8 +89,6 @@ classdef Model < handle
         response_units
         output_units
         task_units
-        monitor_units
-        target_units
         attention_units
         
         input_ids
@@ -108,8 +96,6 @@ classdef Model < handle
         response_ids
         output_ids
         task_ids
-        monitor_ids
-        target_ids
         attention_ids
         
         wm_ids
@@ -179,12 +165,6 @@ classdef Model < handle
             self.task_units = {
                 'Word Categorization', 'PM Task'
                 };
-            self.monitor_units = {
-                'Monitor'
-                };
-            self.target_units = {
-                'Target'
-                };
             self.attention_units = {
                 'Attend Word', ...
                 'Attend Category', ...
@@ -196,8 +176,6 @@ classdef Model < handle
                 self.response_units, ...
                 self.output_units, ...
                 self.task_units, ...
-                self.monitor_units, ...
-                self.target_units, ...
                 self.attention_units, ...
                 {'timeout'}
                 ];
@@ -211,11 +189,9 @@ classdef Model < handle
             self.response_ids = cellfun(@self.unit_id, self.response_units);
             self.output_ids = cellfun(@self.unit_id, self.output_units);
             self.task_ids = cellfun(@self.unit_id, self.task_units);
-            self.monitor_ids = cellfun(@self.unit_id, self.monitor_units);
-            self.target_ids = cellfun(@self.unit_id, self.target_units);
             self.attention_ids = cellfun(@self.unit_id, self.attention_units);
             
-            self.wm_ids = [self.task_ids self.monitor_ids self.attention_ids];
+            self.wm_ids = [self.task_ids self.attention_ids];
 
             % ---==== specify connections between units ====---
             
@@ -258,10 +234,8 @@ classdef Model < handle
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
             ];
             
-            % perception to target detection to response mappings (indirect PM pathway)
-            self.forward_all_to_all(self.perception_ids, self.unit_id('Target'), 0); % EM!!!
-            self.forward_all_to_all(self.unit_id('Target'), self.unit_id('PM Response'), self.TARGET_TO_RESPONSE);
-            self.forward_all_to_all(self.unit_id('Target'), self.response_ids, self.TARGET_TO_RESPONSE_INHIBITION);
+            % perception to task representation (indirect PM pathway)
+            self.forward_all_to_all(self.perception_ids, self.task_ids, 0); % EM!!!
             
             % attention to perception
             from = self.unit_id('Attend Word');
@@ -285,12 +259,6 @@ classdef Model < handle
             % raw inputs to perception (cont'd)
             self.forward_parallel(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);
             
-            % target monitoring to target detection
-            self.forward_parallel(self.monitor_ids, self.target_ids, self.MONITOR_TO_TARGET);
-
-            % target detection to task monitoring (task switch)
-            self.forward_all_to_all(self.target_ids, self.task_ids, 0); % EM!!!
-            
             % forward inhibitions
             self.forward_all_to_all(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION_INHIBITION);
             self.forward_all_to_all(self.perception_ids, self.response_ids, self.PERCEPTION_TO_RESPONSE_INHIBITION);
@@ -302,19 +270,12 @@ classdef Model < handle
             self.lateral_inhibition(self.response_ids, self.RESPONSE_INHIBITION);
             self.lateral_inhibition(self.output_ids, self.OUTPUT_INHIBITION);
             self.lateral_inhibition(self.task_ids, self.TASK_INHIBITION);
-            self.lateral_inhibition(self.monitor_ids, self.MONITOR_INHIBITION);
             self.lateral_inhibition(self.attention_ids, self.ATTENTION_INHIBITION);
 
             % self excitations
             self.self_excitation(self.task_ids, self.TASK_SELF);
-            self.self_excitation(self.monitor_ids, self.MONITOR_SELF);
             self.self_excitation(self.attention_ids, self.ATTENTION_SELF);
             
-            % self inibitions
-            self.self_excitation(self.output_ids, self.OUTPUT_TO_SELF);
-            self.self_excitation(self.target_ids, self.TARGET_TO_SELF);
-            self.self_excitation(self.response_ids, self.RESPONSE_TO_SELF);
-
             % generate weight matrix from defined connections
             self.weights = sparse(self.connections(:,1), self.connections(:,2), self.connections(:,3), ...
                 self.N, self.N);
@@ -325,13 +286,11 @@ classdef Model < handle
             self.bias(self.response_ids) = self.BIAS_FOR_RESPONSES;
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
-            self.bias(self.monitor_ids) = self.BIAS_FOR_MONITOR;
-            self.bias(self.target_ids) = self.BIAS_FOR_TARGET;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
         end
         
         function EM = print_EM(self)
-            EM = full(self.weights(self.perception_ids, self.target_ids));
+            EM = full(self.weights(self.perception_ids, self.task_ids));
             EM = EM';
         end
         
