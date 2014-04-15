@@ -27,46 +27,58 @@ classdef Model < handle
         
         % perception
         
-        BIAS_FOR_PERCEPTION = -5;
+        BIAS_FOR_PERCEPTION = -10;
         PERCEPTION_INHIBITION = 0;
         
         INPUT_TO_PERCEPTION = 10;
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
-        ATTENTION_TO_PERCEPTION = 0;
+        ATTENTION_TO_PERCEPTION = 5;
 
         % responses
         
-        BIAS_FOR_RESPONSES = -2;
-        RESPONSE_INHIBITION = -3;
+        BIAS_FOR_RESPONSES = -6;
+        RESPONSE_INHIBITION = -2;
         
         PERCEPTION_TO_RESPONSE = 3;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
-        TASK_TO_RESPONSE = 0;
-        TASK_TO_RESPONSE_INHIBITION = 0;
+        TASK_TO_RESPONSE = 7;
+        TASK_TO_RESPONSE_INHIBITION = -3;
         
         % outputs
         
         BIAS_FOR_OUTPUTS = 0;
         OUTPUT_INHIBITION = -3;
         
-        RESPONSE_TO_OUTPUT = 2;
+        RESPONSE_TO_OUTPUT = 1;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
         % feature attention
         
         BIAS_FOR_ATTENTION = 0;
-        ATTENTION_INHIBITION = 0;
-        ATTENTION_SELF = 0;
+        ATTENTION_INHIBITION = -2;
+        ATTENTION_SELF = 3;
+        
+        TASK_TO_ATTENTION = 1;
+        TASK_TO_ATTENTION_INHIBITION = -1;
+        
+        OG_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
+        PM_ATTENTION_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
         
         % task representation
         
         BIAS_FOR_TASK = 0;
-        TASK_INHIBITION = 0;
-        TASK_SELF = 0;
+        TASK_INHIBITION = -2;
+        TASK_SELF = 3;
         
-        PERCEPTION_TO_TASK = 0; % (EM)
+        ATTENTION_TO_TASK = 1;
+        ATTENTION_TO_TASK_INHIBITION = 0;
+        
+        OG_TASK_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
+        PM_TASK_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
+        
+        PERCEPTION_TO_TASK = 5; % (EM)
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
@@ -166,8 +178,7 @@ classdef Model < handle
                 'Word Categorization', 'PM Task'
                 };
             self.attention_units = {
-                'Attend Word', ...
-                'Attend Category', ...
+                'Attend Word and Category', ...
                 'Attend Syllables'
                 };
             self.units = [
@@ -232,19 +243,32 @@ classdef Model < handle
                 self.unit_id('No Match 1')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('No Match 2')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
+                
+                % LCA mutual inhibition and excitation
+                self.unit_id('Attend Word and Category') , self.unit_id('Word Categorization') , self.ATTENTION_TO_TASK;
+                self.unit_id('Word Categorization') , self.unit_id('Attend Word and Category') , self.TASK_TO_ATTENTION;
+
+                self.unit_id('Attend Syllables') , self.unit_id('Word Categorization') , self.ATTENTION_TO_TASK_INHIBITION;
+                self.unit_id('Word Categorization') , self.unit_id('Attend Syllables') , self.TASK_TO_ATTENTION_INHIBITION;
+
+                self.unit_id('Attend Syllables') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK;
+                self.unit_id('PM Task') , self.unit_id('Attend Syllables') , self.TASK_TO_ATTENTION;
+                
+                self.unit_id('Attend Word and Category') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK_INHIBITION;
+                self.unit_id('PM Task') , self.unit_id('Attend Word and Category') , self.TASK_TO_ATTENTION_INHIBITION;
             ];
             
             % perception to task representation (indirect PM pathway)
             self.forward_all_to_all(self.perception_ids, self.task_ids, 0); % EM!!!
             
             % attention to perception
-            from = self.unit_id('Attend Word');
+            from = self.unit_id('Attend Word and Category');
             to = cellfun(@self.unit_id, strcat('see:', {
                 'tortoise', 'history', 'crocodile', 'math'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
-            from = self.unit_id('Attend Category');
+            from = self.unit_id('Attend Word and Category');
             to = cellfun(@self.unit_id, strcat('see:', {
                 'a subject', 'an animal'
                 }')');

@@ -118,6 +118,7 @@ classdef Simulator < Model
                     if is_settled
                         activation(active_ids) = self.INPUT_ACTIVATION;
                     end
+                    
                     % set feature attention activations
                     %activation(self.attention_ids) = 0;
                     %activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
@@ -147,6 +148,14 @@ classdef Simulator < Model
                     
                     % calculate net inputs for all units
                     self.net_input = activation * self.weights + self.bias;
+                    
+                    % TODO cheat OG hardcoded
+                    if cycle < 10
+                        self.net_input(self.unit_id('Word Categorization')) = self.OG_TASK_INITIAL_BIAS;
+                        self.net_input(self.unit_id('Attend Word and Category')) = self.OG_ATTENTION_INITIAL_BIAS;
+                        self.net_input(self.unit_id('PM Task')) = self.PM_TASK_INITIAL_BIAS;
+                        self.net_input(self.unit_id('Attend Syllables')) = self.PM_ATTENTION_INITIAL_BIAS;
+                    end
                     
                     % add noise to net inputs (except input units)
                     noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
