@@ -37,7 +37,7 @@ classdef Model < handle
 
         % responses
         
-        BIAS_FOR_RESPONSES = -6;
+        BIAS_FOR_RESPONSES = -7;
         RESPONSE_INHIBITION = -2;
         
         PERCEPTION_TO_RESPONSE = 3;
