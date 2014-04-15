@@ -5,12 +5,13 @@ classdef Model < handle
     properties (Access = public)
         % PDP model parameters
         
-        NOISE_SIGMA = 0.5; % TODO -- ??
+        NOISE_SIGMA = 0.1; % TODO -- ??
         STEP_SIZE = 0.01;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
-        SETTLE_CYCLES = 100;
-        TAU = 0.05; % rate constant from Jon's paper
+        SETTLE_LEEWAY = 10;
+        SETTLE_EPS = 0.0003;
+        TAU = 0.1; % rate constant from Jon's paper
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
         EVIDENCE_ACCUM_THRESHOLD = 1;
@@ -25,8 +26,8 @@ classdef Model < handle
         % --- begin connection weights ---
         
         % biases = leaks
-        BIAS_FOR_PERCEPTION = -2; %-10;
-        BIAS_FOR_RESPONSES = -4; %-3.5;
+        BIAS_FOR_PERCEPTION = -5; %-10;
+        BIAS_FOR_RESPONSES = -9; %-3.5;
         BIAS_FOR_OUTPUTS = 0; %-0.5;
         BIAS_FOR_TASK = 0;
         BIAS_FOR_MONITOR = 0; %-10;
@@ -35,10 +36,9 @@ classdef Model < handle
         
         % feedforward excitatory
         
-        INPUT_TO_PERCEPTION = 2; %10;
-        PERCEPTION_TO_RESPONSE = 0.5; %0.5
-        PERCEPTION_TO_RESPONSE_DOUBLE = 1; %1;
-        RESPONSE_TO_OUTPUT = 1; %5;
+        INPUT_TO_PERCEPTION = 10; %10;
+        PERCEPTION_TO_RESPONSE = 7; %0.5
+        RESPONSE_TO_OUTPUT = 2; %5;
         
         TARGET_TO_RESPONSE = 0; %10;
         TARGET_TO_TASK = 0;
@@ -48,13 +48,13 @@ classdef Model < handle
 
         INPUT_TO_PERCEPTION_INHIBITION = 0; %10;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
-        RESPONSE_TO_OUTPUT_INHIBITION = 0;
+        RESPONSE_TO_OUTPUT_INHIBITION = -2;
         TARGET_TO_RESPONSE_INHIBITION = 0;
         
         % top-down excitatory
         
-        TASK_TO_RESPONSE = 4; %1;
-        ATTENTION_TO_PERCEPTION = 2; %9;
+        TASK_TO_RESPONSE = 0; %1;
+        ATTENTION_TO_PERCEPTION = 0; %9;
         MONITOR_TO_TARGET = 0; %2;
         
         % top-down inhibitory
@@ -165,14 +165,13 @@ classdef Model < handle
         function self = Model()
             % specify unit names in each layer
             self.input_units = {
-                'tortoise', 'history', ... % words (focal targets)
-                'mother', 'crocodile', 'football', 'sheep', ... % words (nontargets)
-                'a subject', 'an animal', 'a sport', 'a relative', ... % categories
+                'tortoise', 'history', 'crocodile', 'math', ... % (focal targets)
+                'a subject', 'an animal', ... % categories
                 };
             self.perception_units = strcat('see:', self.input_units')';
-            self.perception_units = [self.perception_units, 'see:tor', 'see:foot', 'see:croc'];
+            self.perception_units = [self.perception_units, 'see:tor'];
             self.response_units = {
-                'A Subject', 'An Animal', 'A Sport', 'A Relative', 'No Match', 'PM Response'
+                'A Subject', 'An Animal', 'No Match 1', 'No Match 2', 'PM Response'
                 };
             self.output_units = {
                 'Yes', 'No', 'PM'
@@ -224,46 +223,38 @@ classdef Model < handle
                 % task monitoring to responses
                 self.unit_id('Word Categorization')        , self.unit_id('A Subject')         , self.TASK_TO_RESPONSE;
                 self.unit_id('Word Categorization')        , self.unit_id('An Animal')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Word Categorization')        , self.unit_id('A Sport')           , self.TASK_TO_RESPONSE;
-                self.unit_id('Word Categorization')        , self.unit_id('A Relative')        , self.TASK_TO_RESPONSE;
-                self.unit_id('Word Categorization')        , self.unit_id('No Match')          , self.TASK_TO_RESPONSE;
+                self.unit_id('Word Categorization')        , self.unit_id('No Match 1')        , self.TASK_TO_RESPONSE;
+                self.unit_id('Word Categorization')        , self.unit_id('No Match 2')        , self.TASK_TO_RESPONSE;
                 self.unit_id('PM Task')                    , self.unit_id('PM Response')       , self.TASK_TO_RESPONSE;
                 
                 % perception to response mapping (direct OG pathway)
                 % -- categories to categories
-                self.unit_id('see:a subject')                  , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:an animal')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:a sport')                    , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:a relative')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE_DOUBLE;
+                self.unit_id('see:a subject')                  , self.unit_id('A Subject')          , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:an animal')                  , self.unit_id('An Animal')          , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:a subject')                  , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:an animal')                  , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % -- animals to matching categories
-                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE / 3;
-                self.unit_id('see:history')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:mother')                 , self.unit_id('A Relative')        , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE / 3;
-                self.unit_id('see:football')               , self.unit_id('A Sport')           , self.PERCEPTION_TO_RESPONSE_DOUBLE;
-                self.unit_id('see:sheep')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE_DOUBLE / 3;
+                self.unit_id('see:history')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:math')                   , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % -- default response is No Match
-                self.unit_id('see:tortoise')               , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:history')                , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:mother')                 , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:crocodile')              , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:football')               , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:sheep')                  , self.unit_id('No Match')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:history')                , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:math')                   , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:tortoise')               , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:crocodile')              , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 
-                % raw inputs to perception
+                % raw inputs to perception -- PM targets
                 self.unit_id('tortoise')               , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
                 self.unit_id('history')                , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
-                self.unit_id('crocodile')              , self.unit_id('see:croc')        , self.INPUT_TO_PERCEPTION;
-                self.unit_id('football')               , self.unit_id('see:foot')        , self.INPUT_TO_PERCEPTION;
                 
                 % responses to outputs                
-                self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
-                self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
-                self.unit_id('A Sport')             , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
-                self.unit_id('A Relative')          , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT / 4;
-                self.unit_id('No Match')            , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('No Match 1')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('No Match 2')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
             ];
             
@@ -275,20 +266,19 @@ classdef Model < handle
             % attention to perception
             from = self.unit_id('Attend Word');
             to = cellfun(@self.unit_id, strcat('see:', {
-                'tortoise', 'history', ...
-                'mother', 'crocodile', 'football', 'sheep'
+                'tortoise', 'history', 'crocodile', 'math'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
             from = self.unit_id('Attend Category');
             to = cellfun(@self.unit_id, strcat('see:', {
-                'a subject', 'an animal', 'a sport', 'a relative'
+                'a subject', 'an animal'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             from = self.unit_id('Attend Syllables');
             to = cellfun(@self.unit_id, strcat('see:', {
-                'tor', 'foot', 'croc'
+                'tor'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
@@ -305,7 +295,7 @@ classdef Model < handle
             self.forward_all_to_all(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION_INHIBITION);
             self.forward_all_to_all(self.perception_ids, self.response_ids, self.PERCEPTION_TO_RESPONSE_INHIBITION);
             self.forward_all_to_all(self.task_ids, self.response_ids, self.TASK_TO_RESPONSE_INHIBITION);
-            self.forward_all_to_all(self.response_ids, self.response_ids, self.RESPONSE_TO_OUTPUT_INHIBITION);
+            self.forward_all_to_all(self.response_ids, self.output_ids, self.RESPONSE_TO_OUTPUT_INHIBITION);
 
             % lateral inhibitions
             self.lateral_inhibition(self.perception_ids, self.PERCEPTION_INHIBITION);

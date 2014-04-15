@@ -82,20 +82,18 @@ classdef Simulator < Model
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
 
-        function [responses, RTs, activation_log, accumulators_log] = trial(self, stimuli, do_log)
+        function [responses, RTs, activation_log, accumulators_log] = trial(self, stimuli)
             % initialize activations and outputs
             activation = zeros(1, self.N);
-            trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC + self.SETTLE_CYCLES;
-            if do_log
-                activation_log = zeros(trial_duration, self.N);
-                accumulators_log = zeros(trial_duration, self.Nout);
-            end
+            trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
+            activation_log = zeros(trial_duration, self.N);
+            accumulators_log = zeros(trial_duration, self.Nout);
             responses = [];
             RTs = [];
             cycles = 0;
             
             % for each input from the time series
-            for ord=1:1%size(stimuli, 1)
+            for ord=1:size(stimuli, 1)
                 % get active input units for given stimulus
                 % each stimulus string must be a comma-separated list of names of
                 % input units
@@ -111,6 +109,8 @@ classdef Simulator < Model
                 activation(self.monitor_ids) = 0;
                 activation(self.target_ids) = activation(self.target_ids) / 2; % TODO DISCUSS WITH JON!!!
                 %activation(:) = 0;
+                self.net_input_avg = zeros(1, self.N);
+                self.accumulators = zeros(1, size(self.output_ids, 2));
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
@@ -118,28 +118,38 @@ classdef Simulator < Model
                 
                 % simulate response to stimulus
                 responded = false;
-                for cycle=1:timeout + self.SETTLE_CYCLES
+                is_settled = false;
+                for cycle=1:timeout
                     % set input activations
-                    activation(self.input_ids) = 0;
-                    if cycle >= self.SETTLE_CYCLES
-                        % only if the network has settled
+                    activation(self.input_ids) = 0;                    
+                    if is_settled
                         activation(active_ids) = self.INPUT_ACTIVATION;
                     end
                     % set feature attention activations
                     activation(self.attention_ids) = 0;
-                    activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION / 3; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % set task attention activations
                     activation(self.task_ids) = 0;
-                    activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
+                    %activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph (= 0.25) / low emph (= 0)
                     %activation(self.unit_id('Monitor')) = 0.3;
                     
                     % log activation for plotting
-                    if do_log
-                        activation_log(cycles + cycle, :) = activation;
-                        accumulators_log(cycles + cycle, :) = self.accumulators;
+                    activation_log(cycles + cycle, :) = activation;
+                    accumulators_log(cycles + cycle, :) = self.accumulators;
+                    
+                    % see if network has settled
+                    if cycle > self.SETTLE_LEEWAY && ~is_settled
+                        from = cycles + cycle - self.SETTLE_LEEWAY + 1;
+                        to = cycles + cycle - 1;
+                        m = activation_log(from:to,:) - activation_log(from-1:to-1,:);
+                        m = abs(mean(m, 2));
+                        %fprintf('%d -> %.6f, %6f\n', cycle, mean(m), std(m));
+                        if mean(m) < self.SETTLE_EPS
+                            is_settled = true;
+                        end
                     end
                     
                     % calculate net inputs for all units
@@ -166,24 +176,25 @@ classdef Simulator < Model
                     % update activation levels
                     activation = self.logistic(self.net_input_avg);
                     
-                    % update evidence accumulators
-                    act_sorted = sort(activation(self.output_ids), 'descend');
-                    act_max = ones(1, size(self.output_ids, 2)) * act_sorted(1);
-                    act_max(activation(self.output_ids) == act_sorted(1)) = act_sorted(2);
-                    mu = self.EVIDENCE_ACCUM_ALPHA * (activation(self.output_ids) - act_max);
-                    add = normrnd(mu, ones(size(mu)) * self.EVIDENCE_ACCUM_SIGMA);
-                    self.accumulators = self.accumulators + add;
-                    
-                    % check if activation threshold is met
-                    [v, id] = max(self.accumulators);
-                    if ~responded ...
-                            && v > self.EVIDENCE_ACCUM_THRESHOLD ...
-                            && cycle >= self.SETTLE_CYCLES
-                        % save response and response time
-                        output_id = self.output_ids(id);
-                        RT = cycle;
-                        responded = true;
-                        %break;
+                    % update evidence accumulators (after network has
+                    % settled)
+                    if is_settled
+                        act_sorted = sort(activation(self.output_ids), 'descend');
+                        act_max = ones(1, size(self.output_ids, 2)) * act_sorted(1);
+                        act_max(activation(self.output_ids) == act_sorted(1)) = act_sorted(2);
+                        mu = self.EVIDENCE_ACCUM_ALPHA * (activation(self.output_ids) - act_max);
+                        add = normrnd(mu, ones(size(mu)) * self.EVIDENCE_ACCUM_SIGMA);
+                        self.accumulators = self.accumulators + add;
+
+                        % check if activation threshold is met
+                        [v, id] = max(self.accumulators);
+                        if ~responded && v > self.EVIDENCE_ACCUM_THRESHOLD
+                            % save response and response time
+                            output_id = self.output_ids(id);
+                            RT = cycle;
+                            responded = true;
+                            break;
+                        end
                     end
                 end
 
@@ -194,10 +205,8 @@ classdef Simulator < Model
                 cycles = cycles + cycle;
             end
             
-            if do_log
-                activation_log(cycles:end,:) = [];
-                accumulators_log(cycles:end,:) = [];
-            end
+            activation_log(cycles:end,:) = [];
+            accumulators_log(cycles:end,:) = [];
         end
     end
 end
