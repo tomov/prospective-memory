@@ -52,7 +52,7 @@ classdef Model < handle
         OUTPUT_INHIBITION = -3;
         
         RESPONSE_TO_OUTPUT = 1;
-        RESPONSE_TO_OUTPUT_INHIBITION = 0;
+        RESPONSE_TO_OUTPUT_INHIBITION = -1;
         
         % feature attention
         
