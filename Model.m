@@ -78,7 +78,7 @@ classdef Model < handle
         OG_TASK_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
         PM_TASK_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
         
-        PERCEPTION_TO_TASK = 7; % (EM)
+        PERCEPTION_TO_TASK = 8; % (EM)
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
