@@ -41,7 +41,7 @@ classdef Model < handle
         BIAS_FOR_RESPONSES = -7;
         RESPONSE_INHIBITION = -2;
         
-        PERCEPTION_TO_RESPONSE = 2;
+        PERCEPTION_TO_RESPONSE = 3;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
         TASK_TO_RESPONSE = 7;
@@ -65,7 +65,7 @@ classdef Model < handle
         TASK_TO_ATTENTION_INHIBITION = -1;
         
         OG_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
-        PM_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
+        PM_ATTENTION_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
         
         % task representation
         
@@ -116,6 +116,9 @@ classdef Model < handle
         connections
         weights
         bias
+        
+        FOCAL
+        EMPHASIS
     end
     
     methods
@@ -125,7 +128,7 @@ classdef Model < handle
                     if i ~= j
                         self.connections = [self.connections;
                             units(i), units(j), weight];
-                        fprintf('%s -> %s: %d (LI)\n', self.units{units(i)}, self.units{units(j)}, weight);
+                        %fprintf('%s -> %s: %d (LI)\n', self.units{units(i)}, self.units{units(j)}, weight);
                     end
                 end
             end
@@ -137,7 +140,7 @@ classdef Model < handle
             for i=1:size(from, 2)
                 self.connections = [self.connections;
                     from(i), to(i), weight];
-                fprintf('%s -> %s: %d\n', self.units{from(i)}, self.units{to(i)}, weight);
+                %fprintf('%s -> %s: %d\n', self.units{from(i)}, self.units{to(i)}, weight);
             end
         end
 
@@ -147,7 +150,7 @@ classdef Model < handle
                     if ~ismember([from(i), to(j)], self.connections(:,1:2), 'rows')
                         self.connections = [self.connections;
                             from(i), to(j), weight];
-                        fprintf('%s -> %s: %d (FI)\n', self.units{from(i)}, self.units{to(j)}, weight);
+                        %fprintf('%s -> %s: %d (FI)\n', self.units{from(i)}, self.units{to(j)}, weight);
                     end
                 end
             end
@@ -157,11 +160,14 @@ classdef Model < handle
             for i=1:size(units, 2)
                 self.connections = [self.connections;
                     units(i), units(i), weight];
-                fprintf('%s -> %s: %d (SE)\n', self.units{units(i)}, self.units{units(i)}, weight);
+                %fprintf('%s -> %s: %d (SE)\n', self.units{units(i)}, self.units{units(i)}, weight);
             end
         end
         
-        function self = Model()
+        function self = Model(FOCAL, EMPHASIS)
+            self.FOCAL = FOCAL;
+            self.EMPHASIS = EMPHASIS;
+            
             % specify unit names in each layer
             self.input_units = {
                 'tortoise', 'history', 'crocodile', 'math', ... % (focal targets)
@@ -270,14 +276,18 @@ classdef Model < handle
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
-            from = self.unit_id('Attend Syllables');
-            % TODO hardcoded PM task features
-            %{
-            to = cellfun(@self.unit_id, strcat('see:', {
-                'tor'
-                }')');
-            %}
-            self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
+            if ~FOCAL
+                from = self.unit_id('Attend Syllables');
+                to = cellfun(@self.unit_id, strcat('see:', {
+                    'tor'
+                    }')');
+                self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
+            end
+            if EMPHASIS
+                self.PM_ATTENTION_INITIAL_BIAS = 10;
+            else
+                self.PM_ATTENTION_INITIAL_BIAS = 0;
+            end
 
             % raw inputs to perception (cont'd)
             self.forward_parallel(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);

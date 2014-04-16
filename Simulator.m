@@ -13,7 +13,8 @@ classdef Simulator < Model
     end
     
     methods
-        function self = Simulator()
+        function self = Simulator(FOCAL, EMPHASIS)
+            self = self@Model(FOCAL, EMPHASIS);
             self.Nout = size(self.output_ids, 2);
             self.accumulators = zeros(1, self.Nout);
             self.net_input = zeros(1, self.N);
@@ -93,7 +94,7 @@ classdef Simulator < Model
             cycles = 0;
             
             % for each input from the time series
-            for ord=3:4%1:size(stimuli, 1)
+            for ord=1:size(stimuli, 1)
                 % get active input units for given stimulus
                 % each stimulus string must be a comma-separated list of names of
                 % input units
@@ -165,6 +166,7 @@ classdef Simulator < Model
                     %self.net_input = self.net_input + noise;
                     
                     % average net inputs
+                    % TODO ask re kWTA
                     %self.kWTA_average(self.wm_capacity, self.wm_ids);
                     self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
                     
@@ -179,6 +181,7 @@ classdef Simulator < Model
                     self.activation = self.logistic(self.net_input_avg);
                     
                     % normalize WM activation
+                    % TODO ask re normalization
                     %{
                     total_wm = sum(self.activation(self.wm_ids));
                     factor = self.wm_capacity / total_wm;

@@ -1,72 +1,62 @@
 clear
-Model
-Simulator
 
+OG_ONLY = 0;
+FOCAL = 1; % 0 = nonfocal, 1 = focal
+EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
-sim = Simulator();
+for FOCAL = 0:1
+    for EMPHASIS = 0:1
+        if FOCAL
+            if EMPHASIS
+                fprintf('\n ----> focal, high emphasis ----\n');
+            else
+                fprintf('\n ----> focal, low emphasis ----\n');
+            end
+        else
+            if EMPHASIS
+                fprintf('\n ----> nonfocal, high emphasis ----\n');
+            else
+                fprintf('\n ----> nonfocal, low emphasis ----\n');
+            end
+        end
 
-stimuli = [
-    {'tortoise,an animal'}, 1;
-    {'tortoise,a subject'}, 1;
-    {'crocodile,an animal'}, 1;
-    {'crocodile,a subject'}, 1;
-    {'history,an animal'}, 1;
-    {'history,a subject'}, 1;
-    {'math,an animal'}, 1;
-    {'math,a subject'}, 1;
-    ];
+        sim = Simulator(FOCAL, EMPHASIS);
+        
+        stimuli = [
+            {'tortoise,an animal'}, 1;
+            {'tortoise,a subject'}, 1;
+            {'crocodile,an animal'}, 1;
+            {'crocodile,a subject'}, 1;
+            {'history,an animal'}, 1;
+            {'history,a subject'}, 1;
+            {'math,an animal'}, 1;
+            {'math,a subject'}, 1;
+            ];
 
-% PM / no PM: change 1's to 0's
-is_target = [
-            1;
-            1;
-    0;
-    0;
-            0;
-            0;
-    0;
-    0;
-    ];
+        if OG_ONLY
+            is_target = [0; 0; 0; 0; 0; 0; 0; 0];
+            correct = {'Yes'; 'No'; 'Yes'; 'No'; 'No'; 'Yes'; 'No'; 'Yes'};
+        elseif FOCAL
+            is_target = [1; 1; 0; 0; 0; 0; 0; 0];
+            correct = {'PM'; 'PM'; 'Yes'; 'No'; 'No'; 'Yes'; 'No'; 'Yes'};
+            sim.instruction('see:tortoise', 'PM Task', 2);
+        else 
+            % NONFOCAL
+            is_target = [1; 1; 0; 0; 1; 1; 0; 0];
+            correct = {'PM'; 'PM'; 'Yes'; 'No'; 'PM'; 'PM'; 'No'; 'Yes'};
+            sim.instruction('see:tor', 'PM Task', 2);
+        end
 
-% PM / no PM: uncomment and comment out respective responses
-correct = {
-%            'Yes';
-%            'No';
-            'PM';
-            'PM';
-    'Yes';
-    'No'
-            'No';
-            'Yes';
-%            'PM';
-%            'PM';
-    'No'
-    'Yes';
-    };
+        reps = 200;
+        stimuli = repmat(stimuli, reps);
+        is_target = repmat(is_target, reps);
+        correct = repmat(correct, reps);
 
+        sim.wm_capacity = 4;
+        [responses, RTs, act, acc] = sim.trial(stimuli);
 
-reps = 20;
-stimuli = repmat(stimuli, reps);
-is_target = repmat(is_target, reps);
-correct = repmat(correct, reps);
-    
-     
-%{
-RTtot = []
-for i = 1:20
-    i
-    [responses, RTs, act] = sim.trial(stimuli2013, true);
-    RTtot = [RTtot RTs(10:end)];
+        %sim.print_EM
+        stats;
+        %figures;
+    end
 end
-%}
-
-sim.wm_capacity = 4;
-% Einstein 2005: focal
-sim.instruction('see:tortoise', 'PM Task', 2);
-% Einstein 2005: nonfocal
-%sim.instruction('see:tor', 'PM Task', 2);
-sim.print_EM
-[responses, RTs, act, acc] = sim.trial(stimuli);
-
-
-figures;
