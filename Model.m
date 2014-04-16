@@ -14,7 +14,7 @@ classdef Model < handle
         TAU = 0.1; % rate constant from Jon's paper
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
-        EVIDENCE_ACCUM_THRESHOLD = 1;
+        EVIDENCE_ACCUM_THRESHOLD = 1.2;
         
         % activation levels
 
@@ -78,7 +78,7 @@ classdef Model < handle
         OG_TASK_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
         PM_TASK_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
         
-        PERCEPTION_TO_TASK = 5; % (EM)
+        PERCEPTION_TO_TASK = 7; % (EM)
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
@@ -264,20 +264,16 @@ classdef Model < handle
             % attention to perception
             from = self.unit_id('Attend Word and Category');
             to = cellfun(@self.unit_id, strcat('see:', {
-                'tortoise', 'history', 'crocodile', 'math'
-                }')');
-            self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
-
-            from = self.unit_id('Attend Word and Category');
-            to = cellfun(@self.unit_id, strcat('see:', {
+                'tortoise', 'history', 'crocodile', 'math', ...
                 'a subject', 'an animal'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             from = self.unit_id('Attend Syllables');
-            to = cellfun(@self.unit_id, strcat('see:', {
-                'tor'
-                }')');
+            % TODO hardcoded PM task features
+            %to = cellfun(@self.unit_id, strcat('see:', {
+            %    'tor'
+            %    }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
             % raw inputs to perception (cont'd)

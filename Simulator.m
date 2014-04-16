@@ -92,7 +92,7 @@ classdef Simulator < Model
             cycles = 0;
             
             % for each input from the time series
-            for ord=1:1 % size(stimuli, 1)
+            for ord=1:size(stimuli, 1)
                 % get active input units for given stimulus
                 % each stimulus string must be a comma-separated list of names of
                 % input units
@@ -160,20 +160,19 @@ classdef Simulator < Model
                     % add noise to net inputs (except input units)
                     noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
                     noise(self.input_ids) = 0;
-                    self.net_input = self.net_input + noise;
+                    % TODO no noise... for now
+                    %self.net_input = self.net_input + noise;
                     
                     % average net inputs
+                    %self.kWTA_average(self.wm_capacity, self.wm_ids);
                     self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
                     
                     % add k-winner-take-all inhibition
                     %self.kWTA_basic(1, self.output_ids);
                     %self.kWTA_basic(1, self.response_ids);
-                    self.kWTA_basic(1, self.task_ids);
+                    %self.kWTA_basic(1, self.task_ids);
                     %self.kWTA_basic(1, self.monitor_ids);
-                    self.kWTA_basic(2, self.attention_ids);
-                    %self.kWTA_average(self.wm_capacity, self.wm_ids);
-%                    self.kWTA_average(self.wm_capacity, self.wm_ids);
-%                    self.kWTA_average(self.wm_capacity, self.wm_ids);
+                    %self.kWTA_basic(2, self.attention_ids);
 
                     % update activation levels
                     activation = self.logistic(self.net_input_avg);
