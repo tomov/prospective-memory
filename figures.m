@@ -1,64 +1,51 @@
-
 figure;
 
+t_range = 1:800;
+
 subplot(4, 2, 1);
-plot(act(:, sim.output_ids));
+plot(act(t_range, sim.output_ids));
 legend(sim.units(sim.output_ids));
 title('Outputs');
 ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 3);
-plot(act(:, sim.response_ids));
+plot(act(t_range, sim.response_ids));
 legend(sim.units(sim.response_ids));
 title('Responses');
 ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 5);
-plot(act(:, sim.perception_ids));
+plot(act(t_range, sim.perception_ids));
 legend(sim.units(sim.perception_ids));
 title('Feature Perception');
 ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 7);
-plot(act(:, sim.input_ids));
+plot(act(t_range, sim.input_ids));
 legend(sim.units(sim.input_ids));
 title('Stimulus Inputs');
 ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
 subplot(4, 2, 4);
-plot(act(:, sim.task_ids));
+plot(act(t_range, sim.task_ids));
 legend(sim.units(sim.task_ids));
 title('Task Representation');
 ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
-%subplot(4, 2, 4);
-%plot(act(:, sim.monitor_ids));
-%legend(sim.units(sim.monitor_ids));
-%title('Target Monitoring');
-%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
-
 subplot(4, 2, 2);
-plot(acc(:, :));
+plot(acc(t_range, :));
 legend(sim.units(sim.output_ids));
 title('Evidence Accumulation');
 %ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
-%subplot(4, 2, 6);
-%plot(act(:, sim.target_ids));
-%legend(sim.units(sim.target_ids));
-%title('Target Detection');
-%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
-
 subplot(4, 2, 6);
-plot(act(:, sim.attention_ids));
+plot(act(t_range, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
 title('Feature Attention');
 ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
 
-%subplot(3, 2, 6);
-%plot(act(:, sim.unit_id('Super Inhibition')));
-%legend(sim.units(sim.unit_id('Super Inhibition')));
-%title('Super Inhibition');
+
+
 
 
 figure;

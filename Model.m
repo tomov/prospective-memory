@@ -34,12 +34,14 @@ classdef Model < handle
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
         ATTENTION_TO_PERCEPTION = 5;
-        ATTENTION_TO_PERCEPTION_INHIBITION = -5;
+        ATTENTION_TO_PERCEPTION_INHIBITION = 0;
 
         % responses
         
         BIAS_FOR_RESPONSES = -7;
-        RESPONSE_INHIBITION = -2;
+        RESPONSE_INHIBITION = -5; % -2 => not enough, No Match levels off at 0.5 and the two No Matches give the same excitation as the Match
+                                  % -3 => works! but i'd rather see the No
+                                  % Match level off lower, so -4 or -5
         
         PERCEPTION_TO_RESPONSE = 3;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;

@@ -128,6 +128,10 @@ classdef Simulator < Model
                     %activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % set task attention activations
                     %activation(self.task_ids) = 0;
+                    self.activation(self.unit_id('Word Categorization')) = 1;
+                    self.activation(self.unit_id('Attend Word and Category')) = 1;
+                    self.activation(self.unit_id('PM Task')) = 0;
+                    self.activation(self.unit_id('Attend Syllables')) = 0;
                     %activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
                     % Einstein 2005: high emph (= 0.25) / low emph (= 0)
                     %activation(self.unit_id('Monitor')) = 0.3;
