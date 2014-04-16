@@ -22,8 +22,8 @@ is_target = [
             1;
     0;
     0;
-            1;
-            1;
+            0;
+            0;
     0;
     0;
     ];
@@ -36,10 +36,10 @@ correct = {
             'PM';
     'Yes';
     'No'
-%            'No';
-%            'Yes';
-            'PM';
-            'PM';
+            'No';
+            'Yes';
+%            'PM';
+%            'PM';
     'No'
     'Yes';
     };
@@ -62,9 +62,9 @@ end
 
 sim.wm_capacity = 3;
 % Einstein 2005: focal
-%sim.instruction('see:tortoise', 'PM Task', 2);
+sim.instruction('see:tortoise', 'PM Task', 2);
 % Einstein 2005: nonfocal
-sim.instruction('see:tor', 'PM Task', 2);
+%sim.instruction('see:tor', 'PM Task', 2);
 sim.print_EM
 [responses, RTs, act, acc] = sim.trial(stimuli);
 
