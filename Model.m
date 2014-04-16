@@ -64,7 +64,7 @@ classdef Model < handle
         TASK_TO_ATTENTION_INHIBITION = -1;
         
         OG_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
-        PM_ATTENTION_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
+        PM_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
         
         % task representation
         
@@ -271,9 +271,9 @@ classdef Model < handle
             
             from = self.unit_id('Attend Syllables');
             % TODO hardcoded PM task features
-            %to = cellfun(@self.unit_id, strcat('see:', {
-            %    'tor'
-            %    }')');
+            to = cellfun(@self.unit_id, strcat('see:', {
+                'tor'
+                }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
             % raw inputs to perception (cont'd)
