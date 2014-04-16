@@ -43,7 +43,7 @@ classdef Model < handle
                                   % -3 => works! but i'd rather see the No
                                   % Match level off lower, so -4 or -5
         
-        PERCEPTION_TO_RESPONSE = 3;
+        PERCEPTION_TO_RESPONSE = 2;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
         TASK_TO_RESPONSE = 7;
@@ -55,7 +55,7 @@ classdef Model < handle
         OUTPUT_INHIBITION = -3;
         
         RESPONSE_TO_OUTPUT = 1;
-        RESPONSE_TO_OUTPUT_INHIBITION = -1;
+        RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
         % feature attention
         

@@ -1,4 +1,5 @@
 clear
+warning('off', 'MATLAB:ClassInstanceExists');
 clear classes % ! super important ! if you don't do this, MATLAB won't reload your classes
 
 OG_ONLY = 0;
