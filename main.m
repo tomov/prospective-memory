@@ -45,7 +45,7 @@ correct = {
     };
 
 
-reps = 40;
+reps = 20;
 stimuli = repmat(stimuli, reps);
 is_target = repmat(is_target, reps);
 correct = repmat(correct, reps);
@@ -60,7 +60,7 @@ for i = 1:20
 end
 %}
 
-sim.wm_capacity = 3;
+sim.wm_capacity = 4;
 % Einstein 2005: focal
 sim.instruction('see:tortoise', 'PM Task', 2);
 % Einstein 2005: nonfocal

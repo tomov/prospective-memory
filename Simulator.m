@@ -8,6 +8,7 @@ classdef Simulator < Model
         net_input;
         net_input_avg;
         accumulators;
+        activation;
         Nout;
     end
     
@@ -92,7 +93,7 @@ classdef Simulator < Model
             cycles = 0;
             
             % for each input from the time series
-            for ord=1:size(stimuli, 1)
+            for ord=3:4%1:size(stimuli, 1)
                 % get active input units for given stimulus
                 % each stimulus string must be a comma-separated list of names of
                 % input units
@@ -101,7 +102,7 @@ classdef Simulator < Model
                 timeout = stimuli{ord, 2} * self.CYCLES_PER_SEC;
                 
                 % reset response, output, and monitoring activations
-                activation = zeros(1, self.N);
+                self.activation = zeros(1, self.N);
                 self.net_input_avg = zeros(1, self.N);
                 self.accumulators = zeros(1, size(self.output_ids, 2));
                 
@@ -114,9 +115,9 @@ classdef Simulator < Model
                 is_settled = false;
                 for cycle=1:timeout
                     % set input activations
-                    activation(self.input_ids) = 0;                    
+                    self.activation(self.input_ids) = 0;                    
                     if is_settled
-                        activation(active_ids) = self.INPUT_ACTIVATION;
+                        self.activation(active_ids) = self.INPUT_ACTIVATION;
                     end
                     
                     % set feature attention activations
@@ -131,7 +132,7 @@ classdef Simulator < Model
                     %activation(self.unit_id('Monitor')) = 0.3;
                     
                     % log activation for plotting
-                    activation_log(cycles + cycle, :) = activation;
+                    activation_log(cycles + cycle, :) = self.activation;
                     accumulators_log(cycles + cycle, :) = self.accumulators;
                     
                     % see if network has settled
@@ -147,7 +148,7 @@ classdef Simulator < Model
                     end
                     
                     % calculate net inputs for all units
-                    self.net_input = activation * self.weights + self.bias;
+                    self.net_input = self.activation * self.weights + self.bias;
                     
                     % TODO cheat OG hardcoded
                     if cycle < 10
@@ -175,15 +176,24 @@ classdef Simulator < Model
                     %self.kWTA_basic(2, self.attention_ids);
 
                     % update activation levels
-                    activation = self.logistic(self.net_input_avg);
+                    self.activation = self.logistic(self.net_input_avg);
+                    
+                    % normalize WM activation
+                    %{
+                    total_wm = sum(self.activation(self.wm_ids));
+                    factor = self.wm_capacity / total_wm;
+                    if factor < 1
+                        self.activation(self.wm_ids) = self.activation(self.wm_ids) * factor;
+                    end
+                    %}
                     
                     % update evidence accumulators (after network has
                     % settled)
                     if is_settled
-                        act_sorted = sort(activation(self.output_ids), 'descend');
+                        act_sorted = sort(self.activation(self.output_ids), 'descend');
                         act_max = ones(1, size(self.output_ids, 2)) * act_sorted(1);
-                        act_max(activation(self.output_ids) == act_sorted(1)) = act_sorted(2);
-                        mu = self.EVIDENCE_ACCUM_ALPHA * (activation(self.output_ids) - act_max);
+                        act_max(self.activation(self.output_ids) == act_sorted(1)) = act_sorted(2);
+                        mu = self.EVIDENCE_ACCUM_ALPHA * (self.activation(self.output_ids) - act_max);
                         add = normrnd(mu, ones(size(mu)) * self.EVIDENCE_ACCUM_SIGMA);
                         self.accumulators = self.accumulators + add;
 

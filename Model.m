@@ -34,13 +34,14 @@ classdef Model < handle
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
         ATTENTION_TO_PERCEPTION = 5;
+        ATTENTION_TO_PERCEPTION_INHIBITION = -5;
 
         % responses
         
         BIAS_FOR_RESPONSES = -7;
         RESPONSE_INHIBITION = -2;
         
-        PERCEPTION_TO_RESPONSE = 3;
+        PERCEPTION_TO_RESPONSE = 2;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
         TASK_TO_RESPONSE = 7;
@@ -57,7 +58,7 @@ classdef Model < handle
         % feature attention
         
         BIAS_FOR_ATTENTION = 0;
-        ATTENTION_INHIBITION = -2;
+        ATTENTION_INHIBITION = -2; % down -> faster RT's (OG & PM), higher PM hit rate (!) for nonfocal, high emph
         ATTENTION_SELF = 3;
         
         TASK_TO_ATTENTION = 1;
@@ -271,10 +272,12 @@ classdef Model < handle
             
             from = self.unit_id('Attend Syllables');
             % TODO hardcoded PM task features
-            %to = cellfun(@self.unit_id, strcat('see:', {
-            %    'tor'
-            %    }')');
-            %self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
+            %{
+            to = cellfun(@self.unit_id, strcat('see:', {
+                'tor'
+                }')');
+            %}
+            self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
             % raw inputs to perception (cont'd)
             self.forward_parallel(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);
