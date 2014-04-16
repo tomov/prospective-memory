@@ -78,7 +78,7 @@ classdef Model < handle
         OG_TASK_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
         PM_TASK_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
         
-        PERCEPTION_TO_TASK = 8; % (EM)
+        PERCEPTION_TO_TASK = 6; % (EM)
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
@@ -271,9 +271,9 @@ classdef Model < handle
             
             from = self.unit_id('Attend Syllables');
             % TODO hardcoded PM task features
-            %to = cellfun(@self.unit_id, strcat('see:', {
-            %    'tor'
-            %    }')');
+            to = cellfun(@self.unit_id, strcat('see:', {
+                'tor'
+                }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
 
             % raw inputs to perception (cont'd)
