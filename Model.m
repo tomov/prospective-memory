@@ -30,7 +30,11 @@ classdef Model < handle
         BIAS_FOR_PERCEPTION = -10;
         PERCEPTION_INHIBITION = 0;
         
-        INPUT_TO_PERCEPTION = 10;
+        INPUT_TO_PERCEPTION = 8; % 10 = -bias => modulates importance of attention
+                                 % e.g. 8 => with no attention, target
+                                 % excitation is -2 => not enough to get PM
+                                 % response => you need attention in
+                                 % nonfocal condition
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
         ATTENTION_TO_PERCEPTION = 5;
@@ -287,8 +291,10 @@ classdef Model < handle
             end
             if EMPHASIS
                 self.PM_ATTENTION_INITIAL_BIAS = 10;
+                self.PM_TASK_INITIAL_BIAS = 3;
             else
                 self.PM_ATTENTION_INITIAL_BIAS = 0;
+                self.PM_TASK_INITIAL_BIAS = 0;
             end
 
             % raw inputs to perception (cont'd)
@@ -322,6 +328,10 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
+            if FOCAL
+                % turn off PM attention unit
+                self.bias(self.unit_id('Attend Syllables')) = -100;
+            end
         end
         
         function EM = print_EM(self)

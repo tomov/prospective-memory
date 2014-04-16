@@ -121,20 +121,13 @@ classdef Simulator < Model
                         self.activation(active_ids) = self.INPUT_ACTIVATION;
                     end
                     
-                    % set feature attention activations
-                    %activation(self.attention_ids) = 0;
-                    %activation(self.unit_id('Attend Word')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    %activation(self.unit_id('Attend Category')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    %activation(self.unit_id('Attend Syllables')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    % set task attention activations
-                    %activation(self.task_ids) = 0;
-                    self.activation(self.unit_id('Word Categorization')) = 1;
-                    self.activation(self.unit_id('Attend Word and Category')) = 1;
+                    % hack for testing different activations
+                    %{
+                    self.activation(self.unit_id('Word Categorization')) = 0.5;
+                    self.activation(self.unit_id('Attend Word and Category')) = 0.2;
                     self.activation(self.unit_id('PM Task')) = 0;
                     self.activation(self.unit_id('Attend Syllables')) = 0;
-                    %activation(self.unit_id('Word Categorization')) = self.MAXIMUM_ACTIVATION; % TODO ongoing task is hardcoded
-                    % Einstein 2005: high emph (= 0.25) / low emph (= 0)
-                    %activation(self.unit_id('Monitor')) = 0.3;
+                    %}
                     
                     % log activation for plotting
                     activation_log(cycles + cycle, :) = self.activation;
@@ -171,7 +164,7 @@ classdef Simulator < Model
                     
                     % average net inputs
                     % TODO ask re kWTA
-                    %self.kWTA_average(self.wm_capacity, self.wm_ids);
+                    %self.kWTA_basic(self.wm_capacity, self.wm_ids);
                     self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
                     
                     % add k-winner-take-all inhibition

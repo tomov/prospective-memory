@@ -6,8 +6,8 @@ OG_ONLY = 0;
 FOCAL = 1; % 0 = nonfocal, 1 = focal
 EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
-for FOCAL = 1
-    for EMPHASIS = 0
+for FOCAL = 0:1
+    for EMPHASIS = 0:1
         if FOCAL
             if EMPHASIS
                 fprintf('\n ----> focal, high emphasis ----\n');
@@ -54,7 +54,7 @@ for FOCAL = 1
         is_target = repmat(is_target, reps);
         correct = repmat(correct, reps);
 
-        sim.wm_capacity = 4;
+        sim.wm_capacity = 2;
         [responses, RTs, act, acc] = sim.trial(stimuli);
 
         stats;
