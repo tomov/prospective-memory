@@ -148,8 +148,9 @@ classdef Simulator < Model
                     % calculate net inputs for all units
                     self.net_input = self.activation * self.weights + self.bias;
                     
-                    % TODO cheat OG hardcoded
-                    if cycle < 10
+                    % provide instruction in form of temporary input to WM
+                    % units
+                    if cycle < self.INSTRUCTION_CYLCES
                         self.net_input(self.unit_id('Word Categorization')) = self.OG_TASK_INITIAL_BIAS;
                         self.net_input(self.unit_id('Attend Word and Category')) = self.OG_ATTENTION_INITIAL_BIAS;
                         self.net_input(self.unit_id('PM Task')) = self.PM_TASK_INITIAL_BIAS;

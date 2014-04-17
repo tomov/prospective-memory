@@ -9,12 +9,13 @@ classdef Model < handle
         STEP_SIZE = 0.01;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
-        SETTLE_LEEWAY = 10;
+        SETTLE_LEEWAY = 20;
+        INSTRUCTION_CYLCES = 10;
         SETTLE_EPS = 0.0003;
         TAU = 0.1; % rate constant from Jon's paper
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
-        EVIDENCE_ACCUM_THRESHOLD = 1.2;
+        EVIDENCE_ACCUM_THRESHOLD = 1.5;
         
         % activation levels
 
@@ -27,17 +28,17 @@ classdef Model < handle
         
         % perception
         
-        BIAS_FOR_PERCEPTION = -10;
+        BIAS_FOR_PERCEPTION = -15;
         PERCEPTION_INHIBITION = 0;
         
-        INPUT_TO_PERCEPTION = 8; % 10 = -bias => modulates importance of attention
+        INPUT_TO_PERCEPTION = 10; % 10 = -bias => modulates importance of attention
                                  % e.g. 8 => with no attention, target
                                  % excitation is -2 => not enough to get PM
                                  % response => you need attention in
                                  % nonfocal condition
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
-        ATTENTION_TO_PERCEPTION = 5;
+        ATTENTION_TO_PERCEPTION = 10;
         ATTENTION_TO_PERCEPTION_INHIBITION = 0;
 
         % responses
@@ -64,11 +65,11 @@ classdef Model < handle
         % feature attention
         
         BIAS_FOR_ATTENTION = 0;
-        ATTENTION_INHIBITION = -2; % down -> faster RT's (OG & PM), higher PM hit rate (!) for nonfocal, high emph
+        ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = 3;
         
         TASK_TO_ATTENTION = 1;
-        TASK_TO_ATTENTION_INHIBITION = -1;
+        TASK_TO_ATTENTION_INHIBITION = -0.5;
         
         OG_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
         PM_ATTENTION_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
@@ -283,18 +284,24 @@ classdef Model < handle
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             if ~FOCAL
+                % NONFOCAL
                 from = self.unit_id('Attend Syllables');
                 to = cellfun(@self.unit_id, strcat('see:', {
                     'tor'
                     }')');
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
+                self.PM_ATTENTION_INITIAL_BIAS = 4;
             end
             if EMPHASIS
-                self.PM_ATTENTION_INITIAL_BIAS = 10;
-                self.PM_TASK_INITIAL_BIAS = 3;
+                self.PM_TASK_INITIAL_BIAS = 1.6;
+                %self.PM_TASK_INITIAL_BIAS = 2;
+                %self.PERCEPTION_TO_TASK = 6;
+                %self.PM_TASK_INITIAL_BIAS = 5;
             else
-                self.PM_ATTENTION_INITIAL_BIAS = 0;
-                self.PM_TASK_INITIAL_BIAS = 0;
+                self.PM_TASK_INITIAL_BIAS = -1.6;
+                %self.PM_ATTENTION_INITIAL_BIAS = -10;
+                %self.PM_TASK_INITIAL_BIAS = 0;
+                %self.PERCEPTION_TO_TASK = 4;
             end
 
             % raw inputs to perception (cont'd)

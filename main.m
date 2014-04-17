@@ -6,8 +6,8 @@ OG_ONLY = 0;
 FOCAL = 1; % 0 = nonfocal, 1 = focal
 EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
-for FOCAL = 0:1
-    for EMPHASIS = 0:1
+for FOCAL = 1
+    for EMPHASIS = 1
         if FOCAL
             if EMPHASIS
                 fprintf('\n ----> focal, high emphasis ----\n');
