@@ -31,11 +31,7 @@ classdef Model < handle
         BIAS_FOR_PERCEPTION = -15;
         PERCEPTION_INHIBITION = 0;
         
-        INPUT_TO_PERCEPTION = 10; % 10 = -bias => modulates importance of attention
-                                 % e.g. 8 => with no attention, target
-                                 % excitation is -2 => not enough to get PM
-                                 % response => you need attention in
-                                 % nonfocal condition
+        INPUT_TO_PERCEPTION = 10;
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
         ATTENTION_TO_PERCEPTION = 10;
@@ -44,9 +40,7 @@ classdef Model < handle
         % responses
         
         BIAS_FOR_RESPONSES = -7;
-        RESPONSE_INHIBITION = -5; % -2 => not enough, No Match levels off at 0.5 and the two No Matches give the same excitation as the Match
-                                  % -3 => works! but i'd rather see the No
-                                  % Match level off lower, so -4 or -5
+        RESPONSE_INHIBITION = -5;
         
         PERCEPTION_TO_RESPONSE = 2;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
@@ -69,7 +63,7 @@ classdef Model < handle
         ATTENTION_SELF = 3;
         
         TASK_TO_ATTENTION = 1;
-        TASK_TO_ATTENTION_INHIBITION = -0.5;
+        TASK_TO_ATTENTION_INHIBITION = -0.65;
         
         OG_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
         PM_ATTENTION_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
@@ -290,18 +284,17 @@ classdef Model < handle
                     'tor'
                     }')');
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
-                self.PM_ATTENTION_INITIAL_BIAS = 4;
             end
             if EMPHASIS
-                self.PM_TASK_INITIAL_BIAS = 1.6;
-                %self.PM_TASK_INITIAL_BIAS = 2;
-                %self.PERCEPTION_TO_TASK = 6;
-                %self.PM_TASK_INITIAL_BIAS = 5;
+                self.PM_TASK_INITIAL_BIAS = 1;
+                if ~FOCAL
+                    self.PM_ATTENTION_INITIAL_BIAS = 7;
+                end
             else
-                self.PM_TASK_INITIAL_BIAS = -1.6;
-                %self.PM_ATTENTION_INITIAL_BIAS = -10;
-                %self.PM_TASK_INITIAL_BIAS = 0;
-                %self.PERCEPTION_TO_TASK = 4;
+                self.PM_TASK_INITIAL_BIAS = -1; % in negative, modulates PM hit rate only, no relation to OG RT
+                if ~FOCAL
+                    self.PM_ATTENTION_INITIAL_BIAS = 6;  % corr
+                end
             end
 
             % raw inputs to perception (cont'd)

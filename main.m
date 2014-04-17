@@ -1,4 +1,3 @@
-clear
 warning('off', 'MATLAB:ClassInstanceExists');
 clear classes % ! super important ! if you don't do this, MATLAB won't reload your classes
 
@@ -6,8 +5,8 @@ OG_ONLY = 0;
 FOCAL = 1; % 0 = nonfocal, 1 = focal
 EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
-for FOCAL = 1
-    for EMPHASIS = 1
+for FOCAL = 0:1
+    for EMPHASIS = 0:1
         if FOCAL
             if EMPHASIS
                 fprintf('\n ----> focal, high emphasis ----\n');
@@ -49,7 +48,7 @@ for FOCAL = 1
             sim.instruction('see:tor', 'PM Task', 2);
         end
 
-        reps = 20;
+        reps = 100;
         stimuli = repmat(stimuli, reps);
         is_target = repmat(is_target, reps);
         correct = repmat(correct, reps);
@@ -59,6 +58,8 @@ for FOCAL = 1
 
         stats;
         %sim.print_EM
-        figures;
+        %figures;
     end
 end
+
+fits;

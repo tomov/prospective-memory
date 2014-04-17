@@ -1,4 +1,6 @@
-% for RL presentation
+% must precompute simulation values from stats, which in turn must be
+% called from main.m and iterate over all possibilities of focal/nonfocal
+% high/low emphasis
 
 figure;
 
@@ -23,29 +25,6 @@ emp_nonfoc_high_OG = 97;
 emp_nonfoc_high_PM = 81;
 
 
-
-
-sim_foc_low_RT = 141;
-sim_foc_low_STD = 54;
-sim_foc_low_OG = 99.5;
-sim_foc_low_PM = 86.25;
-
-sim_foc_high_RT = 149;
-sim_foc_high_STD = 51.3;
-sim_foc_high_OG = 99;
-sim_foc_high_PM = 98; % !!!
-
-sim_nonfoc_low_RT = 206.8;
-sim_nonfoc_low_STD = 95;
-sim_nonfoc_low_OG = 95;
-sim_nonfoc_low_PM = 71;
-
-sim_nonfoc_high_RT = 226;
-sim_nonfoc_high_STD = 107;
-sim_nonfoc_high_OG = 91;
-sim_nonfoc_high_PM = 88;
-
-
 subplot(2, 2, 1);
 plot([0 1], [emp_foc_low_RT emp_foc_high_RT], '-o');
 hold on;
@@ -58,12 +37,12 @@ legend('Focal', 'Nonfocal');
 title('Empirical Data (Einstein & McDaniel 2005)');
 
 subplot(2, 2, 2);
-plot([0 1], [sim_foc_low_RT sim_foc_high_RT] * 5.5 + 350, '-o');
+plot([0 1], [sim_foc_low_RT sim_foc_high_RT] * 10, '-o');
 hold on;
-plot([0 1], [sim_nonfoc_low_RT sim_nonfoc_high_RT] * 5.5 + 350, '-*');
+plot([0 1], [sim_nonfoc_low_RT sim_nonfoc_high_RT] * 10, '-*');
 hold off;
 axis([-0.5 1.5 1000 1700]);
-ylabel('RT (msec = 5.5 * cycles + 350)');
+ylabel('RT (msec = 10 * cycles)');
 set(gca, 'XTickLabel', {'', 'low emphasis', '', 'high emphasis', ''});
 legend('Focal', 'Nonfocal');
 title('Simulation Results');

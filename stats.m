@@ -63,3 +63,38 @@ fprintf('mean OG correct RTs = %.4f (%.4f)\n', mean(OG_correct_RTs), std(OG_corr
 fprintf('mean PM hit RTs = %.4f (%.4f)\n', mean(PM_hit_RTs), std(PM_hit_RTs));
 fprintf('OG accuracy = %.4f%%\n', size(OG_correct_RTs, 1) / OG_count * 100);
 fprintf('PM hit rate = %.4f%%\n', size(PM_hit_RTs, 1) / PM_count * 100);
+
+
+
+% save stats for fits
+
+RT = mean(OG_correct_RTs);
+STD = std(OG_correct_RTs);
+OG = size(OG_correct_RTs, 1) / OG_count * 100;
+PM = size(PM_hit_RTs, 1) / PM_count * 100;
+
+if FOCAL
+    if EMPHASIS
+        sim_foc_high_RT = RT;
+        sim_foc_high_STD = STD;
+        sim_foc_high_OG = OG;
+        sim_foc_high_PM = PM;
+    else
+        sim_foc_low_RT = RT;
+        sim_foc_low_STD = STD;
+        sim_foc_low_OG = OG;
+        sim_foc_low_PM = PM;
+    end
+else
+    if EMPHASIS
+        sim_nonfoc_high_RT = RT;
+        sim_nonfoc_high_STD = STD;
+        sim_nonfoc_high_OG = OG;
+        sim_nonfoc_high_PM = PM;
+    else
+        sim_nonfoc_low_RT = RT;
+        sim_nonfoc_low_STD = STD;
+        sim_nonfoc_low_OG = OG;
+        sim_nonfoc_low_PM = PM;
+    end
+end
