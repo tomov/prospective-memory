@@ -1,36 +1,39 @@
 figure;
 
-t_range = 1:800;
+t_range = 1:1000;
+y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
+onset_plot = onsets(onsets < t_range(end));
 
 subplot(4, 2, 1);
 plot(act(t_range, sim.output_ids));
 legend(sim.units(sim.output_ids));
 title('Outputs');
-ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
+ylim(y_lim);
 
 subplot(4, 2, 3);
 plot(act(t_range, sim.response_ids));
 legend(sim.units(sim.response_ids));
 title('Responses');
-ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
+ylim(y_lim);
 
 subplot(4, 2, 5);
 plot(act(t_range, sim.perception_ids));
 legend(sim.units(sim.perception_ids));
 title('Feature Perception');
-ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
+ylim(y_lim);
 
 subplot(4, 2, 7);
 plot(act(t_range, sim.input_ids));
 legend(sim.units(sim.input_ids));
 title('Stimulus Inputs');
-ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
+ylim(y_lim);
 
 subplot(4, 2, 4);
 plot(act(t_range, sim.task_ids));
 legend(sim.units(sim.task_ids));
 title('Task Representation');
-ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
+ylim(y_lim);
+line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
 
 subplot(4, 2, 2);
 plot(acc(t_range, :));
@@ -42,7 +45,8 @@ subplot(4, 2, 6);
 plot(act(t_range, sim.attention_ids));
 legend(sim.units(sim.attention_ids));
 title('Feature Attention');
-ylim([sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1]);
+ylim(y_lim);
+line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
 
 
 

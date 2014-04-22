@@ -9,9 +9,10 @@ classdef Model < handle
         STEP_SIZE = 0.01;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
-        SETTLE_LEEWAY = 20;
         INSTRUCTION_CYLCES = 10;
-        SETTLE_EPS = 0.0003;
+        SETTLE_LEEWAY = 20;
+        SETTLE_MEAN_EPS = 1e-5; % adjust these when you add noise to the model
+        SETTLE_STD_EPS = 1e-6; % ...this too
         TAU = 0.1; % rate constant from Jon's paper
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
@@ -56,31 +57,35 @@ classdef Model < handle
         RESPONSE_TO_OUTPUT = 1;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
-        % feature attention
-        
-        BIAS_FOR_ATTENTION = 0;
-        ATTENTION_INHIBITION = -2;
-        ATTENTION_SELF = 3;
-        
-        TASK_TO_ATTENTION = 1;
-        TASK_TO_ATTENTION_INHIBITION = -0.65;
-        
-        OG_ATTENTION_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
-        PM_ATTENTION_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
-        
         % task representation
         
         BIAS_FOR_TASK = 0;
         TASK_INHIBITION = -2;
         TASK_SELF = 3;
         
-        ATTENTION_TO_TASK = 1;
+        ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
         
-        OG_TASK_INITIAL_BIAS = 10; % TODO DISCUSS With Ida/Jon
-        PM_TASK_INITIAL_BIAS = 0; % TODO DISCUSS With Ida/Jon
+        OG_TASK_INITIAL_BIAS = 1;
+        OG_TASK_RESET_BIAS = 10;
+        PM_TASK_INITIAL_BIAS = -1;
+        PM_TASK_RESET_BIAS = -10;
         
         PERCEPTION_TO_TASK = 6; % (EM)
+        
+        % feature attention
+        
+        BIAS_FOR_ATTENTION = 0;
+        ATTENTION_INHIBITION = -2;
+        ATTENTION_SELF = 3;
+        
+        TASK_TO_ATTENTION = 0;
+        TASK_TO_ATTENTION_INHIBITION = 0;
+        
+        OG_ATTENTION_INITIAL_BIAS = 1;
+        OG_ATTENTION_RESET_BIAS = 10;
+        PM_ATTENTION_INITIAL_BIAS = -1;
+        PM_ATTENTION_RESET_BIAS = -10;
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
@@ -113,6 +118,7 @@ classdef Model < handle
         attention_ids
         
         wm_ids
+        ffwd_ids
         
         connections
         weights
@@ -212,6 +218,7 @@ classdef Model < handle
             self.task_ids = cellfun(@self.unit_id, self.task_units);
             self.attention_ids = cellfun(@self.unit_id, self.attention_units);
             
+            self.ffwd_ids = [self.input_ids self.perception_ids self.response_ids self.output_ids];
             self.wm_ids = [self.task_ids self.attention_ids];
 
             % ---==== specify connections between units ====---
@@ -279,24 +286,22 @@ classdef Model < handle
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
-            if ~FOCAL
-                % NONFOCAL
+            if FOCAL
+                self.ATTENTION_INHIBITION = -2.5;
+            else
+                self.ATTENTION_INHIBITION = -1.8;
+                % attention to nonfocal target projection
                 from = self.unit_id('Attend Syllables');
                 to = cellfun(@self.unit_id, strcat('see:', {
                     'tor'
                     }')');
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             end
+            
             if EMPHASIS
-                self.PM_TASK_INITIAL_BIAS = 1;
-                if ~FOCAL
-                    self.PM_ATTENTION_INITIAL_BIAS = 7;
-                end
+                self.TASK_INHIBITION = -1.9;
             else
-                self.PM_TASK_INITIAL_BIAS = -1; % in negative, modulates PM hit rate only, no relation to OG RT
-                if ~FOCAL
-                    self.PM_ATTENTION_INITIAL_BIAS = 6;  % corr
-                end
+                self.TASK_INHIBITION = -2.8;
             end
 
             % raw inputs to perception (cont'd)
@@ -330,12 +335,9 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
-            if FOCAL || OG_ONLY
-                % turn off PM feature attention unit
-                self.bias(self.unit_id('Attend Syllables')) = -100;
-            end
             if OG_ONLY
-                % turn off PM task unit
+                % turn off PM task and feature units
+                self.bias(self.unit_id('Attend Syllables')) = -100;
                 self.bias(self.unit_id('PM Task')) = -100;
             end
         end

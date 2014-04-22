@@ -5,7 +5,7 @@ classdef Simulator < Model
     
     properties (Access = public)
         wm_capacity = 2;
-        attention_factor = 0;
+        attention_factor = 0; % obsolete... for now
         net_input;
         net_input_avg;
         accumulators;
@@ -85,14 +85,18 @@ classdef Simulator < Model
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
 
-        function [responses, RTs, activation_log, accumulators_log] = trial(self, stimuli)
+        function [responses, RTs, activation_log, accumulators_log, onsets] = trial(self, stimuli)
             % initialize activations and outputs
             trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
             activation_log = zeros(trial_duration, self.N);
             accumulators_log = zeros(trial_duration, self.Nout);
+            self.activation = zeros(1, self.N);
+            self.net_input_avg = zeros(1, self.N);
             responses = [];
             RTs = [];
+            onsets = [];
             cycles = 0;
+            last_output_was_target_or_timeout = false;
             
             % for each input from the time series
             for ord=1:size(stimuli, 1)
@@ -104,15 +108,11 @@ classdef Simulator < Model
                 timeout = stimuli{ord, 2} * self.CYCLES_PER_SEC;
                 
                 % reset response, output, and monitoring activations
-                self.activation = zeros(1, self.N);
-                self.net_input_avg = zeros(1, self.N);
                 self.accumulators = zeros(1, size(self.output_ids, 2));
                 
                 % default output is timeout
                 output_id = self.unit_id('timeout');
                 RT = timeout;
-                
-                %self.attention_factor = self.attention_factor + 0.002;
                 
                 % simulate response to stimulus
                 responded = false;
@@ -143,8 +143,10 @@ classdef Simulator < Model
                         m = activation_log(from:to,:) - activation_log(from-1:to-1,:);
                         m = abs(mean(m, 2));
                         %fprintf('%d -> %.6f, %6f\n', cycle, mean(m), std(m));
-                        if mean(m) < self.SETTLE_EPS
+                        if mean(m) < self.SETTLE_MEAN_EPS && std(m) < self.SETTLE_STD_EPS
                             is_settled = true;
+                            % save stimulus onset
+                            onsets = [onsets; cycles + cycle];
                         end
                     end
                     
@@ -153,11 +155,22 @@ classdef Simulator < Model
                     
                     % provide instruction in form of temporary input to WM
                     % units
-                    if cycle < self.INSTRUCTION_CYLCES
+                    % note that we only do this on the first trial of the
+                    % block
+                    % TODO hack-y
+                    if ord == 1 && cycle < self.INSTRUCTION_CYLCES
                         self.net_input(self.unit_id('Word Categorization')) = self.OG_TASK_INITIAL_BIAS;
                         self.net_input(self.unit_id('Attend Word and Category')) = self.OG_ATTENTION_INITIAL_BIAS;
                         self.net_input(self.unit_id('PM Task')) = self.PM_TASK_INITIAL_BIAS;
                         self.net_input(self.unit_id('Attend Syllables')) = self.PM_ATTENTION_INITIAL_BIAS;
+                    end
+                    
+                    % TODO hack-y -- reset activation of OG task after PM 
+                    if cycle < self.INSTRUCTION_CYLCES && last_output_was_target_or_timeout
+                        self.net_input(self.unit_id('Word Categorization')) = self.OG_TASK_RESET_BIAS;
+                        self.net_input(self.unit_id('Attend Word and Category')) = self.OG_ATTENTION_RESET_BIAS;
+                        self.net_input(self.unit_id('PM Task')) = self.PM_TASK_RESET_BIAS;
+                        self.net_input(self.unit_id('Attend Syllables')) = self.PM_ATTENTION_RESET_BIAS;
                     end
                     
                     % add noise to net inputs (except input units)
@@ -180,7 +193,7 @@ classdef Simulator < Model
 
                     % update activation levels
                     self.activation = self.logistic(self.net_input_avg);
-                    
+                                        
                     % normalize WM activation
                     % TODO ask re normalization
                     %{
@@ -208,6 +221,9 @@ classdef Simulator < Model
                             output_id = self.output_ids(id);
                             RT = cycle;
                             responded = true;
+                            % a bit hacky, ALSO TODO does not work after
+                            % timeout
+                            last_output_was_target_or_timeout = (self.unit_id('PM') == output_id);
                             break;
                         end
                     end
@@ -218,6 +234,10 @@ classdef Simulator < Model
                 responses = [responses; {output}];
                 RTs = [RTs; RT];
                 cycles = cycles + cycle;
+            end
+            if ~responded
+                % timeout...
+                last_output_was_target_or_timeout = true;
             end
             
             activation_log(cycles:end,:) = [];

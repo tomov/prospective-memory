@@ -60,7 +60,7 @@ for OG_ONLY = 0:1
             correct = repmat(correct, reps);
 
             sim.wm_capacity = 2;
-            [responses, RTs, act, acc] = sim.trial(stimuli);
+            [responses, RTs, act, acc, onsets] = sim.trial(stimuli);
 
             stats;
             %sim.print_EM
