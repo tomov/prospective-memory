@@ -1,6 +1,6 @@
 figure;
 
-t_range = 1:1000;
+t_range = 1:2000;
 y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
 onset_plot = onsets(onsets < t_range(end));
 

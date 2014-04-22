@@ -54,11 +54,18 @@ for OG_ONLY = 0:1
                 sim.instruction('see:tor', 'PM Task', 2);
             end
 
+            % replicate stimuli
             reps = 20;
-            stimuli = repmat(stimuli, reps);
-            is_target = repmat(is_target, reps);
-            correct = repmat(correct, reps);
+            stimuli = repmat(stimuli, reps, 1);
+            is_target = repmat(is_target, reps, 1);
+            correct = repmat(correct, reps, 1);
 
+            % randomize order
+            idx = randperm(size(stimuli, 1))';
+            stimuli = stimuli(idx, :);
+            is_target = is_target(idx, :);
+            correct = correct(idx, :);
+            
             sim.wm_capacity = 2;
             [responses, RTs, act, acc, onsets] = sim.trial(stimuli);
 

@@ -47,7 +47,7 @@ classdef Model < handle
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
         TASK_TO_RESPONSE = 7;
-        TASK_TO_RESPONSE_INHIBITION = -3;
+        TASK_TO_RESPONSE_INHIBITION = -7;
         
         % outputs
         
@@ -71,7 +71,7 @@ classdef Model < handle
         PM_TASK_INITIAL_BIAS = -1;
         PM_TASK_RESET_BIAS = -10;
         
-        PERCEPTION_TO_TASK = 6; % (EM)
+        PERCEPTION_TO_TASK = 2.5; % (EM)
         
         % feature attention
         
@@ -286,6 +286,7 @@ classdef Model < handle
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
+            % stronger inhibition => bigger spread => better OG
             if FOCAL
                 self.ATTENTION_INHIBITION = -2.5;
             else
@@ -298,6 +299,7 @@ classdef Model < handle
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             end
             
+            % stronger inhibition => bigger spread => better OG
             if EMPHASIS
                 self.TASK_INHIBITION = -1.9;
             else
