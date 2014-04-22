@@ -5,6 +5,7 @@ classdef Simulator < Model
     
     properties (Access = public)
         wm_capacity = 2;
+        attention_factor = 0;
         net_input;
         net_input_avg;
         accumulators;
@@ -13,8 +14,8 @@ classdef Simulator < Model
     end
     
     methods
-        function self = Simulator(FOCAL, EMPHASIS)
-            self = self@Model(FOCAL, EMPHASIS);
+        function self = Simulator(FOCAL, EMPHASIS, OG_ONLY)
+            self = self@Model(FOCAL, EMPHASIS, OG_ONLY);
             self.Nout = size(self.output_ids, 2);
             self.accumulators = zeros(1, self.Nout);
             self.net_input = zeros(1, self.N);
@@ -110,6 +111,8 @@ classdef Simulator < Model
                 % default output is timeout
                 output_id = self.unit_id('timeout');
                 RT = timeout;
+                
+                %self.attention_factor = self.attention_factor + 0.002;
                 
                 % simulate response to stimulus
                 responded = false;

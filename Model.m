@@ -120,6 +120,7 @@ classdef Model < handle
         
         FOCAL
         EMPHASIS
+        OG_ONLY
     end
     
     methods
@@ -165,9 +166,10 @@ classdef Model < handle
             end
         end
         
-        function self = Model(FOCAL, EMPHASIS)
+        function self = Model(FOCAL, EMPHASIS, OG_ONLY)
             self.FOCAL = FOCAL;
             self.EMPHASIS = EMPHASIS;
+            self.OG_ONLY = OG_ONLY;
             
             % specify unit names in each layer
             self.input_units = {
@@ -328,9 +330,13 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
-            if FOCAL
-                % turn off PM attention unit
+            if FOCAL || OG_ONLY
+                % turn off PM feature attention unit
                 self.bias(self.unit_id('Attend Syllables')) = -100;
+            end
+            if OG_ONLY
+                % turn off PM task unit
+                self.bias(self.unit_id('PM Task')) = -100;
             end
         end
         

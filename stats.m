@@ -69,32 +69,62 @@ fprintf('PM hit rate = %.4f%%\n', size(PM_hit_RTs, 1) / PM_count * 100);
 % save stats for fits
 
 RT = mean(OG_correct_RTs);
-STD = std(OG_correct_RTs);
+% http://en.wikipedia.org/wiki/Standard_error !!!
+SD = std(OG_correct_RTs) / sqrt(size(OG_correct_RTs, 2));
+% !!!!
 OG = size(OG_correct_RTs, 1) / OG_count * 100;
 PM = size(PM_hit_RTs, 1) / PM_count * 100;
 
-if FOCAL
-    if EMPHASIS
-        sim_foc_high_RT = RT;
-        sim_foc_high_STD = STD;
-        sim_foc_high_OG = OG;
-        sim_foc_high_PM = PM;
+if OG_ONLY
+    if FOCAL
+        if EMPHASIS
+            sim_foc_high_RT_noPM = RT;
+            sim_foc_high_SD_noPM = SD;
+            sim_foc_high_OG_noPM = OG;
+            sim_foc_high_PM_noPM = PM;
+        else
+            sim_foc_low_RT_noPM = RT;
+            sim_foc_low_SD_noPM = SD;
+            sim_foc_low_OG_noPM = OG;
+            sim_foc_low_PM_noPM = PM;
+        end
     else
-        sim_foc_low_RT = RT;
-        sim_foc_low_STD = STD;
-        sim_foc_low_OG = OG;
-        sim_foc_low_PM = PM;
+        if EMPHASIS
+            sim_nonfoc_high_RT_noPM = RT;
+            sim_nonfoc_high_SD_noPM = SD;
+            sim_nonfoc_high_OG_noPM = OG;
+            sim_nonfoc_high_PM_noPM = PM;
+        else
+            sim_nonfoc_low_RT_noPM = RT;
+            sim_nonfoc_low_SD_noPM = SD;
+            sim_nonfoc_low_OG_noPM = OG;
+            sim_nonfoc_low_PM_noPM = PM;
+        end
     end
 else
-    if EMPHASIS
-        sim_nonfoc_high_RT = RT;
-        sim_nonfoc_high_STD = STD;
-        sim_nonfoc_high_OG = OG;
-        sim_nonfoc_high_PM = PM;
+    if FOCAL
+        if EMPHASIS
+            sim_foc_high_RT = RT;
+            sim_foc_high_SD = SD;
+            sim_foc_high_OG = OG;
+            sim_foc_high_PM = PM;
+        else
+            sim_foc_low_RT = RT;
+            sim_foc_low_SD = SD;
+            sim_foc_low_OG = OG;
+            sim_foc_low_PM = PM;
+        end
     else
-        sim_nonfoc_low_RT = RT;
-        sim_nonfoc_low_STD = STD;
-        sim_nonfoc_low_OG = OG;
-        sim_nonfoc_low_PM = PM;
-    end
+        if EMPHASIS
+            sim_nonfoc_high_RT = RT;
+            sim_nonfoc_high_SD = SD;
+            sim_nonfoc_high_OG = OG;
+            sim_nonfoc_high_PM = PM;
+        else
+            sim_nonfoc_low_RT = RT;
+            sim_nonfoc_low_SD = SD;
+            sim_nonfoc_low_OG = OG;
+            sim_nonfoc_low_PM = PM;
+        end
+    end    
 end
