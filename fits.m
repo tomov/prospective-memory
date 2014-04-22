@@ -49,15 +49,21 @@ emp_nonfoc_high_OG = 97;
 emp_nonfoc_high_PM = 81;
 
 
-xticklabel = {'low, no PM', 'low, PM', 'high, no PM', 'high, PM'};
+xticklabel = {'low,no PM', 'low,PM', 'high,no PM', 'high,PM'};
 
-% OG RT's
+% ------------ OG RT's ----------------
 
 subplot(3, 2, 1);
-plot([0 1 2 3], [emp_foc_low_RT_noPM emp_foc_low_RT emp_foc_high_RT_noPM emp_foc_high_RT], '-o');
+plot([0 1 2 3], [emp_foc_low_RT_noPM emp_foc_low_RT emp_foc_high_RT_noPM emp_foc_high_RT], ...
+    'b-o', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 hold on;
 %errorbar([0 1], [emp_foc_low_RT emp_foc_high_RT], [emp_foc_low_SD emp_foc_high_SD]);
-plot([0 1 2 3], [emp_nonfoc_low_RT_noPM emp_nonfoc_low_RT emp_nonfoc_high_RT_noPM emp_nonfoc_high_RT], '-*');
+plot([0 1 2 3], [emp_nonfoc_low_RT_noPM emp_nonfoc_low_RT emp_nonfoc_high_RT_noPM emp_nonfoc_high_RT], ...
+    'r-*', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 %errorbar([0 1], [emp_nonfoc_low_RT emp_nonfoc_high_RT], [emp_nonfoc_low_SD emp_nonfoc_high_SD]);
 hold off;
 axis([-0.5 3.5 1000 1700]);
@@ -66,62 +72,95 @@ set(gca, 'XTickLabel', xticklabel);
 legend('Focal', 'Nonfocal');
 title('Empirical Data (Einstein & McDaniel 2005)');
 
+
 subplot(3, 2, 2);
-plot([0 1 2 3], [sim_foc_low_RT_noPM sim_foc_low_RT sim_foc_high_RT_noPM sim_foc_high_RT] * 10, '-o');
+plot([0 1 2 3], [sim_foc_low_RT_noPM sim_foc_low_RT sim_foc_high_RT_noPM sim_foc_high_RT] * 10, ...
+    'b-o', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 hold on;
 %errorbar([0 1], [sim_foc_low_RT sim_foc_high_RT] * 10, [sim_foc_low_SD sim_foc_high_SD] * 10);
-plot([0 1 2 3], [sim_nonfoc_low_RT_noPM sim_nonfoc_low_RT sim_nonfoc_high_RT_noPM sim_nonfoc_high_RT] * 10, '-*');
+plot([0 1 2 3], [sim_nonfoc_low_RT_noPM sim_nonfoc_low_RT sim_nonfoc_high_RT_noPM sim_nonfoc_high_RT] * 10, ...
+    'r-*', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);    
 %errorbar([0 1], [sim_nonfoc_low_RT sim_nonfoc_high_RT] * 10, [sim_nonfoc_low_SD sim_nonfoc_high_SD] * 10);
 hold off;
 axis([-0.5 3.5 1000 1700]);
 ylabel('RT (msec = 10 * cycles)');
 set(gca, 'XTickLabel', xticklabel);
-legend('Focal', 'Nonfocal');
+%legend('Focal', 'Nonfocal');
 title('Simulation Results');
 
-% PM hit rates
+
+% ------------ PM hit rates ------------
+
 
 subplot(3, 2, 3);
-plot([1 3], [ emp_foc_low_PM  emp_foc_high_PM], '-o');
+plot([1 3], [ emp_foc_low_PM  emp_foc_high_PM], ...
+    'b-o', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 hold on;
-plot([1 3], [ emp_nonfoc_low_PM  emp_nonfoc_high_PM], '-*');
+plot([1 3], [ emp_nonfoc_low_PM  emp_nonfoc_high_PM], ...
+    'r-*', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);    
 hold off;
 axis([-0.5 3.5 50 100]);
 ylabel('PM Hit Rate (%)');
 set(gca, 'XTickLabel', xticklabel);
-legend('Focal', 'Nonfocal');
+%legend('Focal', 'Nonfocal');
 
 subplot(3, 2, 4);
-plot([1 3], [ sim_foc_low_PM  sim_foc_high_PM], '-o');
+plot([1 3], [ sim_foc_low_PM  sim_foc_high_PM], ...
+    'b-o', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);    
 hold on;
-plot([1 3], [ sim_nonfoc_low_PM  sim_nonfoc_high_PM], '-*');
+plot([1 3], [ sim_nonfoc_low_PM  sim_nonfoc_high_PM], ...
+    'r-*', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);    
 hold off;
 axis([-0.5 3.5 50 100]);
-ylabel('PM Hit Rate (%)');
+%ylabel('PM Hit Rate (%)');
 set(gca, 'XTickLabel', xticklabel);
-legend('Focal', 'Nonfocal');
+%legend('Focal', 'Nonfocal');
 
-% OG accuracies
+% ------------ OG accuracies ------------
 
 subplot(3, 2, 5);
-plot([0 1 2 3], [emp_foc_low_OG_noPM emp_foc_low_OG emp_foc_high_OG_noPM emp_foc_high_OG], '-o');
+plot([0 1 2 3], [emp_foc_low_OG_noPM emp_foc_low_OG emp_foc_high_OG_noPM emp_foc_high_OG], ...
+    'b-o', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 hold on;
-plot([0 1 2 3], [emp_nonfoc_low_OG_noPM emp_nonfoc_low_OG emp_nonfoc_high_OG_noPM emp_nonfoc_high_OG], '-*');
+plot([0 1 2 3], [emp_nonfoc_low_OG_noPM emp_nonfoc_low_OG emp_nonfoc_high_OG_noPM emp_nonfoc_high_OG], ...
+    'r-*', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);    
 hold off;
 axis([-0.5 3.5 50 100]);
 ylabel('OG accuracy (%)');
 set(gca, 'XTickLabel', xticklabel);
-legend('Focal', 'Nonfocal');
+%legend('Focal', 'Nonfocal');
 
 subplot(3, 2, 6);
-plot([0 1 2 3], [sim_foc_low_OG_noPM sim_foc_low_OG sim_foc_high_OG_noPM sim_foc_high_OG], '-o');
+plot([0 1 2 3], [sim_foc_low_OG_noPM sim_foc_low_OG sim_foc_high_OG_noPM sim_foc_high_OG], ...
+    'b-o', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 hold on;
-plot([0 1 2 3], [sim_nonfoc_low_OG_noPM sim_nonfoc_low_OG sim_nonfoc_high_OG_noPM sim_nonfoc_high_OG], '-*');
+plot([0 1 2 3], [sim_nonfoc_low_OG_noPM sim_nonfoc_low_OG sim_nonfoc_high_OG_noPM sim_nonfoc_high_OG], ...
+    'r-*', ...
+    'LineWidth',2, ...
+    'MarkerSize', 6);
 hold off;
 axis([-0.5 3.5 50 100]);
-ylabel('OG accuracy (%)');
+%ylabel('OG accuracy (%)');
 set(gca, 'XTickLabel', xticklabel);
-legend('Focal', 'Nonfocal');
+%legend('Focal', 'Nonfocal');
 
 
 

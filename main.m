@@ -54,7 +54,7 @@ for OG_ONLY = 0:1
                 sim.instruction('see:tor', 'PM Task', 2);
             end
 
-            reps = 100;
+            reps = 20;
             stimuli = repmat(stimuli, reps);
             is_target = repmat(is_target, reps);
             correct = repmat(correct, reps);
