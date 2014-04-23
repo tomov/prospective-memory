@@ -7,7 +7,7 @@ EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
 for OG_ONLY = 0
     for FOCAL = 1
-        for EMPHASIS = 0:1
+        for EMPHASIS = 0
             if OG_ONLY
                 og_string = 'No PM task';
             else
@@ -73,9 +73,10 @@ for OG_ONLY = 0
                 is_target = [is_target; 0; 0; 0; 0; 0; 0; 0; 0];
                 correct = [correct; {'Yes'; 'No'; 'No'; 'Yes'; 'Yes'; 'No'; 'No'; 'Yes'}];
             end
+            
 
             % replicate stimuli
-            reps = 2;
+            reps = 1;
             stimuli = repmat(stimuli, reps, 1);
             is_target = repmat(is_target, reps, 1);
             correct = repmat(correct, reps, 1);

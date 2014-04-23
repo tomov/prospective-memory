@@ -1,37 +1,56 @@
 
-x = [0:0.02:1];
-cycs = 100;
+x = [-10:0.5:10];
+%x = 1
+cycs = 200;
+
+I = 0;
+li = -2;
+se = 3;
 
 W = [
-    3 -2;
-    -2 3
+    se li 0 0;
+    li se 0 0;
+    0 0 se li;
+    0 0 li se;
     ];
-b = [0 0];
+b = [I I I I];
+tau = 0.1;
+instruction = 10;
 
 z = zeros(size(x, 2));
 
 for i = 1:size(x, 2)
     for j = 1:size(x, 2)
-        a1 = x(i);
-        a2 = x(j);
-        z(i, j) = a1 + a2;
+        i1 = x(i);
+        i2 = x(j);
         
-        a = [a1 a2];
-        net = [0 0];
-        act = zeros(cycs+1, 2);
+        %a = [a1 a2];
+        a = [0 0 0 0];
+        net = [0 0 0 0];
+        avg = [0 0 0 0];
+        act = zeros(cycs+1, 4);
         act(1,:) = a;
         for cyc = 1:cycs
-            net = a * W + b;
-            a = 1 ./ (1 + exp(-net));
+            if cyc < instruction
+                net = [i1 i2 i1 i2];
+            else
+                net = a * W + b;
+            end
+            avg = (1 - tau) * avg + tau * net;
+            a = 1 ./ (1 + exp(-avg));
             act(cyc+1,:) = a;
         end
-        z(i, j) = norm(act(end,:) - act(1,:));
+        z(i, j) = norm(act(end,:) - act(instruction,:));
         
-        %plot(act);
-        %ylim([0 1]);
+        if size(x, 2) == 1
+            figure;
+            plot(act);
+            ylim([0 1]);
+        end
     end
 end
 
-figure;
-surf(x, x, z);
-%act = 1 ./ (1 + exp(-net));
+if size(x, 2) > 1
+    figure;
+    surf(x, x, z);
+end

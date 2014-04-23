@@ -60,10 +60,10 @@ classdef Model < handle
         % task representation
         
         BIAS_FOR_TASK = 0;
-        TASK_INHIBITION = -2;
-        TASK_SELF = 3;
+        TASK_INHIBITION = -2.5;
+        TASK_SELF = 2.5;
         
-        ATTENTION_TO_TASK = 0.5;
+        ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
         
         OG_TASK_INITIAL_BIAS = 1;
@@ -75,17 +75,20 @@ classdef Model < handle
         
         % feature attention
         
-        BIAS_FOR_ATTENTION = 0;
-        ATTENTION_INHIBITION = -2;
-        ATTENTION_SELF = 3;
+        BIAS_FOR_ATTENTION = 0; % b > 0 x1=x2 > 0.5; b < 0 => x1=x2 < 0.5
+        ATTENTION_INHIBITION = -2.5; % LI/SE > 1 => x1=x2 < 0.5; LI/SE < 1 => x1=x2 > 0.5; LI=SE => x1=x2=0.5 (given b = 0)
+        ATTENTION_SELF = 2.5;
+        % LI + SE > 10 => x1 = 0, x2 = 1 because of the logistic -- think
+        % of the sum as the driving difference in the x-coordinates between
+        % the two activations; aim for LI + SE = 5 for the sweet spot
         
-        TASK_TO_ATTENTION = 0.5;
+        TASK_TO_ATTENTION = 0;
         TASK_TO_ATTENTION_INHIBITION = 0;
         
-        OG_ATTENTION_INITIAL_BIAS = 1;
-        OG_ATTENTION_RESET_BIAS = 10;
+        OG_ATTENTION_INITIAL_BIAS = -1;
+        OG_ATTENTION_RESET_BIAS = 1;
         PM_ATTENTION_INITIAL_BIAS = -1;
-        PM_ATTENTION_RESET_BIAS = -10;
+        PM_ATTENTION_RESET_BIAS = 1;
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
@@ -286,10 +289,7 @@ classdef Model < handle
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
-            % stronger inhibition => bigger spread => better OG
-            if FOCAL
-                self.ATTENTION_INHIBITION = -2.5;
-            else
+            if ~FOCAL
                 self.ATTENTION_INHIBITION = -1.8;
                 % attention to nonfocal target projection
                 from = self.unit_id('Attend Syllables');
@@ -297,13 +297,6 @@ classdef Model < handle
                     'tor'
                     }')');
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
-            end
-            
-            % stronger inhibition => bigger spread => better OG
-            if EMPHASIS
-                self.TASK_INHIBITION = -2.1;
-            else
-                self.TASK_INHIBITION = 2;
             end
 
             % raw inputs to perception (cont'd)
