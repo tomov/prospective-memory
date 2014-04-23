@@ -126,10 +126,10 @@ classdef Simulator < Model
                     
                     % hack for testing different activations
                     %{
-                    self.activation(self.unit_id('Word Categorization')) = 0.5;
-                    self.activation(self.unit_id('Attend Word and Category')) = 0.2;
+                    self.activation(self.unit_id('OG Task')) = 0.5;
+                    self.activation(self.unit_id('OG features')) = 0.2;
                     self.activation(self.unit_id('PM Task')) = 0;
-                    self.activation(self.unit_id('Attend Syllables')) = 0;
+                    self.activation(self.unit_id('PM features')) = 0;
                     %}
                     
                     % log activation for plotting
@@ -157,20 +157,13 @@ classdef Simulator < Model
                     % units
                     % note that we only do this on the first trial of the
                     % block
-                    % TODO hack-y
                     if ord == 1 && cycle < self.INSTRUCTION_CYLCES
-                        self.net_input(self.unit_id('Word Categorization')) = self.OG_TASK_INITIAL_BIAS;
-                        self.net_input(self.unit_id('Attend Word and Category')) = self.OG_ATTENTION_INITIAL_BIAS;
-                        self.net_input(self.unit_id('PM Task')) = self.PM_TASK_INITIAL_BIAS;
-                        self.net_input(self.unit_id('Attend Syllables')) = self.PM_ATTENTION_INITIAL_BIAS;
+                        self.net_input = self.initial_current;
                     end
                     
-                    % TODO hack-y -- reset activation of OG task after PM 
+                    % reset activation of OG task after PM 
                     if cycle < self.INSTRUCTION_CYLCES && last_output_was_target_or_timeout
-                        self.net_input(self.unit_id('Word Categorization')) = self.OG_TASK_RESET_BIAS;
-                        self.net_input(self.unit_id('Attend Word and Category')) = self.OG_ATTENTION_RESET_BIAS;
-                        self.net_input(self.unit_id('PM Task')) = self.PM_TASK_RESET_BIAS;
-                        self.net_input(self.unit_id('Attend Syllables')) = self.PM_ATTENTION_RESET_BIAS;
+                        self.net_input = self.reset_current;
                     end
                     
                     % add noise to net inputs (except input units)
@@ -179,30 +172,10 @@ classdef Simulator < Model
                     % TODO no noise... for now
                     %self.net_input = self.net_input + noise;
                     
-                    % average net inputs
-                    % TODO ask re kWTA
-                    %self.kWTA_basic(self.wm_capacity, self.wm_ids);
                     self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
-                    
-                    % add k-winner-take-all inhibition
-                    %self.kWTA_basic(1, self.output_ids);
-                    %self.kWTA_basic(1, self.response_ids);
-                    %self.kWTA_basic(1, self.task_ids);
-                    %self.kWTA_basic(1, self.monitor_ids);
-                    %self.kWTA_basic(2, self.attention_ids);
 
                     % update activation levels
                     self.activation = self.logistic(self.net_input_avg);
-                                        
-                    % normalize WM activation
-                    % TODO ask re normalization
-                    %{
-                    total_wm = sum(self.activation(self.wm_ids));
-                    factor = self.wm_capacity / total_wm;
-                    if factor < 1
-                        self.activation(self.wm_ids) = self.activation(self.wm_ids) * factor;
-                    end
-                    %}
                     
                     % update evidence accumulators (after network has
                     % settled)

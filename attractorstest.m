@@ -1,17 +1,17 @@
 
-x = [-10:0.5:10];
+x = [-5:0.3:5];
 %x = 1
-cycs = 200;
+cycs = 300;
 
 I = 0;
-li = -2.5;
-se = 2.5;
-ve = 1;
+li = -2;
+se = 3;
+ve = 0;
 
 W = [
-    se li ve 0;
+    se-0.21 li-0.5 ve 0;
     li se 0 ve;
-    ve 0 se li;
+    ve 0 se-0.21 li-0.5;
     0 ve li se;
     ];
 b = [I I I I];
@@ -23,9 +23,10 @@ z = zeros(size(x, 2));
 for i = 1:size(x, 2)
     for j = 1:size(x, 2)
         i1 = x(i);
-        i2 = x(j);
+        i2 = x(j)+0.1;
         
-        %a = [a1 a2];
+        %i1 = -5;
+        %i2 = 5;
         a = [0 0 0 0];
         net = [0 0 0 0];
         avg = [0 0 0 0];
@@ -47,6 +48,7 @@ for i = 1:size(x, 2)
             figure;
             plot(act);
             ylim([0 1]);
+            legend('1','2','3','4');
         end
     end
 end

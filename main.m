@@ -6,7 +6,7 @@ FOCAL = 1; % 0 = nonfocal, 1 = focal
 EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
 for OG_ONLY = 0
-    for FOCAL = 1
+    for FOCAL = 0
         for EMPHASIS = 0
             if OG_ONLY
                 og_string = 'No PM task';

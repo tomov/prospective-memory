@@ -66,10 +66,10 @@ classdef Model < handle
         ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
         
-        OG_TASK_INITIAL_BIAS = 1;
-        OG_TASK_RESET_BIAS = 10;
-        PM_TASK_INITIAL_BIAS = -1;
-        PM_TASK_RESET_BIAS = -10;
+        OG_TASK_INITIAL_BIAS = 0;
+        OG_TASK_RESET_BIAS = 0;
+        PM_TASK_INITIAL_BIAS = 0;
+        PM_TASK_RESET_BIAS = 0;
         
         PERCEPTION_TO_TASK = 10;  % EM
         
@@ -85,10 +85,10 @@ classdef Model < handle
         TASK_TO_ATTENTION = 0;    % VI (all-way, no VE) => same effect as b
         TASK_TO_ATTENTION_INHIBITION = 0; % disbalaned VI/VE => no x1=x2 stable state...
         
-        OG_ATTENTION_INITIAL_BIAS = -1;
-        OG_ATTENTION_RESET_BIAS = 1;
-        PM_ATTENTION_INITIAL_BIAS = -1;
-        PM_ATTENTION_RESET_BIAS = 1;
+        OG_ATTENTION_INITIAL_BIAS = 0;
+        OG_ATTENTION_RESET_BIAS = 0;
+        PM_ATTENTION_INITIAL_BIAS = 0;
+        PM_ATTENTION_RESET_BIAS = 0;
         
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
@@ -126,6 +126,8 @@ classdef Model < handle
         connections
         weights
         bias
+        initial_current
+        reset_current
         
         FOCAL
         EMPHASIS
@@ -194,11 +196,11 @@ classdef Model < handle
                 'Yes', 'No', 'PM'
                 };
             self.task_units = {
-                'Word Categorization', 'PM Task'
+                'OG Task', 'PM Task'
                 };
             self.attention_units = {
-                'Attend Word and Category', ...
-                'Attend Syllables'
+                'OG features', ...
+                'PM features'
                 };
             self.units = [
                 self.input_units, ...
@@ -228,11 +230,11 @@ classdef Model < handle
             
             self.connections = [
                 % task monitoring to responses
-                self.unit_id('Word Categorization')        , self.unit_id('A Subject')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Word Categorization')        , self.unit_id('An Animal')         , self.TASK_TO_RESPONSE;
-                self.unit_id('Word Categorization')        , self.unit_id('No Match 1')        , self.TASK_TO_RESPONSE;
-                self.unit_id('Word Categorization')        , self.unit_id('No Match 2')        , self.TASK_TO_RESPONSE;
-                self.unit_id('PM Task')                    , self.unit_id('PM Response')       , self.TASK_TO_RESPONSE;
+                self.unit_id('OG Task')        , self.unit_id('A Subject')         , self.TASK_TO_RESPONSE;
+                self.unit_id('OG Task')        , self.unit_id('An Animal')         , self.TASK_TO_RESPONSE;
+                self.unit_id('OG Task')        , self.unit_id('No Match 1')        , self.TASK_TO_RESPONSE;
+                self.unit_id('OG Task')        , self.unit_id('No Match 2')        , self.TASK_TO_RESPONSE;
+                self.unit_id('PM Task')        , self.unit_id('PM Response')       , self.TASK_TO_RESPONSE;
                 
                 % perception to response mapping (direct OG pathway)
                 % -- categories to categories
@@ -265,38 +267,58 @@ classdef Model < handle
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
                 
                 % LCA mutual inhibition and excitation
-                self.unit_id('Attend Word and Category') , self.unit_id('Word Categorization') , self.ATTENTION_TO_TASK;
-                self.unit_id('Word Categorization') , self.unit_id('Attend Word and Category') , self.TASK_TO_ATTENTION;
+                self.unit_id('OG features') , self.unit_id('OG Task') , self.ATTENTION_TO_TASK;
+                self.unit_id('OG Task') , self.unit_id('OG features') , self.TASK_TO_ATTENTION;
 
-                self.unit_id('Attend Syllables') , self.unit_id('Word Categorization') , self.ATTENTION_TO_TASK_INHIBITION;
-                self.unit_id('Word Categorization') , self.unit_id('Attend Syllables') , self.TASK_TO_ATTENTION_INHIBITION;
+                self.unit_id('PM features') , self.unit_id('OG Task') , self.ATTENTION_TO_TASK_INHIBITION;
+                self.unit_id('OG Task') , self.unit_id('PM features') , self.TASK_TO_ATTENTION_INHIBITION;
 
-                self.unit_id('Attend Syllables') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK;
-                self.unit_id('PM Task') , self.unit_id('Attend Syllables') , self.TASK_TO_ATTENTION;
+                self.unit_id('PM features') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK;
+                self.unit_id('PM Task') , self.unit_id('PM features') , self.TASK_TO_ATTENTION;
                 
-                self.unit_id('Attend Word and Category') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK_INHIBITION;
-                self.unit_id('PM Task') , self.unit_id('Attend Word and Category') , self.TASK_TO_ATTENTION_INHIBITION;
+                self.unit_id('OG features') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK_INHIBITION;
+                self.unit_id('PM Task') , self.unit_id('OG features') , self.TASK_TO_ATTENTION_INHIBITION;
             ];
             
             % perception to task representation (indirect PM pathway)
             self.forward_all_to_all(self.perception_ids, self.task_ids, 0); % EM!!!
             
             % attention to perception
-            from = self.unit_id('Attend Word and Category');
+            from = self.unit_id('OG features');
             to = cellfun(@self.unit_id, strcat('see:', {
                 'tortoise', 'history', 'crocodile', 'math', ...
                 'a subject', 'an animal'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
-            if ~FOCAL
-                self.ATTENTION_INHIBITION = -1.8;
+            if FOCAL
+                self.OG_ATTENTION_INITIAL_BIAS = 5;
+                self.OG_ATTENTION_RESET_BIAS = 5;
+                self.PM_ATTENTION_INITIAL_BIAS = -5;
+                self.PM_ATTENTION_RESET_BIAS = -5;
+            else
+                self.OG_ATTENTION_INITIAL_BIAS = 0;
+                self.OG_ATTENTION_RESET_BIAS = 0;
+                self.PM_ATTENTION_INITIAL_BIAS = 0;
+                self.PM_ATTENTION_RESET_BIAS = 0;
                 % attention to nonfocal target projection
-                from = self.unit_id('Attend Syllables');
+                from = self.unit_id('PM features');
                 to = cellfun(@self.unit_id, strcat('see:', {
                     'tor'
                     }')');
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
+            end
+            
+            if EMPHASIS
+                self.OG_TASK_INITIAL_BIAS = 0;
+                self.OG_TASK_RESET_BIAS = 0;
+                self.PM_TASK_INITIAL_BIAS = 0;
+                self.PM_TASK_RESET_BIAS = 0;
+            else
+                self.OG_TASK_INITIAL_BIAS = 5;
+                self.OG_TASK_RESET_BIAS = 5;
+                self.PM_TASK_INITIAL_BIAS = -5;
+                self.PM_TASK_RESET_BIAS = -5;
             end
 
             % raw inputs to perception (cont'd)
@@ -332,9 +354,23 @@ classdef Model < handle
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
             if OG_ONLY
                 % turn off PM task and feature units
-                self.bias(self.unit_id('Attend Syllables')) = -100;
+                self.bias(self.unit_id('PM features')) = -100;
                 self.bias(self.unit_id('PM Task')) = -100;
             end
+            
+            % initial currents
+            self.initial_current = zeros(1, self.N);
+            self.initial_current(self.unit_id('OG Task')) = self.OG_TASK_INITIAL_BIAS;
+            self.initial_current(self.unit_id('OG features')) = self.OG_ATTENTION_INITIAL_BIAS;
+            self.initial_current(self.unit_id('PM Task')) = self.PM_TASK_INITIAL_BIAS;
+            self.initial_current(self.unit_id('PM features')) = self.PM_ATTENTION_INITIAL_BIAS;
+            
+            % reset currents
+            self.reset_current = zeros(1, self.N);
+            self.reset_current(self.unit_id('OG Task')) = self.OG_TASK_RESET_BIAS;
+            self.reset_current(self.unit_id('OG features')) = self.OG_ATTENTION_RESET_BIAS;
+            self.reset_current(self.unit_id('PM Task')) = self.PM_TASK_RESET_BIAS;
+            self.reset_current(self.unit_id('PM features')) = self.PM_ATTENTION_RESET_BIAS;
         end
         
         function EM = print_EM(self)
