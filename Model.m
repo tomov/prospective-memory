@@ -82,8 +82,8 @@ classdef Model < handle
         % of the sum as the driving difference in the x-coordinates between
         % the two activations; aim for LI + SE = 5 for the sweet spot
         
-        TASK_TO_ATTENTION = 0;
-        TASK_TO_ATTENTION_INHIBITION = 0;
+        TASK_TO_ATTENTION = 0;    % VI (all-way, no VE) => same effect as b
+        TASK_TO_ATTENTION_INHIBITION = 0; % disbalaned VI/VE => no x1=x2 stable state...
         
         OG_ATTENTION_INITIAL_BIAS = -1;
         OG_ATTENTION_RESET_BIAS = 1;

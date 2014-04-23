@@ -4,14 +4,15 @@ x = [-10:0.5:10];
 cycs = 200;
 
 I = 0;
-li = -2;
-se = 3;
+li = -2.5;
+se = 2.5;
+ve = 1;
 
 W = [
-    se li 0 0;
-    li se 0 0;
-    0 0 se li;
-    0 0 li se;
+    se li ve 0;
+    li se 0 ve;
+    ve 0 se li;
+    0 ve li se;
     ];
 b = [I I I I];
 tau = 0.1;
