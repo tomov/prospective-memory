@@ -63,7 +63,7 @@ classdef Model < handle
         TASK_INHIBITION = -2;
         TASK_SELF = 3;
         
-        ATTENTION_TO_TASK = 0;
+        ATTENTION_TO_TASK = 0.5;
         ATTENTION_TO_TASK_INHIBITION = 0;
         
         OG_TASK_INITIAL_BIAS = 1;
@@ -71,7 +71,7 @@ classdef Model < handle
         PM_TASK_INITIAL_BIAS = -1;
         PM_TASK_RESET_BIAS = -10;
         
-        PERCEPTION_TO_TASK = 2.5; % (EM)
+        PERCEPTION_TO_TASK = 10;  % EM
         
         % feature attention
         
@@ -79,7 +79,7 @@ classdef Model < handle
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = 3;
         
-        TASK_TO_ATTENTION = 0;
+        TASK_TO_ATTENTION = 0.5;
         TASK_TO_ATTENTION_INHIBITION = 0;
         
         OG_ATTENTION_INITIAL_BIAS = 1;
@@ -301,9 +301,9 @@ classdef Model < handle
             
             % stronger inhibition => bigger spread => better OG
             if EMPHASIS
-                self.TASK_INHIBITION = -1.9;
+                self.TASK_INHIBITION = -2.1;
             else
-                self.TASK_INHIBITION = -2.8;
+                self.TASK_INHIBITION = 2;
             end
 
             % raw inputs to perception (cont'd)

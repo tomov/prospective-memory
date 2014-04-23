@@ -31,7 +31,7 @@ for i=1:size(responses, 1)
                 OG_timeout_RTs = [OG_timeout_RTs; RTs(i)];
                 continue;
             end
-            if strcmp(responses{i}, 'say:PM') == 1
+            if strcmp(responses{i}, 'PM') == 1
                 % false alarm
                 false_alarm_RTs = [false_alarm_RTs; RTs(i)];
             else

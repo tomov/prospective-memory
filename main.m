@@ -5,8 +5,8 @@ OG_ONLY = 0;
 FOCAL = 1; % 0 = nonfocal, 1 = focal
 EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
-for OG_ONLY = 0:1
-    for FOCAL = 0:1
+for OG_ONLY = 0
+    for FOCAL = 1
         for EMPHASIS = 0:1
             if OG_ONLY
                 og_string = 'No PM task';
@@ -29,6 +29,8 @@ for OG_ONLY = 0:1
 
             sim = Simulator(FOCAL, EMPHASIS, OG_ONLY);
 
+            % OG and PM trials
+            
             stimuli = [
                 {'tortoise,an animal'}, 1;
                 {'tortoise,a subject'}, 1;
@@ -38,7 +40,7 @@ for OG_ONLY = 0:1
                 {'history,a subject'}, 1;
                 {'math,an animal'}, 1;
                 {'math,a subject'}, 1;
-                ];
+            ];
 
             if OG_ONLY
                 is_target = [0; 0; 0; 0; 0; 0; 0; 0];
@@ -53,9 +55,27 @@ for OG_ONLY = 0:1
                 correct = {'PM'; 'PM'; 'Yes'; 'No'; 'PM'; 'PM'; 'No'; 'Yes'};
                 sim.instruction('see:tor', 'PM Task', 2);
             end
+            
+            % add some OG-only trials
+            
+            for gimme_some_og_trials=1:2
+                stimuli = [
+                    stimuli;
+                    {'crocodile,an animal'}, 1;
+                    {'crocodile,a subject'}, 1;
+                    {'math,an animal'}, 1;
+                    {'math,a subject'}, 1;
+                    {'crocodile,an animal'}, 1;
+                    {'crocodile,a subject'}, 1;
+                    {'math,an animal'}, 1;
+                    {'math,a subject'}, 1;
+                ];
+                is_target = [is_target; 0; 0; 0; 0; 0; 0; 0; 0];
+                correct = [correct; {'Yes'; 'No'; 'No'; 'Yes'; 'Yes'; 'No'; 'No'; 'Yes'}];
+            end
 
             % replicate stimuli
-            reps = 20;
+            reps = 2;
             stimuli = repmat(stimuli, reps, 1);
             is_target = repmat(is_target, reps, 1);
             correct = repmat(correct, reps, 1);
@@ -71,9 +91,9 @@ for OG_ONLY = 0:1
 
             stats;
             %sim.print_EM
-            %figures;
+            figures;
         end
     end
 end
     
-fits;
+%fits;
