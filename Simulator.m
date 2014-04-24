@@ -126,6 +126,7 @@ classdef Simulator < Model
                 % simulate response to stimulus
                 responded = false;
                 is_settled = false;
+                settle_cycles = 0;
                 for cycle=1:timeout
                     % set input activations
                     self.activation(self.input_ids) = 0;                    
@@ -134,12 +135,8 @@ classdef Simulator < Model
                     end
                     
                     % hack for testing different activations
-                    %{
-                    self.activation(self.unit_id('OG Task')) = 0.5;
-                    self.activation(self.unit_id('OG features')) = 0.2;
-                    self.activation(self.unit_id('PM Task')) = 0;
-                    self.activation(self.unit_id('PM features')) = 0;
-                    %}
+                    self.wm_act = [5 -5 5 -5];
+                    self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
                     
                     % log activation for plotting
                     activation_log(cycles + cycle, :) = self.activation;
@@ -155,6 +152,7 @@ classdef Simulator < Model
                         %fprintf('%d -> %.6f, %6f\n', cycle, mean(m), std(m));
                         if mean(m) < self.SETTLE_MEAN_EPS && std(m) < self.SETTLE_STD_EPS
                             is_settled = true;
+                            settle_cycles = cycle;
                             % save stimulus onset
                             onsets = [onsets; cycles + cycle];
                         end
@@ -199,7 +197,7 @@ classdef Simulator < Model
                     self.wm_act = self.wm_act + self.STEP_SIZE * self.net_input(self.wm_ids);
                     self.wm_act(self.wm_act > self.MAX_WM_ACT) = self.MAX_WM_ACT;
                     self.wm_act(self.wm_act < self.MIN_WM_ACT) = self.MIN_WM_ACT;
-                    self.activation(self.wm_ids) = self.logistic(self.wm_act); % TODO this is a hack to make the two modules talk to each other..
+                    self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
                     
                     % update evidence accumulators (after network has
                     % settled)
@@ -216,7 +214,7 @@ classdef Simulator < Model
                         if ~responded && v > self.EVIDENCE_ACCUM_THRESHOLD
                             % save response and response time
                             output_id = self.output_ids(id);
-                            RT = cycle;
+                            RT = cycle - settle_cycles;
                             responded = true;
                             % a bit hacky, ALSO TODO does not work after
                             % timeout

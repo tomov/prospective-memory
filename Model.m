@@ -48,14 +48,14 @@ classdef Model < handle
 
         % responses
         
-        BIAS_FOR_RESPONSES = -9;
+        BIAS_FOR_RESPONSES = -7;
         RESPONSE_INHIBITION = -5;
         
         PERCEPTION_TO_RESPONSE = 4;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
-        TASK_TO_RESPONSE = 5;
-        TASK_TO_RESPONSE_INHIBITION = -5;
+        TASK_TO_RESPONSE = 3;
+        TASK_TO_RESPONSE_INHIBITION = -3;
         
         % outputs
         
