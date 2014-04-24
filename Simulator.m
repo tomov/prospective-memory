@@ -112,6 +112,10 @@ classdef Simulator < Model
                 active_ids = self.string_to_ids(stimulus);
                 timeout = stimuli{ord, 2} * self.CYCLES_PER_SEC;
                 
+                % reset feedforward part of the network
+                %self.activation(self.ffwd_ids) = 0;
+                %self.net_input_avg(self.ffwd_ids) = -10;
+                
                 % reset response, output, and monitoring activations
                 self.accumulators = zeros(1, size(self.output_ids, 2));
                 

@@ -37,10 +37,10 @@ classdef Model < handle
         
         % perception
         
-        BIAS_FOR_PERCEPTION = -18;
+        BIAS_FOR_PERCEPTION = -20;
         PERCEPTION_INHIBITION = 0;
         
-        INPUT_TO_PERCEPTION = 10;
+        INPUT_TO_PERCEPTION = 15;
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
         ATTENTION_TO_PERCEPTION = 10;
@@ -48,14 +48,14 @@ classdef Model < handle
 
         % responses
         
-        BIAS_FOR_RESPONSES = -7;
+        BIAS_FOR_RESPONSES = -9;
         RESPONSE_INHIBITION = -5;
         
-        PERCEPTION_TO_RESPONSE = 2;
+        PERCEPTION_TO_RESPONSE = 4;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
-        TASK_TO_RESPONSE = 7;
-        TASK_TO_RESPONSE_INHIBITION = -7;
+        TASK_TO_RESPONSE = 5;
+        TASK_TO_RESPONSE_INHIBITION = -5;
         
         % outputs
         
@@ -79,11 +79,11 @@ classdef Model < handle
         PM_TASK_INITIAL_BIAS = 0;
         PM_TASK_RESET_BIAS = 0;
         
-        PERCEPTION_TO_TASK = 3;  % EM
+        PERCEPTION_TO_TASK = 5;  % EM
         
         % feature attention
         
-        BIAS_FOR_ATTENTION = 0;
+        BIAS_FOR_ATTENTION = 1;
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2;
         
@@ -259,6 +259,13 @@ classdef Model < handle
                 self.unit_id('see:math')                   , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:tortoise')               , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:crocodile')              , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+
+                % -- TODO FIXME HACK to make the PM task work, you need to put
+                % it up to baseline (the winning OG response gets x2 inputs)
+                self.unit_id('see:history')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % raw inputs to perception -- PM targets
                 self.unit_id('tortoise')               , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
@@ -297,15 +304,46 @@ classdef Model < handle
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             if FOCAL
-                self.OG_ATTENTION_INITIAL_BIAS = 5;
-                self.PM_ATTENTION_INITIAL_BIAS = -5;
-                self.OG_ATTENTION_RESET_BIAS = 0;
-                self.PM_ATTENTION_RESET_BIAS = 0;
+                if EMPHASIS
+                    % focal, high emphasis
+                    self.OG_TASK_INITIAL_BIAS = 1.5;
+                    self.PM_TASK_INITIAL_BIAS = -1.5;
+                    self.OG_TASK_RESET_BIAS = 6.5;
+                    self.PM_TASK_RESET_BIAS = -6.5;
+                    
+                    self.OG_ATTENTION_INITIAL_BIAS = 5;
+                    self.PM_ATTENTION_INITIAL_BIAS = -5;
+                else
+                    % focal, low emphasis
+                    self.OG_TASK_INITIAL_BIAS = 5;
+                    self.PM_TASK_INITIAL_BIAS = -5;
+                    self.OG_TASK_RESET_BIAS = 10;
+                    self.PM_TASK_RESET_BIAS = -10;
+                    
+                    self.OG_ATTENTION_INITIAL_BIAS = 5;
+                    self.PM_ATTENTION_INITIAL_BIAS = -5;
+                end
             else
-                self.OG_ATTENTION_INITIAL_BIAS = 0;
-                self.PM_ATTENTION_INITIAL_BIAS = 0;
-                self.OG_ATTENTION_RESET_BIAS = 0;
-                self.PM_ATTENTION_RESET_BIAS = 0;
+                if EMPHASIS
+                    % nonfocal, high emphasis
+                    self.OG_TASK_INITIAL_BIAS = 1.5;
+                    self.PM_TASK_INITIAL_BIAS = -1.5;
+                    self.OG_TASK_RESET_BIAS = 6.5;
+                    self.PM_TASK_RESET_BIAS = -6.5;
+                    
+                    self.OG_ATTENTION_INITIAL_BIAS = 0;
+                    self.PM_ATTENTION_INITIAL_BIAS = 0;
+                else
+                    % nonfocal, low emphasis
+                    self.OG_TASK_INITIAL_BIAS = 5;
+                    self.PM_TASK_INITIAL_BIAS = -5;
+                    self.OG_TASK_RESET_BIAS = 10;
+                    self.PM_TASK_RESET_BIAS = -10;
+                    
+                    self.OG_ATTENTION_INITIAL_BIAS = 0;
+                    self.PM_ATTENTION_INITIAL_BIAS = 0;
+                end
+                
                 % attention to nonfocal target projection
                 from = self.unit_id('PM features');
                 to = cellfun(@self.unit_id, strcat('see:', {
@@ -314,17 +352,6 @@ classdef Model < handle
                 self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             end
             
-            if EMPHASIS
-                self.OG_TASK_INITIAL_BIAS = 1.5;
-                self.PM_TASK_INITIAL_BIAS = -1.5;
-                self.OG_TASK_RESET_BIAS = 6.5;
-                self.PM_TASK_RESET_BIAS = -6.5;
-            else
-                self.OG_TASK_INITIAL_BIAS = 5;
-                self.PM_TASK_INITIAL_BIAS = -5;
-                self.OG_TASK_RESET_BIAS = 10;
-                self.PM_TASK_RESET_BIAS = -10;
-            end
 
             % raw inputs to perception (cont'd)
             self.forward_parallel(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);
@@ -357,6 +384,9 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
+            if FOCAL
+                self.bias(self.unit_id('PM features')) = -100;
+            end
             if OG_ONLY
                 % turn off PM task and feature units
                 self.bias(self.unit_id('PM features')) = -100;

@@ -7,7 +7,7 @@ EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
 for OG_ONLY = 0
     for FOCAL = 1
-        for EMPHASIS = 0:1
+        for EMPHASIS = 0
             if OG_ONLY
                 og_string = 'No PM task';
             else
@@ -58,6 +58,7 @@ for OG_ONLY = 0
             
             % add some OG-only trials
             
+            %{
             for gimme_some_og_trials=1:2
                 stimuli = [
                     stimuli;
@@ -73,28 +74,34 @@ for OG_ONLY = 0
                 is_target = [is_target; 0; 0; 0; 0; 0; 0; 0; 0];
                 correct = [correct; {'Yes'; 'No'; 'No'; 'Yes'; 'Yes'; 'No'; 'No'; 'Yes'}];
             end
+            %}
             
 
             % replicate stimuli
-            reps = 10;
+            reps = 5;
             stimuli = repmat(stimuli, reps, 1);
             is_target = repmat(is_target, reps, 1);
             correct = repmat(correct, reps, 1);
 
             % randomize order
+            %{
             idx = randperm(size(stimuli, 1))';
             stimuli = stimuli(idx, :);
             is_target = is_target(idx, :);
             correct = correct(idx, :);
+            %}
             
             sim.wm_capacity = 2;
             [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
 
             stats;
             %sim.print_EM
-            figures;
+            if ~OG_ONLY
+                figures;
+            end
         end
     end
 end
     
+
 %fits;
