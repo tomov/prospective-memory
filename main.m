@@ -6,7 +6,7 @@ FOCAL = 1; % 0 = nonfocal, 1 = focal
 EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
 for OG_ONLY = 0
-    for FOCAL = 0
+    for FOCAL = 1
         for EMPHASIS = 0
             if OG_ONLY
                 og_string = 'No PM task';
@@ -88,7 +88,7 @@ for OG_ONLY = 0
             correct = correct(idx, :);
             
             sim.wm_capacity = 2;
-            [responses, RTs, act, acc, onsets] = sim.trial(stimuli);
+            [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
 
             stats;
             %sim.print_EM

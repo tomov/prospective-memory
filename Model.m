@@ -2,21 +2,25 @@ classdef Model < handle
     % All constants and predefined variables in the model
     %
     
-    properties (Access = public)
+    properties (Constant = true)
         % PDP model parameters
         
         NOISE_SIGMA = 0.1; % TODO -- ??
-        STEP_SIZE = 0.01;
+        STEP_SIZE = 0.05;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
-        INSTRUCTION_CYLCES = 10;
-        SETTLE_LEEWAY = 20;
-        SETTLE_MEAN_EPS = 1e-5; % adjust these when you add noise to the model
-        SETTLE_STD_EPS = 1e-6; % ...this too
+        SETTLE_MEAN_EPS = 1e-4; % adjust these when you add noise to the model
+        SETTLE_STD_EPS = 1e-5; % ...this too
         TAU = 0.1; % rate constant from Jon's paper
+        INSTRUCTION_CYLCES = 2/Model.TAU;
+        SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
         EVIDENCE_ACCUM_THRESHOLD = 1.5;
+    end
+
+    
+    properties (Access = public)
         
         % activation levels
 
@@ -60,8 +64,8 @@ classdef Model < handle
         % task representation
         
         BIAS_FOR_TASK = 0;
-        TASK_INHIBITION = -2.5;
-        TASK_SELF = 2.5;
+        TASK_INHIBITION = -2;
+        TASK_SELF = -2;
         
         ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
@@ -75,15 +79,12 @@ classdef Model < handle
         
         % feature attention
         
-        BIAS_FOR_ATTENTION = 0; % b > 0 x1=x2 > 0.5; b < 0 => x1=x2 < 0.5
-        ATTENTION_INHIBITION = -2.5; % LI/SE > 1 => x1=x2 < 0.5; LI/SE < 1 => x1=x2 > 0.5; LI=SE => x1=x2=0.5 (given b = 0)
-        ATTENTION_SELF = 2.5;
-        % LI + SE > 10 => x1 = 0, x2 = 1 because of the logistic -- think
-        % of the sum as the driving difference in the x-coordinates between
-        % the two activations; aim for LI + SE = 5 for the sweet spot
+        BIAS_FOR_ATTENTION = 0;
+        ATTENTION_INHIBITION = -2;
+        ATTENTION_SELF = -2;
         
-        TASK_TO_ATTENTION = 0;    % VI (all-way, no VE) => same effect as b
-        TASK_TO_ATTENTION_INHIBITION = 0; % disbalaned VI/VE => no x1=x2 stable state...
+        TASK_TO_ATTENTION = 0;
+        TASK_TO_ATTENTION_INHIBITION = 0;
         
         OG_ATTENTION_INITIAL_BIAS = 0;
         OG_ATTENTION_RESET_BIAS = 0;
@@ -293,9 +294,9 @@ classdef Model < handle
             
             if FOCAL
                 self.OG_ATTENTION_INITIAL_BIAS = 5;
-                self.OG_ATTENTION_RESET_BIAS = 5;
+                self.OG_ATTENTION_RESET_BIAS = 0;
                 self.PM_ATTENTION_INITIAL_BIAS = -5;
-                self.PM_ATTENTION_RESET_BIAS = -5;
+                self.PM_ATTENTION_RESET_BIAS = 0;
             else
                 self.OG_ATTENTION_INITIAL_BIAS = 0;
                 self.OG_ATTENTION_RESET_BIAS = 0;
@@ -316,9 +317,9 @@ classdef Model < handle
                 self.PM_TASK_RESET_BIAS = 0;
             else
                 self.OG_TASK_INITIAL_BIAS = 5;
-                self.OG_TASK_RESET_BIAS = 5;
+                self.OG_TASK_RESET_BIAS = 0;
                 self.PM_TASK_INITIAL_BIAS = -5;
-                self.PM_TASK_RESET_BIAS = -5;
+                self.PM_TASK_RESET_BIAS = 0;
             end
 
             % raw inputs to perception (cont'd)

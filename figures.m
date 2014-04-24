@@ -1,6 +1,6 @@
 figure;
 
-t_range = 1:2000;
+t_range = 1:200;
 y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
 onset_plot = onsets(onsets < t_range(end));
 
@@ -28,18 +28,18 @@ legend(sim.units(sim.input_ids));
 title('Stimulus Inputs');
 ylim(y_lim);
 
+subplot(4, 2, 2);
+plot(acc(t_range, :));
+legend(sim.units(sim.output_ids));
+title('Evidence Accumulation');
+%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
+
 subplot(4, 2, 4);
 plot(act(t_range, sim.task_ids));
 legend(sim.units(sim.task_ids));
 title('Task Representation');
 ylim(y_lim);
 line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
-
-subplot(4, 2, 2);
-plot(acc(t_range, :));
-legend(sim.units(sim.output_ids));
-title('Evidence Accumulation');
-%ylim([sim.MINIMUM_ACTIVATION sim.MAXIMUM_ACTIVATION]);
 
 subplot(4, 2, 6);
 plot(act(t_range, sim.attention_ids));

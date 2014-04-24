@@ -10,6 +10,8 @@ classdef Simulator < Model
         net_input_avg;
         accumulators;
         activation;
+        wm_act;
+        wm_net;
         Nout;
     end
     
@@ -85,12 +87,15 @@ classdef Simulator < Model
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
 
-        function [responses, RTs, activation_log, accumulators_log, onsets] = trial(self, stimuli)
+        function [responses, RTs, activation_log, accumulators_log, onsets, net_log] = trial(self, stimuli)
             % initialize activations and outputs
             trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
             activation_log = zeros(trial_duration, self.N);
             accumulators_log = zeros(trial_duration, self.Nout);
+            net_log = zeros(trial_duration, self.N);
             self.activation = zeros(1, self.N);
+            self.wm_act = zeros(1, size(self.wm_ids, 2));
+            self.wm_net = zeros(1, size(self.wm_ids, 2));
             self.net_input_avg = zeros(1, self.N);
             responses = [];
             RTs = [];
@@ -135,6 +140,7 @@ classdef Simulator < Model
                     % log activation for plotting
                     activation_log(cycles + cycle, :) = self.activation;
                     accumulators_log(cycles + cycle, :) = self.accumulators;
+                    net_log(cycles + cycle, :) = self.net_input;
                     
                     % see if network has settled
                     if cycle > self.SETTLE_LEEWAY && ~is_settled
@@ -151,19 +157,23 @@ classdef Simulator < Model
                     end
                     
                     % calculate net inputs for all units
-                    self.net_input = self.activation * self.weights + self.bias;
+                    self.net_input(self.ffwd_ids) = self.activation * self.weights(:, self.ffwd_ids) ...
+                        + self.bias(self.ffwd_ids);
+                    self.net_input(self.wm_ids) = self.activation(self.ffwd_ids) * self.weights(self.ffwd_ids, self.wm_ids) ...
+                        + self.wm_act * self.weights(self.wm_ids, self.wm_ids) ...
+                        + self.bias(self.wm_ids);
                     
                     % provide instruction in form of temporary input to WM
                     % units
                     % note that we only do this on the first trial of the
                     % block
                     if ord == 1 && cycle < self.INSTRUCTION_CYLCES
-                        self.net_input = self.initial_current;
+                        self.net_input = self.net_input + self.initial_current;
                     end
                     
                     % reset activation of OG task after PM 
                     if cycle < self.INSTRUCTION_CYLCES && last_output_was_target_or_timeout
-                        self.net_input = self.reset_current;
+                        self.net_input = self.net_input + self.reset_current;
                     end
                     
                     % add noise to net inputs (except input units)
@@ -172,10 +182,14 @@ classdef Simulator < Model
                     % TODO no noise... for now
                     %self.net_input = self.net_input + noise;
                     
-                    self.net_input_avg = self.TAU * self.net_input + (1 - self.TAU) * self.net_input_avg;
-
-                    % update activation levels
-                    self.activation = self.logistic(self.net_input_avg);
+                    % update activation levels for feedforward part of the
+                    % network
+                    self.net_input_avg(self.ffwd_ids) = self.TAU * self.net_input(self.ffwd_ids) + (1 - self.TAU) * self.net_input_avg(self.ffwd_ids);
+                    self.activation(self.ffwd_ids) = self.logistic(self.net_input_avg(self.ffwd_ids));
+                    
+                    % same for WM module
+                    self.wm_act = self.wm_act + self.STEP_SIZE * self.net_input(self.wm_ids);
+                    self.activation(self.wm_ids) = self.logistic(self.wm_act); % TODO this is a hack to make the two modules talk to each other..
                     
                     % update evidence accumulators (after network has
                     % settled)
