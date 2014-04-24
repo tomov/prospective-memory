@@ -1,4 +1,4 @@
 function RTs = cyc2rt( cycles )
-    RTs = cycles * 6.5;
+    RTs = cycles * 11 + 400;
 end
 

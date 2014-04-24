@@ -135,9 +135,17 @@ classdef Simulator < Model
                     end
                     
                     % hack for testing different activations
-                    self.wm_act = [5 -5 5 -5];
-                    self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
+                    %self.wm_act = self.init_wm;
+                    %self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
                     
+                    % initialize WM at beginning of block (i.e. first
+                    % trial),
+                    % or after a PM switch
+                    if cycle == 1 && (ord == 1 || switched_to_PM_task)
+                        self.wm_act = self.init_wm;
+                        self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
+                    end
+                                        
                     % log activation for plotting
                     activation_log(cycles + cycle, :) = self.activation;
                     accumulators_log(cycles + cycle, :) = self.accumulators;
@@ -168,20 +176,7 @@ classdef Simulator < Model
                     %if cycles + cycle < 10
                     %    fprintf('%d: %.4f %.4f\n', cycles + cycle, self.activation(1), self.net_input(self.unit_id('PM Task')));
                     %end
-                    
-                    % provide instruction in form of temporary input to WM
-                    % units
-                    % note that we only do this on the first trial of the
-                    % block
-                    if ord == 1 && cycle < self.INSTRUCTION_CYLCES
-                        self.net_input(self.wm_ids) = self.initial_current(self.wm_ids);
-                    end
-                    
-                    % reset activation of OG task after PM 
-                    if cycle < self.RESET_CYCLES && switched_to_PM_task
-                        self.net_input(self.wm_ids) = self.reset_current(self.wm_ids);
-                    end
-                    
+                                        
                     % add noise to net inputs (except input units)
                     noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
                     noise(self.input_ids) = 0;

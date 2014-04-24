@@ -54,8 +54,8 @@ classdef Model < handle
         PERCEPTION_TO_RESPONSE = 4;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
-        TASK_TO_RESPONSE = 3;
-        TASK_TO_RESPONSE_INHIBITION = -3;
+        TASK_TO_RESPONSE = 4;
+        TASK_TO_RESPONSE_INHIBITION = -1;
         
         % outputs
         
@@ -67,17 +67,12 @@ classdef Model < handle
         
         % task representation
         
-        BIAS_FOR_TASK = 0;
+        BIAS_FOR_TASK = 1;
         TASK_INHIBITION = -2;
         TASK_SELF = -2;
         
         ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
-        
-        OG_TASK_INITIAL_BIAS = 0;
-        OG_TASK_RESET_BIAS = 0;
-        PM_TASK_INITIAL_BIAS = 0;
-        PM_TASK_RESET_BIAS = 0;
         
         PERCEPTION_TO_TASK = 5;  % EM
         
@@ -88,13 +83,7 @@ classdef Model < handle
         ATTENTION_SELF = -2;
         
         TASK_TO_ATTENTION = 0;
-        TASK_TO_ATTENTION_INHIBITION = 0;
-        
-        OG_ATTENTION_INITIAL_BIAS = 0;
-        OG_ATTENTION_RESET_BIAS = 0;
-        PM_ATTENTION_INITIAL_BIAS = 0;
-        PM_ATTENTION_RESET_BIAS = 0;
-        
+        TASK_TO_ATTENTION_INHIBITION = 0;        
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;
@@ -131,8 +120,7 @@ classdef Model < handle
         connections
         weights
         bias
-        initial_current
-        reset_current
+        init_wm
         
         FOCAL
         EMPHASIS
@@ -304,44 +292,20 @@ classdef Model < handle
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             if FOCAL
-                if EMPHASIS
-                    % focal, high emphasis
-                    self.OG_TASK_INITIAL_BIAS = 1.5;
-                    self.PM_TASK_INITIAL_BIAS = -1.5;
-                    self.OG_TASK_RESET_BIAS = 6.5;
-                    self.PM_TASK_RESET_BIAS = -6.5;
-                    
-                    self.OG_ATTENTION_INITIAL_BIAS = 5;
-                    self.PM_ATTENTION_INITIAL_BIAS = -5;
-                else
+                if ~EMPHASIS
                     % focal, low emphasis
-                    self.OG_TASK_INITIAL_BIAS = 5;
-                    self.PM_TASK_INITIAL_BIAS = -5;
-                    self.OG_TASK_RESET_BIAS = 10;
-                    self.PM_TASK_RESET_BIAS = -10;
-                    
-                    self.OG_ATTENTION_INITIAL_BIAS = 5;
-                    self.PM_ATTENTION_INITIAL_BIAS = -5;
+                    self.init_wm = [5 1 5 -5];
+                else
+                    % focal, high emphasis
+                    self.init_wm = [2 2 5 -5];
                 end
             else
-                if EMPHASIS
-                    % nonfocal, high emphasis
-                    self.OG_TASK_INITIAL_BIAS = 1.5;
-                    self.PM_TASK_INITIAL_BIAS = -1.5;
-                    self.OG_TASK_RESET_BIAS = 6.5;
-                    self.PM_TASK_RESET_BIAS = -6.5;
-                    
-                    self.OG_ATTENTION_INITIAL_BIAS = 0;
-                    self.PM_ATTENTION_INITIAL_BIAS = 0;
-                else
+                if ~EMPHASIS
                     % nonfocal, low emphasis
-                    self.OG_TASK_INITIAL_BIAS = 5;
-                    self.PM_TASK_INITIAL_BIAS = -5;
-                    self.OG_TASK_RESET_BIAS = 10;
-                    self.PM_TASK_RESET_BIAS = -10;
-                    
-                    self.OG_ATTENTION_INITIAL_BIAS = 0;
-                    self.PM_ATTENTION_INITIAL_BIAS = 0;
+                    self.init_wm = [5 1 1 0];
+                else
+                    % nonfocal, high emphasis
+                    self.init_wm = [2 2 1 0];
                 end
                 
                 % attention to nonfocal target projection
@@ -391,21 +355,7 @@ classdef Model < handle
                 % turn off PM task and feature units
                 self.bias(self.unit_id('PM features')) = -100;
                 self.bias(self.unit_id('PM Task')) = -100;
-            end
-            
-            % initial currents
-            self.initial_current = zeros(1, self.N);
-            self.initial_current(self.unit_id('OG Task')) = self.OG_TASK_INITIAL_BIAS;
-            self.initial_current(self.unit_id('OG features')) = self.OG_ATTENTION_INITIAL_BIAS;
-            self.initial_current(self.unit_id('PM Task')) = self.PM_TASK_INITIAL_BIAS;
-            self.initial_current(self.unit_id('PM features')) = self.PM_ATTENTION_INITIAL_BIAS;
-            
-            % reset currents
-            self.reset_current = zeros(1, self.N);
-            self.reset_current(self.unit_id('OG Task')) = self.OG_TASK_RESET_BIAS;
-            self.reset_current(self.unit_id('OG features')) = self.OG_ATTENTION_RESET_BIAS;
-            self.reset_current(self.unit_id('PM Task')) = self.PM_TASK_RESET_BIAS;
-            self.reset_current(self.unit_id('PM features')) = self.PM_ATTENTION_RESET_BIAS;
+            end            
         end
         
         function EM = print_EM(self)
