@@ -13,27 +13,31 @@ classdef Model < handle
         SETTLE_STD_EPS = 1e-5; % ...this too
         TAU = 0.1; % rate constant from Jon's paper
         INSTRUCTION_CYLCES = 2/Model.TAU;
+        RESET_CYCLES = Model.INSTRUCTION_CYLCES;
         SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
         EVIDENCE_ACCUM_THRESHOLD = 1.5;
-    end
-
-    
-    properties (Access = public)
         
         % activation levels
 
         MAXIMUM_ACTIVATION = 1;
         MINIMUM_ACTIVATION = 0;
+        MAX_WM_ACT = 5;
+        MIN_WM_ACT = -5;
         
         INPUT_ACTIVATION = 1;
+    end
+
+    
+    properties (Access = public)
+        
 
         % --- begin connection weights ---
         
         % perception
         
-        BIAS_FOR_PERCEPTION = -15;
+        BIAS_FOR_PERCEPTION = -18;
         PERCEPTION_INHIBITION = 0;
         
         INPUT_TO_PERCEPTION = 10;
@@ -75,7 +79,7 @@ classdef Model < handle
         PM_TASK_INITIAL_BIAS = 0;
         PM_TASK_RESET_BIAS = 0;
         
-        PERCEPTION_TO_TASK = 10;  % EM
+        PERCEPTION_TO_TASK = 3;  % EM
         
         % feature attention
         
@@ -294,13 +298,13 @@ classdef Model < handle
             
             if FOCAL
                 self.OG_ATTENTION_INITIAL_BIAS = 5;
-                self.OG_ATTENTION_RESET_BIAS = 0;
                 self.PM_ATTENTION_INITIAL_BIAS = -5;
+                self.OG_ATTENTION_RESET_BIAS = 0;
                 self.PM_ATTENTION_RESET_BIAS = 0;
             else
                 self.OG_ATTENTION_INITIAL_BIAS = 0;
-                self.OG_ATTENTION_RESET_BIAS = 0;
                 self.PM_ATTENTION_INITIAL_BIAS = 0;
+                self.OG_ATTENTION_RESET_BIAS = 0;
                 self.PM_ATTENTION_RESET_BIAS = 0;
                 % attention to nonfocal target projection
                 from = self.unit_id('PM features');
@@ -311,15 +315,15 @@ classdef Model < handle
             end
             
             if EMPHASIS
-                self.OG_TASK_INITIAL_BIAS = 0;
-                self.OG_TASK_RESET_BIAS = 0;
-                self.PM_TASK_INITIAL_BIAS = 0;
-                self.PM_TASK_RESET_BIAS = 0;
+                self.OG_TASK_INITIAL_BIAS = 1.5;
+                self.PM_TASK_INITIAL_BIAS = -1.5;
+                self.OG_TASK_RESET_BIAS = 6.5;
+                self.PM_TASK_RESET_BIAS = -6.5;
             else
                 self.OG_TASK_INITIAL_BIAS = 5;
-                self.OG_TASK_RESET_BIAS = 0;
                 self.PM_TASK_INITIAL_BIAS = -5;
-                self.PM_TASK_RESET_BIAS = 0;
+                self.OG_TASK_RESET_BIAS = 10;
+                self.PM_TASK_RESET_BIAS = -10;
             end
 
             % raw inputs to perception (cont'd)

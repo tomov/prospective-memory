@@ -101,7 +101,7 @@ classdef Simulator < Model
             RTs = [];
             onsets = [];
             cycles = 0;
-            last_output_was_target_or_timeout = false;
+            switched_to_PM_task = false;
             
             % for each input from the time series
             for ord=1:size(stimuli, 1)
@@ -162,18 +162,22 @@ classdef Simulator < Model
                     self.net_input(self.wm_ids) = self.activation(self.ffwd_ids) * self.weights(self.ffwd_ids, self.wm_ids) ...
                         + self.wm_act * self.weights(self.wm_ids, self.wm_ids) ...
                         + self.bias(self.wm_ids);
+                    % for debugging...
+                    %if cycles + cycle < 10
+                    %    fprintf('%d: %.4f %.4f\n', cycles + cycle, self.activation(1), self.net_input(self.unit_id('PM Task')));
+                    %end
                     
                     % provide instruction in form of temporary input to WM
                     % units
                     % note that we only do this on the first trial of the
                     % block
                     if ord == 1 && cycle < self.INSTRUCTION_CYLCES
-                        self.net_input = self.net_input + self.initial_current;
+                        self.net_input(self.wm_ids) = self.initial_current(self.wm_ids);
                     end
                     
                     % reset activation of OG task after PM 
-                    if cycle < self.INSTRUCTION_CYLCES && last_output_was_target_or_timeout
-                        self.net_input = self.net_input + self.reset_current;
+                    if cycle < self.RESET_CYCLES && switched_to_PM_task
+                        self.net_input(self.wm_ids) = self.reset_current(self.wm_ids);
                     end
                     
                     % add noise to net inputs (except input units)
@@ -189,6 +193,8 @@ classdef Simulator < Model
                     
                     % same for WM module
                     self.wm_act = self.wm_act + self.STEP_SIZE * self.net_input(self.wm_ids);
+                    self.wm_act(self.wm_act > self.MAX_WM_ACT) = self.MAX_WM_ACT;
+                    self.wm_act(self.wm_act < self.MIN_WM_ACT) = self.MIN_WM_ACT;
                     self.activation(self.wm_ids) = self.logistic(self.wm_act); % TODO this is a hack to make the two modules talk to each other..
                     
                     % update evidence accumulators (after network has
@@ -210,21 +216,18 @@ classdef Simulator < Model
                             responded = true;
                             % a bit hacky, ALSO TODO does not work after
                             % timeout
-                            last_output_was_target_or_timeout = (self.unit_id('PM') == output_id);
                             break;
                         end
                     end
                 end
+                
+                switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
 
                 % record response and response time
                 output = self.units{output_id};
                 responses = [responses; {output}];
                 RTs = [RTs; RT];
                 cycles = cycles + cycle;
-            end
-            if ~responded
-                % timeout...
-                last_output_was_target_or_timeout = true;
             end
             
             activation_log(cycles:end,:) = [];
