@@ -74,11 +74,11 @@ classdef Model < handle
         ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
         
-        PERCEPTION_TO_TASK = 5;  % EM
+        PERCEPTION_TO_TASK = 6;  % EM
         
         % feature attention
         
-        BIAS_FOR_ATTENTION = 1;
+        BIAS_FOR_ATTENTION = 2;
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2;
         
@@ -297,15 +297,15 @@ classdef Model < handle
                     self.init_wm = [5 -2 5 -5];
                 else
                     % focal, high emphasis
-                    self.init_wm = [3 1 5 -5];
+                    self.init_wm = [2 0 5 -5];
                 end
             else
                 if ~EMPHASIS
                     % nonfocal, low emphasis
-                    self.init_wm = [5 -2 3 1];
+                    self.init_wm = [5 -3 2 0];
                 else
                     % nonfocal, high emphasis
-                    self.init_wm = [3 1 3 1];
+                    self.init_wm = [3 0 2 0];
                 end
                 
                 % attention to nonfocal target projection
