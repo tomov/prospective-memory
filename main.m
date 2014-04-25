@@ -7,7 +7,7 @@ EMPHASIS = 1; % 0 = low emphasis, 1 = high emphasis
 
 for OG_ONLY = 0:1
     for FOCAL = 0:1
-        for EMPHASIS = 0:1
+        for EMPHASIS = 1:-1:0
             if OG_ONLY
                 og_string = 'No PM task';
             else
@@ -95,8 +95,8 @@ for OG_ONLY = 0:1
             [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
 
             stats;
-            %sim.print_EM
             if ~OG_ONLY
+                %sim.print_EM
                 figures;
             end
         end

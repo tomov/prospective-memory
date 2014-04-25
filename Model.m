@@ -55,7 +55,7 @@ classdef Model < handle
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
         TASK_TO_RESPONSE = 4;
-        TASK_TO_RESPONSE_INHIBITION = -1;
+        TASK_TO_RESPONSE_INHIBITION = -4;
         
         % outputs
         
@@ -67,7 +67,7 @@ classdef Model < handle
         
         % task representation
         
-        BIAS_FOR_TASK = 1;
+        BIAS_FOR_TASK = 3;
         TASK_INHIBITION = -2;
         TASK_SELF = -2;
         
@@ -294,18 +294,18 @@ classdef Model < handle
             if FOCAL
                 if ~EMPHASIS
                     % focal, low emphasis
-                    self.init_wm = [5 1 5 -5];
+                    self.init_wm = [5 -2 5 -5];
                 else
                     % focal, high emphasis
-                    self.init_wm = [2 2 5 -5];
+                    self.init_wm = [3 1 5 -5];
                 end
             else
                 if ~EMPHASIS
                     % nonfocal, low emphasis
-                    self.init_wm = [5 1 1 0];
+                    self.init_wm = [5 -2 3 1];
                 else
                     % nonfocal, high emphasis
-                    self.init_wm = [2 2 1 0];
+                    self.init_wm = [3 1 3 1];
                 end
                 
                 % attention to nonfocal target projection
