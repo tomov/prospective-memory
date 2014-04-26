@@ -16,8 +16,8 @@ classdef Simulator < Model
     end
     
     methods
-        function self = Simulator(FOCAL, EMPHASIS, OG_ONLY)
-            self = self@Model(FOCAL, EMPHASIS, OG_ONLY);
+        function self = Simulator(FOCAL, EMPHASIS, OG_ONLY, params)
+            self = self@Model(FOCAL, EMPHASIS, OG_ONLY, params);
             self.Nout = size(self.output_ids, 2);
             self.accumulators = zeros(1, self.Nout);
             self.net_input = zeros(1, self.N);
@@ -145,7 +145,7 @@ classdef Simulator < Model
                         self.wm_act = self.init_wm;
                         self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
                     end
-                                        
+
                     % log activation for plotting
                     activation_log(cycles + cycle, :) = self.activation;
                     accumulators_log(cycles + cycle, :) = self.accumulators;

@@ -170,10 +170,16 @@ classdef Model < handle
             end
         end
         
-        function self = Model(FOCAL, EMPHASIS, OG_ONLY)
+        function self = Model(FOCAL, EMPHASIS, OG_ONLY, params)
+            % initialize free parameters
             self.FOCAL = FOCAL;
             self.EMPHASIS = EMPHASIS;
             self.OG_ONLY = OG_ONLY;
+            focal_low_init_wm = params(1:4);
+            focal_high_init_wm = params(5:8);
+            nonfocal_low_init_wm = params(9:12);
+            nonfocal_high_init_wm = params(13:16);
+
             
             % specify unit names in each layer
             self.input_units = {
@@ -294,18 +300,18 @@ classdef Model < handle
             if FOCAL
                 if ~EMPHASIS
                     % focal, low emphasis
-                    self.init_wm = [5 -2 5 -5];
+                    self.init_wm = focal_low_init_wm; %[5 -2 5 -5];
                 else
                     % focal, high emphasis
-                    self.init_wm = [2 0 5 -5];
+                    self.init_wm = focal_high_init_wm; % [2 0 5 -5];
                 end
             else
                 if ~EMPHASIS
                     % nonfocal, low emphasis
-                    self.init_wm = [5 -3 2 0];
+                    self.init_wm = nonfocal_low_init_wm; %[5 -3 2 0];
                 else
                     % nonfocal, high emphasis
-                    self.init_wm = [3 0 2 0];
+                    self.init_wm = nonfocal_high_init_wm; %[3 0 2 0];
                 end
                 
                 % attention to nonfocal target projection

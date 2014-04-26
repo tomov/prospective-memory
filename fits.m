@@ -1,53 +1,10 @@
 % must precompute simulation values from stats, which in turn must be
 % called from main.m and iterate over all possibilities of focal/nonfocal
 % high/low emphasis
+init_goalstats;
+set_simstats;
 
 figure;
-
-% no PM task
-
-emp_foc_low_RT_noPM = 1073.25;
-emp_foc_low_SD_noPM = 112.04;
-emp_foc_low_OG_noPM = 97;
-emp_foc_low_PM_noPM = NaN;
-
-emp_foc_high_RT_noPM = 1149.25;
-emp_foc_high_SD_noPM = 137.58;
-emp_foc_high_OG_noPM = 97;
-emp_foc_high_PM_noPM = NaN;
-
-emp_nonfoc_low_RT_noPM = 1140.92;
-emp_nonfoc_low_SD_noPM = 172.87;
-emp_nonfoc_low_OG_noPM = 97;
-emp_nonfoc_low_PM_noPM = NaN;
-
-emp_nonfoc_high_RT_noPM = 1183.17;
-emp_nonfoc_high_SD_noPM = 164.43;
-emp_nonfoc_high_OG_noPM = 97;
-emp_nonfoc_high_PM_noPM = NaN;
-
-% PM task
-
-emp_foc_low_RT = 1120.87;
-emp_foc_low_SD = 116.48;
-emp_foc_low_OG = 97;
-emp_foc_low_PM = 88;
-
-emp_foc_high_RT = 1239.17;
-emp_foc_high_SD = 175.42;
-emp_foc_high_OG = 97;
-emp_foc_high_PM = 92;
-
-emp_nonfoc_low_RT = 1425.39;
-emp_nonfoc_low_SD = 379.52;
-emp_nonfoc_low_OG = 97;
-emp_nonfoc_low_PM = 53;
-
-emp_nonfoc_high_RT = 1593.43;
-emp_nonfoc_high_SD = 300.86;
-emp_nonfoc_high_OG = 97;
-emp_nonfoc_high_PM = 81;
-
 
 xticklabel = {'low,no PM', 'low,PM', 'high,no PM', 'high,PM'};
 
@@ -59,12 +16,15 @@ plot([0 1 2 3], [emp_foc_low_RT_noPM emp_foc_low_RT emp_foc_high_RT_noPM emp_foc
     'LineWidth',2, ...
     'MarkerSize', 6);
 hold on;
-%errorbar([0 1], [emp_foc_low_RT emp_foc_high_RT], [emp_foc_low_SD emp_foc_high_SD]);
+%errorbar([0 1 2 3], [emp_foc_low_RT_noPM emp_foc_low_RT emp_foc_high_RT_noPM emp_foc_high_RT], ...
+%    [emp_foc_low_SD_noPM emp_foc_low_SD emp_foc_high_SD_noPM emp_foc_high_SD]);
+
 plot([0 1 2 3], [emp_nonfoc_low_RT_noPM emp_nonfoc_low_RT emp_nonfoc_high_RT_noPM emp_nonfoc_high_RT], ...
     'r-*', ...
     'LineWidth',2, ...
     'MarkerSize', 6);
-%errorbar([0 1], [emp_nonfoc_low_RT emp_nonfoc_high_RT], [emp_nonfoc_low_SD emp_nonfoc_high_SD]);
+%errorbar([0 1 2 3], [emp_nonfoc_low_RT_noPM emp_nonfoc_low_RT emp_nonfoc_high_RT_noPM emp_nonfoc_high_RT], ...
+%    [emp_nonfoc_low_SD_noPM emp_nonfoc_low_SD emp_nonfoc_high_SD_noPM emp_nonfoc_high_SD]);
 hold off;
 axis([-0.5 3.5 1000 1700]);
 ylabel('RT (msec)');
@@ -74,17 +34,20 @@ title('Empirical Data (Einstein & McDaniel 2005)');
 
 
 subplot(3, 2, 2);
-plot([0 1 2 3], cyc2rt([sim_foc_low_RT_noPM sim_foc_low_RT sim_foc_high_RT_noPM sim_foc_high_RT]), ...
+plot([0 1 2 3], cyc2rt([sim_foc_low_RT_noPM sim_foc_low_RT sim_foc_high_RT_noPM sim_foc_high_RT], true), ...
     'b-o', ...
     'LineWidth',2, ...
     'MarkerSize', 6);
 hold on;
-%errorbar([0 1], [sim_foc_low_RT sim_foc_high_RT] * 10, [sim_foc_low_SD sim_foc_high_SD] * 10);
-plot([0 1 2 3], cyc2rt([sim_nonfoc_low_RT_noPM sim_nonfoc_low_RT sim_nonfoc_high_RT_noPM sim_nonfoc_high_RT]), ...
+%errorbar([0 1 2 3], cyc2rt([sim_foc_low_RT_noPM sim_foc_low_RT sim_foc_high_RT_noPM sim_foc_high_RT], true), ...
+%    cyc2rt([sim_foc_low_SD_noPM sim_foc_low_SD sim_foc_high_SD_noPM sim_foc_high_SD], false));
+
+plot([0 1 2 3], cyc2rt([sim_nonfoc_low_RT_noPM sim_nonfoc_low_RT sim_nonfoc_high_RT_noPM sim_nonfoc_high_RT], true), ...
     'r-*', ...
     'LineWidth',2, ...
     'MarkerSize', 6);    
-%errorbar([0 1], [sim_nonfoc_low_RT sim_nonfoc_high_RT] * 10, [sim_nonfoc_low_SD sim_nonfoc_high_SD] * 10);
+%errorbar([0 1 2 3], cyc2rt([sim_nonfoc_low_RT_noPM sim_nonfoc_low_RT sim_nonfoc_high_RT_noPM sim_nonfoc_high_RT], true), ...
+%    cyc2rt([sim_nonfoc_low_SD_noPM sim_nonfoc_low_SD sim_nonfoc_high_SD_noPM sim_nonfoc_high_SD], false));
 hold off;
 axis([-0.5 3.5 1000 1700]);
 ylabel('RT (msec = 10 * cycles)');

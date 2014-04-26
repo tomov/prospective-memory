@@ -1,5 +1,5 @@
+function s = getstats(OG_ONLY, FOCAL, EMPHASIS, responses, RTs, is_target, correct)
 
-bar_names = {'OG correct', 'PM hit', 'false alarm', 'OG wrong', 'PM miss', 'OG timeout', 'PM timeout'};
 OG_count = 0;
 PM_count = 0;
 OG_correct_RTs = [];
@@ -59,12 +59,31 @@ OG_count
 PM_count
 %}
 
-if ~OG_ONLY
+if OG_ONLY
+    og_string = 'No PM task';
+else
+    og_string = 'PM task';
+end
+if FOCAL
+    if EMPHASIS
+        fprintf('\n ----> focal, high emphasis, %s ----\n', og_string);
+    else
+        fprintf('\n ----> focal, low emphasis, %s ----\n', og_string);
+    end
+else
+    if EMPHASIS
+        fprintf('\n ----> nonfocal, high emphasis, %s ----\n', og_string);
+    else
+        fprintf('\n ----> nonfocal, low emphasis, %s ----\n', og_string);
+    end
+end
+
+%if ~OG_ONLY
     fprintf('mean OG correct RTs = %.4f (%.4f)\n', mean(OG_correct_RTs), std(OG_correct_RTs));
     fprintf('mean PM hit RTs = %.4f (%.4f)\n', mean(PM_hit_RTs), std(PM_hit_RTs));
     fprintf('OG accuracy = %.4f%%\n', size(OG_correct_RTs, 1) / OG_count * 100);
     fprintf('PM hit rate = %.4f%%\n', size(PM_hit_RTs, 1) / PM_count * 100);
-end
+%end
 
 
 % save stats for fits
@@ -76,56 +95,4 @@ SD = std(OG_correct_RTs) / sqrt(size(OG_correct_RTs, 2));
 OG = size(OG_correct_RTs, 1) / OG_count * 100;
 PM = size(PM_hit_RTs, 1) / PM_count * 100;
 
-if OG_ONLY
-    if FOCAL
-        if EMPHASIS
-            sim_foc_high_RT_noPM = RT;
-            sim_foc_high_SD_noPM = SD;
-            sim_foc_high_OG_noPM = OG;
-            sim_foc_high_PM_noPM = PM;
-        else
-            sim_foc_low_RT_noPM = RT;
-            sim_foc_low_SD_noPM = SD;
-            sim_foc_low_OG_noPM = OG;
-            sim_foc_low_PM_noPM = PM;
-        end
-    else
-        if EMPHASIS
-            sim_nonfoc_high_RT_noPM = RT;
-            sim_nonfoc_high_SD_noPM = SD;
-            sim_nonfoc_high_OG_noPM = OG;
-            sim_nonfoc_high_PM_noPM = PM;
-        else
-            sim_nonfoc_low_RT_noPM = RT;
-            sim_nonfoc_low_SD_noPM = SD;
-            sim_nonfoc_low_OG_noPM = OG;
-            sim_nonfoc_low_PM_noPM = PM;
-        end
-    end
-else
-    if FOCAL
-        if EMPHASIS
-            sim_foc_high_RT = RT;
-            sim_foc_high_SD = SD;
-            sim_foc_high_OG = OG;
-            sim_foc_high_PM = PM;
-        else
-            sim_foc_low_RT = RT;
-            sim_foc_low_SD = SD;
-            sim_foc_low_OG = OG;
-            sim_foc_low_PM = PM;
-        end
-    else
-        if EMPHASIS
-            sim_nonfoc_high_RT = RT;
-            sim_nonfoc_high_SD = SD;
-            sim_nonfoc_high_OG = OG;
-            sim_nonfoc_high_PM = PM;
-        else
-            sim_nonfoc_low_RT = RT;
-            sim_nonfoc_low_SD = SD;
-            sim_nonfoc_low_OG = OG;
-            sim_nonfoc_low_PM = PM;
-        end
-    end    
-end
+s = [RT SD OG PM];

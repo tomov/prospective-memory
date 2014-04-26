@@ -2,6 +2,7 @@ figure;
 
 t_range = 1:2000;
 y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
+bar_names = {'OG correct', 'PM hit', 'false alarm', 'OG wrong', 'PM miss', 'OG timeout', 'PM timeout'};
 onset_plot = onsets(onsets < t_range(end));
 
 subplot(4, 2, 1);
