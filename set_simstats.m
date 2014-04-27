@@ -11,11 +11,12 @@ for OG_ONLY = 0:1
     for FOCAL = 1:-1:0
         for EMPHASIS = 0:1
             
-            s = stat(step, step+3);
+            s = stat(step:step+3);
             RT = s(1);
             SD = s(2);
             OG = s(3);
             PM = s(4);
+            step = step + 4;
 
             if OG_ONLY
                 if FOCAL

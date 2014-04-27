@@ -70,7 +70,7 @@ plot([1 3], [ emp_nonfoc_low_PM  emp_nonfoc_high_PM], ...
     'LineWidth',2, ...
     'MarkerSize', 6);    
 hold off;
-axis([-0.5 3.5 50 100]);
+axis([-0.5 3.5 40 100]);
 ylabel('PM Hit Rate (%)');
 set(gca, 'XTickLabel', xticklabel);
 %legend('Focal', 'Nonfocal');
@@ -86,7 +86,7 @@ plot([1 3], [ sim_nonfoc_low_PM  sim_nonfoc_high_PM], ...
     'LineWidth',2, ...
     'MarkerSize', 6);    
 hold off;
-axis([-0.5 3.5 50 100]);
+axis([-0.5 3.5 40 100]);
 %ylabel('PM Hit Rate (%)');
 set(gca, 'XTickLabel', xticklabel);
 %legend('Focal', 'Nonfocal');
@@ -104,7 +104,7 @@ plot([0 1 2 3], [emp_nonfoc_low_OG_noPM emp_nonfoc_low_OG emp_nonfoc_high_OG_noP
     'LineWidth',2, ...
     'MarkerSize', 6);    
 hold off;
-axis([-0.5 3.5 50 100]);
+axis([-0.5 3.5 40 100]);
 ylabel('OG accuracy (%)');
 set(gca, 'XTickLabel', xticklabel);
 %legend('Focal', 'Nonfocal');
@@ -120,7 +120,7 @@ plot([0 1 2 3], [sim_nonfoc_low_OG_noPM sim_nonfoc_low_OG sim_nonfoc_high_OG_noP
     'LineWidth',2, ...
     'MarkerSize', 6);
 hold off;
-axis([-0.5 3.5 50 100]);
+axis([-0.5 3.5 40 100]);
 %ylabel('OG accuracy (%)');
 set(gca, 'XTickLabel', xticklabel);
 %legend('Focal', 'Nonfocal');

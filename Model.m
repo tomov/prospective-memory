@@ -297,29 +297,33 @@ classdef Model < handle
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
-            if FOCAL
-                if ~EMPHASIS
-                    % focal, low emphasis
-                    self.init_wm = focal_low_init_wm; %[5 -2 5 -5];
+            if OG_ONLY
+                self.init_wm = [5 -5 5 -5];
+            else       
+                if FOCAL
+                    if ~EMPHASIS
+                        % focal, low emphasis
+                        self.init_wm = focal_low_init_wm; %[5 -2 5 -5];
+                    else
+                        % focal, high emphasis
+                        self.init_wm = focal_high_init_wm; % [2 0 5 -5];
+                    end
                 else
-                    % focal, high emphasis
-                    self.init_wm = focal_high_init_wm; % [2 0 5 -5];
+                    if ~EMPHASIS
+                        % nonfocal, low emphasis
+                        self.init_wm = nonfocal_low_init_wm; %[5 -3 2 0];
+                    else
+                        % nonfocal, high emphasis
+                        self.init_wm = nonfocal_high_init_wm; %[3 0 2 0];
+                    end
+
+                    % attention to nonfocal target projection
+                    from = self.unit_id('PM features');
+                    to = cellfun(@self.unit_id, strcat('see:', {
+                        'tor'
+                        }')');
+                    self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
                 end
-            else
-                if ~EMPHASIS
-                    % nonfocal, low emphasis
-                    self.init_wm = nonfocal_low_init_wm; %[5 -3 2 0];
-                else
-                    % nonfocal, high emphasis
-                    self.init_wm = nonfocal_high_init_wm; %[3 0 2 0];
-                end
-                
-                % attention to nonfocal target projection
-                from = self.unit_id('PM features');
-                to = cellfun(@self.unit_id, strcat('see:', {
-                    'tor'
-                    }')');
-                self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             end
             
 
@@ -348,6 +352,12 @@ classdef Model < handle
                 self.N, self.N);
 
             % biases
+            if OG_ONLY
+                % turn off PM task and feature units
+                self.bias(self.attention_ids) = 0;
+                self.bias(self.task_ids) = 0;
+            end
+
             self.bias = zeros(1, self.N);
             self.bias(self.perception_ids) = self.BIAS_FOR_PERCEPTION;
             self.bias(self.response_ids) = self.BIAS_FOR_RESPONSES;
@@ -355,13 +365,8 @@ classdef Model < handle
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
             if FOCAL
-                self.bias(self.unit_id('PM features')) = -100;
+                self.bias(self.attention_ids) = 0;
             end
-            if OG_ONLY
-                % turn off PM task and feature units
-                self.bias(self.unit_id('PM features')) = -100;
-                self.bias(self.unit_id('PM Task')) = -100;
-            end            
         end
         
         function EM = print_EM(self)

@@ -2,6 +2,7 @@ function stat = EM2005( params )
 % run a simulation of the E&M with certain parameters and spit out the
 % stats
 
+params
 stat = [];
 
 for OG_ONLY = 0:1
@@ -56,7 +57,7 @@ for OG_ONLY = 0:1
 
 
             % replicate stimuli
-            reps = 30;
+            reps = 100;
             stimuli = repmat(stimuli, reps, 1);
             is_target = repmat(is_target, reps, 1);
             correct = repmat(correct, reps, 1);
