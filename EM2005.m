@@ -1,9 +1,10 @@
-function stat = EM2005( params )
+function [stat, res] = EM2005( params )
 % run a simulation of the E&M with certain parameters and spit out the
 % stats
 
 params
 stat = [];
+res = [];
 
 for OG_ONLY = 0:1
     for FOCAL = 1:-1:0
@@ -57,7 +58,7 @@ for OG_ONLY = 0:1
 
 
             % replicate stimuli
-            reps = 100;
+            reps = 30;
             stimuli = repmat(stimuli, reps, 1);
             is_target = repmat(is_target, reps, 1);
             correct = repmat(correct, reps, 1);
@@ -73,12 +74,11 @@ for OG_ONLY = 0:1
             sim.wm_capacity = 2;
             [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
 
-            s = getstats(OG_ONLY, FOCAL, EMPHASIS, responses, RTs, is_target, correct);
+            s = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                responses, RTs, act, acc, onsets, ...
+                is_target, correct);
             stat = [stat, s];
-            if ~OG_ONLY
-                %sim.print_EM
-                %figures;
-            end
+            res = [res; {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, nets}];
         end
     end
 end

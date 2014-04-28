@@ -357,6 +357,9 @@ classdef Model < handle
                 self.bias(self.attention_ids) = 0;
                 self.bias(self.task_ids) = 0;
             end
+            if FOCAL
+                self.bias(self.attention_ids) = 0;
+            end
 
             self.bias = zeros(1, self.N);
             self.bias(self.perception_ids) = self.BIAS_FOR_PERCEPTION;
@@ -364,9 +367,6 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
-            if FOCAL
-                self.bias(self.attention_ids) = 0;
-            end
         end
         
         function EM = print_EM(self)

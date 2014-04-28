@@ -1,8 +1,8 @@
 function RTs = cyc2rt( cycles, intercept )
     if intercept
-        RTs = cycles * 12 + 150;
+        RTs = cycles * 10 + 356;
     else
-        RTs = cycles * 12;
+        RTs = cycles * 10;
     end
 end
 
