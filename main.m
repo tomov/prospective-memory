@@ -14,10 +14,9 @@ clear classes % ! super important ! if you don't do this, MATLAB won't reload yo
 % then start the search
 startpar = zeros(1, 16);
 %{
-startpar = [5 -2  5 -5 ...
-               2  0  5 -5 ...
-               5 -3  2  0 ...
-               3  0  2  0];
+startpar = [5 -2  5 -5     2  0  5 -5      5 -3  2  0     3  0  2  0];
+% startpar for nonfocal:
+   [....blah focal....       4.5 0  2  0     2  0  2  0]
 %}
 init_goalstats;
 typestat = [2 3 1 1, 2 3 1 1, 2 3 1 1, 2 3 1 1, ...

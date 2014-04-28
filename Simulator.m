@@ -44,7 +44,6 @@ classdef Simulator < Model
             from = zeros(1, self.N);
             from(from_ids) = self.MAXIMUM_ACTIVATION;
             to = zeros(1, self.N);
-            to(self.task_ids) = -self.MAXIMUM_ACTIVATION;
             to(to_ids) = self.MAXIMUM_ACTIVATION;
             duration = secs * self.CYCLES_PER_SEC;
             for cycle=1:duration
@@ -218,7 +217,10 @@ classdef Simulator < Model
                     end
                 end
                 
-                switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
+                %switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
+                % TODO hacky...
+                switched_to_PM_task = (self.wm_act(2) > self.init_wm(2) + 0.1);
+                %switched_to_PM_task = true;
 
                 % record response and response time
                 output = self.units{output_id};

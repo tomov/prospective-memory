@@ -1,7 +1,7 @@
 
-x = [-1:0.2:5];
-%x = 1;
-cycs = 100;
+%x = [-1:0.2:5];
+x = 1;
+cycs = 5000;
 
 %{
 I = 0;
@@ -12,21 +12,15 @@ ci = 0; % cross-inhibition
 step = 0.2;
 %}
 
-I = 3.8;
-li = -1; % lateral inhibition
-se = 0; % self-excitation
-ve = 0; % vertical excitation
-ci = 0.002; % cross-inhibition
-step = 0.2;
+I = 0.33;
+alpha = 2.0;
+beta = 0.15;
+step = 0.01;
+n = 6;
 
 
-W = [
-    se li ve ci;
-    li se ci ve;
-    ve 0 se li;
-    0 ve li se;
-    ];
-b = [I I I I];
+W = 1 - eye(n);
+b = zeros(1, n);
 
 z = zeros(size(x, 2));
 
@@ -37,28 +31,36 @@ for i = 1:size(x, 2)
  
         a = [a1 a2 a1 a2];
         if size(x, 2) == 1
-            a = [4 0 1.5 2];
+            a = zeros(1, n);
         end
-        net = [0 0 0 0];
-        avg = [0 0 0 0];
-        act = zeros(cycs+1, 4);
+        act = zeros(cycs+1, n);
+        
                                                 %act(1,:) = 1 ./ (1 + exp(-a));
                                                 act(1,:) = a;
         for cyc = 1:cycs
-            net = a * W + b;
-                                               % da = net;
-                                                da = -a + quadsquare(b + a * W);
-            a = a + step * da;
+            for k = 1:n
+                start = k * 300 + 10;
+                finish = start + 500;
+                if cyc > start && cyc < finish
+                    b(k) = I;
+                else
+                    b(k) = -0.1;
+                end
+            end
+            
+            da = alpha * F(a) - beta * F(a * W) + b + normrnd(0, 0.2, size(a));
+            a = (1 - step) * a + step * da;
+            %a = max(a, 0);
                                                 %act(cyc+1,:) = 1 ./ (1 + exp(-a));
-                                                act(cyc+1,:) = a;
+                                                act(cyc+1,:) = F(a);
         end
         z(i, j) = norm(act(end,:) - act(1,:));
         
         if size(x, 2) == 1
             figure;
             plot(act);
-            ylim([-3 5]);
-            legend('1', '2', '3', '4');
+            ylim([-0.1 1.1]);
+            legend('1', '2', '3', '4', '5', '6');
         end
     end
 end

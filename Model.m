@@ -15,7 +15,7 @@ classdef Model < handle
         INSTRUCTION_CYLCES = 2/Model.TAU;
         RESET_CYCLES = Model.INSTRUCTION_CYLCES;
         SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
-        EVIDENCE_ACCUM_SIGMA = 0.1;
+        EVIDENCE_ACCUM_SIGMA = 0.08;
         EVIDENCE_ACCUM_ALPHA = 0.1;
         EVIDENCE_ACCUM_THRESHOLD = 1.5;
         
@@ -62,12 +62,12 @@ classdef Model < handle
         BIAS_FOR_OUTPUTS = 0;
         OUTPUT_INHIBITION = -3;
         
-        RESPONSE_TO_OUTPUT = 1;
+        RESPONSE_TO_OUTPUT = 2;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
         
         % task representation
         
-        BIAS_FOR_TASK = 3;
+        BIAS_FOR_TASK = 10;
         TASK_INHIBITION = -2;
         TASK_SELF = -2;
         
@@ -256,6 +256,8 @@ classdef Model < handle
 
                 % -- TODO FIXME HACK to make the PM task work, you need to put
                 % it up to baseline (the winning OG response gets x2 inputs)
+                self.unit_id('see:a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:history')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
@@ -296,7 +298,15 @@ classdef Model < handle
                 'a subject', 'an animal'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
+
+            % attention to nonfocal target projection
+            from = self.unit_id('PM features');
+            to = cellfun(@self.unit_id, strcat('see:', {
+                'tor'
+                }')');
+            self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
+            % PM instructions
             if OG_ONLY
                 self.init_wm = [5 -5 5 -5];
             else       
@@ -316,13 +326,6 @@ classdef Model < handle
                         % nonfocal, high emphasis
                         self.init_wm = nonfocal_high_init_wm; %[3 0 2 0];
                     end
-
-                    % attention to nonfocal target projection
-                    from = self.unit_id('PM features');
-                    to = cellfun(@self.unit_id, strcat('see:', {
-                        'tor'
-                        }')');
-                    self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
                 end
             end
             

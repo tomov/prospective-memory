@@ -6,9 +6,9 @@ params
 stat = [];
 res = [];
 
-for OG_ONLY = 0:1
-    for FOCAL = 1:-1:0
-        for EMPHASIS = 0:1
+for OG_ONLY = 0 %0:1
+    for FOCAL = 0 %1:-1:0
+        for EMPHASIS = 0:1 %0:1
             sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);
 
             % OG and PM trials
@@ -40,7 +40,7 @@ for OG_ONLY = 0:1
 
             % add some OG-only trials
 
-            for gimme_some_og_trials=1:2
+            for gimme_some_og_trials=1:1
                 stimuli = [
                     stimuli;
                     {'crocodile,an animal'}, 1;
@@ -58,7 +58,7 @@ for OG_ONLY = 0:1
 
 
             % replicate stimuli
-            reps = 30;
+            reps = 10;
             stimuli = repmat(stimuli, reps, 1);
             is_target = repmat(is_target, reps, 1);
             correct = repmat(correct, reps, 1);
