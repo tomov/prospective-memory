@@ -31,7 +31,6 @@ PM_hit_nonfocal_M = mean(PM_hit_nonfocal(~isnan(PM_hit_nonfocal)));
 PM_hit_nonfocal_SD = std(PM_hit_nonfocal(~isnan(PM_hit_nonfocal)));  % / sqrt(sum(~isnan(PM_hit_nonfocal)))
 
 
-
 % --- PM hit rate in high emphasis vs. low emphasis ----
 
 PM_hit_low = PM_hit(subjects(:, 3) == 0);
@@ -50,6 +49,7 @@ PM_hit_high_SD = std(PM_hit_high(~isnan(PM_hit_high)));  %/ sqrt(sum(~isnan(PM_h
 % other
 %p = anovan(PM_hit, {subjects(:, 2) subjects(:, 3)}, 'model','interaction');
 
+barweb([10 50; 60 70], [5 5; 5 5], 1, {'Focal', 'Nonfocal'}, 'title', 'xlabel', 'PM Hit rate (%)');
 
 
 
@@ -119,7 +119,7 @@ simulation_stats(:, SD_cols) = simulation_stats(:, SD_cols) / sqrt(subjects_per_
 empirical_RTs = empirical_stats(:, 4);
 simulation_cycles = simulation_stats(:, 4);
 
-p = polyfit(simulation_cycles, empirical_RTs, 1)
+p = polyfit(simulation_cycles, empirical_RTs, 1);
 RT_slope = p(1);
 RT_intercept = p(2);
 yfit = polyval(p, simulation_cycles);
@@ -130,10 +130,10 @@ SStotal = (length(empirical_RTs)-1) * var(empirical_RTs);
 rsq = 1 - SSresid/SStotal;
 
 if DO_PLOT
-    figure;
     scatter(simulation_cycles, empirical_RTs);
-    %xlabel('Simulation RTs (cycles)');
-    %ylabel('Empirical RTs (msec)');
+    clear xlabel ylabel;
+    xlabel('Simulation RTs (cycles)');
+    ylabel('Empirical RTs (msec)');
     lsline
     title(sprintf('R^2 = %.4f', rsq));
 end
@@ -142,28 +142,30 @@ end
 % ------------------ plot the all the good stuff
 
 
-figure;
+if DO_PLOT
+    figure;
 
-subplot(3, 2, 1);
-title('Empirical Data (Einstein & McDaniel 2005)');
-ylabel('OG RT (msec)');
-plot_all_conditions(empirical_stats(:, [1:3 4 5]), 1000, 1700, 1, 0, true);
+    subplot(3, 2, 1);
+    title('Empirical Data (Einstein & McDaniel 2005)');
+    ylabel('OG RT (msec)');
+    plot_all_conditions(empirical_stats(:, [1:3 4 5]), 1000, 1700, 1, 0, true);
 
-subplot(3, 2, 2);
-title('Simulation Data');
-ylabel(sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept));
-plot_all_conditions(simulation_stats(:, [1:3 4 5]), 1000, 1700, RT_slope, RT_intercept, false);
+    subplot(3, 2, 2);
+    title('Simulation Data');
+    ylabel(sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept));
+    plot_all_conditions(simulation_stats(:, [1:3 4 5]), 1000, 1700, RT_slope, RT_intercept, false);
 
-subplot(3, 2, 3);
-ylabel('OG Accuracy (%)');
-plot_all_conditions(empirical_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
+    subplot(3, 2, 3);
+    ylabel('OG Accuracy (%)');
+    plot_all_conditions(empirical_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
 
-subplot(3, 2, 4);
-plot_all_conditions(simulation_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
+    subplot(3, 2, 4);
+    plot_all_conditions(simulation_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
 
-subplot(3, 2, 5);
-ylabel('PM Hit Rate (%)');
-plot_all_conditions(empirical_stats(:, [1:3 10 11]), 40, 100, 1, 0, false);
+    subplot(3, 2, 5);
+    ylabel('PM Hit Rate (%)');
+    plot_all_conditions(empirical_stats(:, [1:3 10 11]), 40, 100, 1, 0, false);
 
-subplot(3, 2, 6);
-plot_all_conditions(simulation_stats(:, [1:3 10 11]), 40, 100, 1, 0, false);
+    subplot(3, 2, 6);
+    plot_all_conditions(simulation_stats(:, [1:3 10 11]), 40, 100, 1, 0, false);
+end

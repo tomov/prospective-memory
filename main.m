@@ -3,7 +3,7 @@ clear classes % ! super important ! if you don't do this, MATLAB won't reload yo
 
 
 % best parameters so far...
-startpar = [5 -2  5 -5     2  0  5 -5   5  -2  1.5  0     4  0  1  0];
+startpar = [5 -2  5 -5     2  0  5 -5   5  -2  1.5  0     4  0  1  0     10 2];
 % show us what we got
 %stat = EM2005(bestpar);
 %fits;

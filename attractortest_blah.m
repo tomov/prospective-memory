@@ -1,7 +1,7 @@
 
 x = [-1:0.2:5];
-%x = 1;
-cycs = 100;
+x = 1;
+cycs = 150;
 
 %{
 I = 0;
@@ -12,19 +12,19 @@ ci = 0; % cross-inhibition
 step = 0.2;
 %}
 
-I = 3.8;
-li = -1; % lateral inhibition
-se = 0; % self-excitation
-ve = 0; % vertical excitation
-ci = 0.002; % cross-inhibition
-step = 0.2;
+I = 4;
+li = -2; % lateral inhibition
+se = -2; % self-excitation
+ve = -1; % vertical excitation
+ci = -1; % cross-inhibition
+step = 0.1;
 
 
 W = [
     se li ve ci;
     li se ci ve;
-    ve 0 se li;
-    0 ve li se;
+    ve ci se li;
+    ci ve li se;
     ];
 b = [I I I I];
 
@@ -46,9 +46,21 @@ for i = 1:size(x, 2)
                                                 act(1,:) = a;
         for cyc = 1:cycs
             net = a * W + b;
-                                               % da = net;
-                                                da = -a + quadsquare(b + a * W);
+            
+            if cyc > 50 && cyc < 90
+                b(2) = 15;
+            else
+                if cyc == 90
+                    a = [4 0 1.5 2];
+                end
+                b(2) = 4;
+            end
+            
+                                                da = net;
+                                                %da = -a + quadsquare(b + a * W);
             a = a + step * da;
+            a = min(a, 5);
+            a = max(a, -5);
                                                 %act(cyc+1,:) = 1 ./ (1 + exp(-a));
                                                 act(cyc+1,:) = a;
         end
@@ -56,9 +68,30 @@ for i = 1:size(x, 2)
         
         if size(x, 2) == 1
             figure;
-            plot(act);
-            ylim([-3 5]);
-            legend('1', '2', '3', '4');
+            
+            plot(act, 'LineWidth', 2);
+            ylim([-5 6]);
+            legend('OG Task', 'PM Task', 'OG Features', 'PM Features');
+            ylabel('activation');
+            xlabel('cycle');
+            line([10 10],ylim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5]);
+            line([50 50],ylim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5]);
+            line([90 90],ylim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5]);
+            
+            line([110 110],ylim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5]);
+            
+            text(12, -4.4, 'trial #1');
+            text(52, -4.4, 'trial #2 (target)');
+            
+            %text(92, -4.4, 'trial #3');
+            text(92, -4.4, 'end trial');            
+            text(112, -4, 'trial #3');
+            
+            %title('Ongoing Trials, 4 WM units');            
+            title('Task Switch, 4 WM units');
+            
+            figureHandle = gcf;
+            set(findall(figureHandle,'type','text'),'fontSize',14);
         end
     end
 end

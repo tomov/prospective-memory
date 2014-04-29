@@ -179,6 +179,8 @@ classdef Model < handle
             focal_high_init_wm = params(5:8);
             nonfocal_low_init_wm = params(9:12);
             nonfocal_high_init_wm = params(13:16);
+            self.BIAS_FOR_TASK = params(17);
+            self.BIAS_FOR_ATTENTION = params(18);
 
             
             % specify unit names in each layer
