@@ -1,4 +1,4 @@
-function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, is_target, correct, og_correct)
+function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, is_target, correct, og_correct)
 
 OG_count = 0;
 PM_count = 0;
@@ -106,6 +106,7 @@ PM_RT = mean(PM_hit_RTs);
 PM_RT_SD = std(PM_hit_RTs) / sqrt(size(PM_hit_RTs, 2));
 PM_Hit = size(PM_hit_RTs, 1) / PM_count * 100;
 
+PM_miss_OG_hit = size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100;
 
 
 

@@ -3,21 +3,13 @@ clear classes % ! super important ! if you don't do this, MATLAB won't reload yo
 
 
 % best parameters so far...
- bestpar = [5.0000   -2.0000    5.0000   -5.0000    ...
-           2.6000   0    5.0000   -5.0000    ...
-           5.0000   -3.0000   2.0000         0  ...
-           3.0000    0.3750    2.0000     0];
+startpar = [5 -2  5 -5     2  0  5 -5   5  -2  1.5  0     4  0  1  0];
 % show us what we got
 %stat = EM2005(bestpar);
 %fits;
        
 % then start the search
-startpar = zeros(1, 16);
-%{
-startpar = [5 -2  5 -5     2  0  5 -5      5 -3  2  0     3  0  2  0];
-% startpar for nonfocal:
-   [....blah focal....       4.5 0  2  0     2  0  2  0]
-%}
+%startpar = zeros(1, 16);
 init_goalstats;
 typestat = [2 3 1 1, 2 3 1 1, 2 3 1 1, 2 3 1 1, ...
             2 3 1 1, 2 3 1 1, 2 3 1 1, 2 3 1 1];

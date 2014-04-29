@@ -15,7 +15,7 @@ subjects = [];
 subjects_extra = [];
 
 for OG_ONLY = 0:1 %0:1
-    for FOCAL = 1:-1:0
+    for FOCAL = 1:-1:0  % 1:-1:0
         for EMPHASIS = 0:1 %0:1
             sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);
 
@@ -51,6 +51,19 @@ for OG_ONLY = 0:1 %0:1
             
             % insert one PM target in each of the PM blocks
             if ~OG_ONLY
+                %{
+                for i = 1:length(stimuli)
+                    if mod(i,3) == 0
+                        target_id = mod(i, size(pm_targets, 1)) + 1;
+                        middle = i;
+                        stimuli(middle,:) = pm_targets(target_id, :);
+                        correct(middle) = pm_correct(target_id);
+                        og_correct(middle) = pm_og_correct(target_id);
+                        is_target(middle) = 1;
+                    end
+                end
+                %}
+                
                 for i = 1:length(pm_blocks)
                     b = pm_blocks(i);
                     block_start = (b - 1) * trials_per_block + 1;
@@ -63,6 +76,7 @@ for OG_ONLY = 0:1 %0:1
                     og_correct(middle) = pm_og_correct(target_id);
                     is_target(middle) = 1;
                 end
+                
             end
             
             if FOCAL
@@ -82,10 +96,10 @@ for OG_ONLY = 0:1 %0:1
             for s = 1:subjects_per_condition
                 [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
 
-                [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
                     responses, RTs, act, acc, onsets, ...
                     is_target, correct, og_correct);
-                subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit];
+                subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
                 subjects = [subjects; subject];
                 extra = {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, nets};
                 subjects_extra = [subjects_extra; extra];
