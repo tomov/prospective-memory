@@ -19,9 +19,6 @@ classdef Simulator < Model
         function self = Simulator(FOCAL, EMPHASIS, OG_ONLY, params)
             self = self@Model(FOCAL, EMPHASIS, OG_ONLY, params);
             self.Nout = size(self.output_ids, 2);
-            self.accumulators = zeros(1, self.Nout);
-            self.net_input = zeros(1, self.N);
-            self.net_input_avg = zeros(1, self.N);
         end
         
         function ids = string_to_ids(self, stimulus)
@@ -89,6 +86,9 @@ classdef Simulator < Model
         function [responses, RTs, activation_log, accumulators_log, onsets, net_log] = trial(self, stimuli)
             % initialize activations and outputs
             trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
+            self.accumulators = zeros(1, self.Nout);
+            self.net_input = zeros(1, self.N);
+            self.net_input_avg = zeros(1, self.N);
             activation_log = zeros(trial_duration, self.N);
             accumulators_log = zeros(trial_duration, self.Nout);
             net_log = zeros(trial_duration, self.N);

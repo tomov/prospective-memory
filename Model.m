@@ -183,7 +183,7 @@ classdef Model < handle
             
             % specify unit names in each layer
             self.input_units = {
-                'tortoise', 'history', 'crocodile', 'math', ... % (focal targets)
+                'tortoise', 'physics', 'crocodile', 'math', ... % (focal targets)
                 'a subject', 'an animal', ... % categories
                 };
             self.perception_units = strcat('see:', self.input_units')';
@@ -243,13 +243,13 @@ classdef Model < handle
                 self.unit_id('see:an animal')                  , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % -- animals to matching categories
-                self.unit_id('see:history')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:physics')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:math')                   , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % -- default response is No Match
-                self.unit_id('see:history')                , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:physics')                , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:math')                   , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:tortoise')               , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:crocodile')              , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
@@ -258,14 +258,13 @@ classdef Model < handle
                 % it up to baseline (the winning OG response gets x2 inputs)
                 self.unit_id('see:a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:history')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see:physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see:crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % raw inputs to perception -- PM targets
                 self.unit_id('tortoise')               , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
-                self.unit_id('history')                , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
                 
                 % responses to outputs                
                 self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
@@ -294,7 +293,7 @@ classdef Model < handle
             % attention to perception
             from = self.unit_id('OG features');
             to = cellfun(@self.unit_id, strcat('see:', {
-                'tortoise', 'history', 'crocodile', 'math', ...
+                'tortoise', 'physics', 'crocodile', 'math', ...
                 'a subject', 'an animal'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);

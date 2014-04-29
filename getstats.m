@@ -1,4 +1,4 @@
-function s = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, is_target, correct)
+function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, is_target, correct, og_correct)
 
 OG_count = 0;
 PM_count = 0;
@@ -7,6 +7,7 @@ PM_hit_RTs = [];
 false_alarm_RTs = [];
 OG_wrong_RTs = [];
 PM_miss_RTs = [];
+PM_miss_correct_OG_RTs = [];
 OG_timeout_RTs = [];
 PM_timeout_RTs = [];
 
@@ -47,6 +48,10 @@ for i=1:size(responses, 1)
             end
             % PM miss
             PM_miss_RTs = [PM_miss_RTs; RTs(i)];
+            if strcmp(responses{i}, og_correct{i}) == 1
+                % but still correct OG
+                PM_miss_correct_OG_RTs = [PM_miss_correct_OG_RTs; RTs(i)];
+            end
         end
     end
 end
@@ -58,6 +63,7 @@ responses
 OG_count
 PM_count
 %}
+
 
 if OG_ONLY
     og_string = 'No PM task';
@@ -82,32 +88,35 @@ end
     fprintf('mean OG correct RTs = %.4f (%.4f)\n', mean(OG_correct_RTs), std(OG_correct_RTs));
     fprintf('mean PM hit RTs = %.4f (%.4f)\n', mean(PM_hit_RTs), std(PM_hit_RTs));
     fprintf('OG accuracy = %.4f%%\n', size(OG_correct_RTs, 1) / OG_count * 100);
-    fprintf('PM hit rate = %.4f%%\n', size(PM_hit_RTs, 1) / PM_count * 100);
+    fprintf('PM hit rate = %.4f%% (%.4f%% were OG correct)\n', size(PM_hit_RTs, 1) / PM_count * 100, ...
+        size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100);
 %end
 
 
-% save stats for fits
 
-RT = mean(OG_correct_RTs);
+% return statistics for subject
+
+OG_RT = mean(OG_correct_RTs);
 % http://en.wikipedia.org/wiki/Standard_error !!!
-SD = std(OG_correct_RTs) / sqrt(size(OG_correct_RTs, 2));
-OG = size(OG_correct_RTs, 1) / OG_count * 100;
-PM = size(PM_hit_RTs, 1) / PM_count * 100;
+OG_RT_SD = std(OG_correct_RTs) / sqrt(size(OG_correct_RTs, 2));
+OG_Hit = size(OG_correct_RTs, 1) / OG_count * 100;
 
-s = [RT SD OG PM];
-
+PM_RT = mean(PM_hit_RTs);
+% http://en.wikipedia.org/wiki/Standard_error !!!
+PM_RT_SD = std(PM_hit_RTs) / sqrt(size(PM_hit_RTs, 2));
+PM_Hit = size(PM_hit_RTs, 1) / PM_count * 100;
 
 
 
 
 % show figures
 
-if true
+if false
     figure;
 
-    t_range = 1:2000;
+    t_range = 1:3000;
     y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
-    bar_names = {'OG correct', 'PM hit', 'false alarm', 'OG wrong', 'PM miss', 'OG timeout', 'PM timeout'};
+    bar_names = {'OG correct', 'PM hit', 'false alarm', 'OG wrong', 'PM miss', 'PM OG' 'OG timeout', 'PM timeout'};
     onset_plot = onsets(onsets < t_range(end));
 
     subplot(4, 2, 1);
@@ -158,7 +167,8 @@ if true
 
     subplot(1, 2, 1);
     bar([mean(OG_correct_RTs), mean(PM_hit_RTs), ...
-        mean(false_alarm_RTs), mean(OG_wrong_RTs), mean(PM_miss_RTs), ...
+        mean(false_alarm_RTs), mean(OG_wrong_RTs), ...
+        mean(PM_miss_RTs), mean(PM_miss_correct_OG_RTs), ...
         mean(OG_timeout_RTs), mean(PM_timeout_RTs)]);
     set(gca, 'XTickLabel', bar_names);
     ylim([0 sim.CYCLES_PER_SEC]);
@@ -166,7 +176,8 @@ if true
 
     subplot(1, 2, 2);
     bar(100 * [size(OG_correct_RTs, 1) / OG_count, size(PM_hit_RTs, 1) / PM_count, ...
-        size(false_alarm_RTs, 1) / OG_count, size(OG_wrong_RTs, 1) / OG_count, size(PM_miss_RTs, 1) / PM_count, ...
+        size(false_alarm_RTs, 1) / OG_count, size(OG_wrong_RTs, 1) / OG_count, ...
+        size(PM_miss_RTs, 1) / PM_count, size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1), ...
         size(OG_timeout_RTs, 1) / OG_count, size(PM_timeout_RTs, 1) / PM_count]);
     set(gca, 'XTickLabel', bar_names);
     ylim([0 100]);
