@@ -140,9 +140,9 @@ classdef Simulator < Model
                     % initialize WM at beginning of block (i.e. first
                     % trial),
                     % or after a PM switch
-                    if cycle == 1 && (ord == 1 || switched_to_PM_task)
+                    if cycle < 10 && (ord == 1 || switched_to_PM_task)
                         self.wm_act = self.init_wm;
-                        self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
+                        self.activation(self.wm_ids) = self.wm_act;
                     end
 
                     % log activation for plotting
@@ -188,10 +188,12 @@ classdef Simulator < Model
                     self.activation(self.ffwd_ids) = self.logistic(self.net_input_avg(self.ffwd_ids));
                     
                     % same for WM module
+                    % for WM module, activation f'n is linear and
+                    % thresholded between 0 and 1
                     self.wm_act = self.wm_act + self.STEP_SIZE * self.net_input(self.wm_ids);
-                    self.wm_act(self.wm_act > self.MAX_WM_ACT) = self.MAX_WM_ACT;
-                    self.wm_act(self.wm_act < self.MIN_WM_ACT) = self.MIN_WM_ACT;
-                    self.activation(self.wm_ids) = (self.wm_act + 5) / 10;%self.logistic(self.wm_act);
+                    self.wm_act = min(self.wm_act, self.MAXIMUM_ACTIVATION);
+                    self.wm_act = max(self.wm_act, self.MINIMUM_ACTIVATION);
+                    self.activation(self.wm_ids) = self.wm_act;
                     
                     % update evidence accumulators (after network has
                     % settled)
@@ -219,7 +221,7 @@ classdef Simulator < Model
                 
                 %switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
                 % TODO hacky...
-                switched_to_PM_task = (self.wm_act(2) > self.init_wm(2) + 0.1);
+                switched_to_PM_task = (self.wm_act(2) > self.init_wm(2) + 0.01);
                 %switched_to_PM_task = true;
 
                 % record response and response time

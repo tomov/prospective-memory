@@ -5,10 +5,9 @@ function [subjects, subjects_extra] = EM2005( params )
 params
 
 % from E&M Experiment 1 methods
-subjects_per_condition = 24;
-blocks_per_condition = 8;
+subjects_per_condition = 24; % 24;
+blocks_per_condition = 8; %8;
 pm_blocks = [1 3 6 7];
-%pm_blocks = [1 2 3 4 5 6 7 8]; % temporary TODO remove in final simulation
 trials_per_block = 24;
 
 subjects = [];
@@ -51,6 +50,7 @@ for OG_ONLY = 0:1 %0:1
             
             % insert one PM target in each of the PM blocks
             if ~OG_ONLY
+                
                 %{
                 for i = 1:length(stimuli)
                     if mod(i,3) == 0

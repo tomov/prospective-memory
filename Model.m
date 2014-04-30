@@ -23,8 +23,6 @@ classdef Model < handle
 
         MAXIMUM_ACTIVATION = 1;
         MINIMUM_ACTIVATION = 0;
-        MAX_WM_ACT = 5;
-        MIN_WM_ACT = -5;
         
         INPUT_ACTIVATION = 1;
     end
@@ -67,18 +65,18 @@ classdef Model < handle
         
         % task representation
         
-        BIAS_FOR_TASK = 10;
+        BIAS_FOR_TASK = 3;
         TASK_INHIBITION = -2;
         TASK_SELF = -2;
         
         ATTENTION_TO_TASK = 0;
         ATTENTION_TO_TASK_INHIBITION = 0;
         
-        PERCEPTION_TO_TASK = 6;  % EM
+        PERCEPTION_TO_TASK = 2.6;  % EM
         
         % feature attention
         
-        BIAS_FOR_ATTENTION = 2;
+        BIAS_FOR_ATTENTION = 2.2;
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2;
         
@@ -309,23 +307,23 @@ classdef Model < handle
             
             % PM instructions
             if OG_ONLY
-                self.init_wm = [5 -5 5 -5];
+                self.init_wm = [1 0 1 0];
             else       
                 if FOCAL
                     if ~EMPHASIS
                         % focal, low emphasis
-                        self.init_wm = focal_low_init_wm; %[5 -2 5 -5];
+                        self.init_wm = focal_low_init_wm;
                     else
                         % focal, high emphasis
-                        self.init_wm = focal_high_init_wm; % [2 0 5 -5];
+                        self.init_wm = focal_high_init_wm;
                     end
                 else
                     if ~EMPHASIS
                         % nonfocal, low emphasis
-                        self.init_wm = nonfocal_low_init_wm; %[5 -3 2 0];
+                        self.init_wm = nonfocal_low_init_wm;
                     else
                         % nonfocal, high emphasis
-                        self.init_wm = nonfocal_high_init_wm; %[3 0 2 0];
+                        self.init_wm = nonfocal_high_init_wm;
                     end
                 end
             end

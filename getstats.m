@@ -112,10 +112,10 @@ PM_miss_OG_hit = size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100;
 
 % show figures
 
-if false
+if true
     figure;
 
-    t_range = 1:3000;
+    t_range = 1:2000;
     y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
     bar_names = {'OG correct', 'PM hit', 'false alarm', 'OG wrong', 'PM miss', 'PM OG' 'OG timeout', 'PM timeout'};
     onset_plot = onsets(onsets < t_range(end));

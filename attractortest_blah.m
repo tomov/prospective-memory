@@ -12,23 +12,23 @@ ci = 0; % cross-inhibition
 step = 0.2;
 %}
 
-I = 4;
+I = (4 + 20) / 10;
 li = -2; % lateral inhibition
 se = -2; % self-excitation
-ve = -1; % vertical excitation
-ci = -1; % cross-inhibition
+ve = 0; % vertical excitation
+ci = 0; % cross-inhibition
 step = 0.1;
 
 
 W = [
-    se li ve ci -2;
-    li se ci ve -2;
-    ve ci se li -2;
-    ci ve li se -2;
-    -2 -2 -2 -2 se;
+    se li ve ci 0;
+    li se ci ve 0;
+    ve ci se li 0;
+    ci ve li se 0;
+    0 0 0 0 0;
     ];
-b = [I I I I I];
-init_a = [4 0 1.5 2 10];
+b = [I*1.1 I*1.1 I I I];
+init_a = [0.8 0.9 0.4 0.3 0];
 
 z = zeros(size(x, 2));
 
@@ -50,13 +50,14 @@ for i = 1:size(x, 2)
             net = a * W + b;
             
             if cyc > 50 && cyc < 90
-                b(2) = 15;
+                b(2) = (15 + 5*4)/10;
             else
                 if cyc == 90
                     a(1:5) = init_a(1:5);
                 end
-                b(2) = I;
+                b(2) = I * 1.1;
             end
+            
 
             %if cyc > 20 && cyc < 40
             %    b(5) = 15;
@@ -67,8 +68,8 @@ for i = 1:size(x, 2)
                                                 da = net;
                                                 %da = -a + quadsquare(b + a * W);
             a = a + step * da;
-            a = min(a, 5);
-            a = max(a, -5);
+            a = min(a, 1);
+            a = max(a, 0);
                                                 %act(cyc+1,:) = 1 ./ (1 + exp(-a));
                                                 act(cyc+1,:) = a;
         end
@@ -78,7 +79,7 @@ for i = 1:size(x, 2)
             figure;
             
             plot(act, 'LineWidth', 2);
-            ylim([-5 6]);
+            ylim([0 1]);
             legend('OG Task', 'PM Task', 'OG Features', 'PM Features', 'Load');
             ylabel('activation');
             xlabel('cycle');
