@@ -62,7 +62,7 @@ classdef Model < handle
         
         RESPONSE_TO_OUTPUT = 2;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
-        
+                
         % task representation
         
         BIAS_FOR_TASK = 3;
@@ -70,18 +70,16 @@ classdef Model < handle
         TASK_SELF = -2;
         
         ATTENTION_TO_TASK = -1;
-        ATTENTION_TO_TASK_INHIBITION = -1;
         
         PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch
         
         % feature attention
         
-        BIAS_FOR_ATTENTION = 2.2;
+        BIAS_FOR_ATTENTION = 3;
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2;
         
         TASK_TO_ATTENTION = -1;
-        TASK_TO_ATTENTION_INHIBITION = -1;
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;
@@ -130,9 +128,11 @@ classdef Model < handle
             for i=1:size(units, 2)
                 for j=1:size(units, 2)
                     if i ~= j
-                        self.connections = [self.connections;
-                            units(i), units(j), weight];
-                        %fprintf('%s -> %s: %d (LI)\n', self.units{units(i)}, self.units{units(j)}, weight);
+                        if ~ismember([units(i), units(j)], self.connections(:,1:2), 'rows')
+                            self.connections = [self.connections;
+                                units(i), units(j), weight];
+                            %fprintf('%s -> %s: %d (LI)\n', self.units{units(i)}, self.units{units(j)}, weight);
+                        end
                     end
                 end
             end
@@ -173,12 +173,12 @@ classdef Model < handle
             self.FOCAL = FOCAL;
             self.EMPHASIS = EMPHASIS;
             self.OG_ONLY = OG_ONLY;
-            focal_low_init_wm = params(1:4);
-            focal_high_init_wm = params(5:8);
-            nonfocal_low_init_wm = params(9:12);
-            nonfocal_high_init_wm = params(13:16);
-            self.BIAS_FOR_TASK = params(17);
-            self.BIAS_FOR_ATTENTION = params(18);
+            focal_low_init_wm = params(1:5);
+            focal_high_init_wm = params(6:10);
+            nonfocal_low_init_wm = params(11:15);
+            nonfocal_high_init_wm = params(16:20);
+            self.BIAS_FOR_TASK = params(21);
+            self.BIAS_FOR_ATTENTION = params(22);
 
             
             % specify unit names in each layer
@@ -199,7 +199,8 @@ classdef Model < handle
                 };
             self.attention_units = {
                 'OG features', ...
-                'PM features'
+                'Monitor tortoise', ...
+                'Monitor tor'
                 };
             self.units = [
                 self.input_units, ...
@@ -266,6 +267,10 @@ classdef Model < handle
                 % raw inputs to perception -- PM targets
                 self.unit_id('tortoise')               , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
                 
+                % attention to particular items -- PM targets
+                self.unit_id('Monitor tortoise')       , self.unit_id('see:tortoise')         , self.ATTENTION_TO_PERCEPTION;
+                self.unit_id('Monitor tor')            , self.unit_id('see:tor')              , self.ATTENTION_TO_PERCEPTION;
+   
                 % responses to outputs                
                 self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
@@ -273,41 +278,26 @@ classdef Model < handle
                 self.unit_id('No Match 2')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
                 
-                % LCA mutual inhibition and excitation
-                self.unit_id('OG features') , self.unit_id('OG Task') , self.ATTENTION_TO_TASK;
-                self.unit_id('OG Task') , self.unit_id('OG features') , self.TASK_TO_ATTENTION;
-
-                self.unit_id('PM features') , self.unit_id('OG Task') , self.ATTENTION_TO_TASK_INHIBITION;
-                self.unit_id('OG Task') , self.unit_id('PM features') , self.TASK_TO_ATTENTION_INHIBITION;
-
-                self.unit_id('PM features') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK;
-                self.unit_id('PM Task') , self.unit_id('PM features') , self.TASK_TO_ATTENTION;
-                
-                self.unit_id('OG features') , self.unit_id('PM Task') , self.ATTENTION_TO_TASK_INHIBITION;
-                self.unit_id('PM Task') , self.unit_id('OG features') , self.TASK_TO_ATTENTION_INHIBITION;
             ];
+        
+            % WM LCA vertical mutual inhibition
+            self.forward_all_to_all(self.attention_ids, self.task_ids, self.ATTENTION_TO_TASK);
+            self.forward_all_to_all(self.task_ids, self.attention_ids, self.TASK_TO_ATTENTION);
             
             % perception to task representation (indirect PM pathway)
             self.forward_all_to_all(self.perception_ids, self.task_ids, 0); % EM!!!
             
-            % attention to perception
+            % OG attention to perception
             from = self.unit_id('OG features');
             to = cellfun(@self.unit_id, strcat('see:', {
                 'tortoise', 'physics', 'crocodile', 'math', ...
                 'a subject', 'an animal'
                 }')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
-
-            % attention to nonfocal target projection
-            from = self.unit_id('PM features');
-            to = cellfun(@self.unit_id, strcat('see:', {
-                'tor'
-                }')');
-            self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
             % PM instructions
             if OG_ONLY
-                self.init_wm = [1 0 1 0];
+                self.init_wm = [1 0 1 0 0];
             else       
                 if FOCAL
                     if ~EMPHASIS

@@ -2,9 +2,7 @@ warning('off', 'MATLAB:ClassInstanceExists');
 clear classes % ! super important ! if you don't do this, MATLAB won't reload your classes
 
 
-% best parameters so far...
-% KEEP I_WM equal for both task and feature units
-startpar = [1 0.2 1 0,   1 0.4 1 0,  1 0.2 0.7 0.5, 1 0.4 0.7 0.5,  3 3];
+init_startpar;
 % show us what we got
 %stat = EM2005(bestpar);
 %fits;

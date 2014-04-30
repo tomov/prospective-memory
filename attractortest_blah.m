@@ -1,7 +1,7 @@
 
 x = [-1:0.2:5];
 x = 1;
-cycs = 150;
+cycs = 100;
 
 %{
 I = 0;
@@ -27,7 +27,9 @@ W = [
     ci ve li se 0;
     0 0 0 0 0;
     ];
-b = [I*1.1 I*1.1 I I I];
+b_high = [I*1.1 I*1.1 I I I];
+b_low = b_high / 10;
+b = b_high;
 init_a = [0.9 0.8 0.4 0.3 0];
 
 z = zeros(size(x, 2));
@@ -48,7 +50,7 @@ for i = 1:size(x, 2)
                                                 act(1,:) = a;
         for cyc = 1:cycs
             net = a * W + b;
-            
+            %{
             if cyc > 50 && cyc < 90
                 b(2) = 4;
             else
@@ -57,8 +59,19 @@ for i = 1:size(x, 2)
                 end
                 b(2) = I * 1.1;
             end
+            %}
             
+            %b = b - b * 0.00001;
+            
+            %{
+            if cyc > 50 && cyc < 70
+                b = b_low;
+            else
+                b = b_high;
+            end
+            %}
 
+            
             %if cyc > 20 && cyc < 40
             %    b(5) = 15;
             %else
