@@ -15,7 +15,7 @@
  (see EM2005)
 %}
 
-DO_PLOT = false;
+DO_PLOT = true;
 
 
 % -------------- define the empirical stats (Table 1 from E&M 2005)
@@ -282,7 +282,7 @@ fprintf('                 F = 22.87\n');
 fprintf('\n  Simulation Data -------\n');
 fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 
-if true
+if DO_PLOT
     Ms = zeros(1, 2);
     SEMs = zeros(1, 2);
     for FOCAL = 1:-1:0
@@ -319,7 +319,7 @@ fprintf('                 F = 6.47\n');
 fprintf('\n  Simulation Data -------\n');
 fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 
-if true
+if DO_PLOT
     Ms = zeros(1, 2);
     SEMs = zeros(1, 2);
     for EMPHASIS = 0:1
@@ -375,23 +375,26 @@ fprintf('===> shit...theyre all significant.. .fuck fuck fuck\n');
 
 % ----------------- OG RT: cost, interaction focality & emphasis
 
+
 M_OG_only = mean(OG_RTs(subjects(:, 1) == 1));
 
-[p, table] = anovan(OG_RTs, {subjects(:, 1) subjects(:, 2) & ~subjects(:, 3)}, 'model','full', 'display', 'off');
-fprintf('\n\n----- OG RT Cost: Focal, Low Emphasis ------\n');
-fprintf('\n  Empirical Data -------\n');
-fprintf('                 F = 1.73\n');
-fprintf('\n  Simulation Data -------\n');
-fprintf('                 F = %.4f, p = %f\n', table{4,6}, p(1));
-fprintf('===> shit... significant.... oh well\n');
-
-[p, table] = anovan(OG_RTs, {subjects(:, 1) subjects(:, 2) & subjects(:, 3)}, 'model','full', 'display', 'on');
-fprintf('\n\n----- OG RT Cost: Focal, High Emphasis ------\n');
-fprintf('\n  Empirical Data -------\n');
-fprintf('                 F = 6.15\n');
-fprintf('\n  Simulation Data -------\n');
-fprintf('                 F = %.4f, p = %f\n', table{4,6}, p(1));
-
+empirical_Fs = [
+    61.52, 127.96; % nonfocal: low, high
+    1.73, 6.15     % focal: low, high
+    ];
+focal_titles = {'Nonfocal', 'Focal'};
+emphasis_titles = {'Low Emphasis', 'High Emphasis'};
+for FOCAL = 1:-1:0
+    for EMPHASIS = 0:1
+        samples = subjects(subjects(:, 2) == FOCAL & subjects(:, 3) == EMPHASIS, :);
+        [p, table] = anovan(samples(:,4), {samples(:, 1)}, 'model','full', 'display', 'off');
+        fprintf('\n\n----- OG RT Cost: %s, %s ------\n', focal_titles{FOCAL+1}, emphasis_titles{EMPHASIS+1});
+        fprintf('\n  Empirical Data -------\n');
+        fprintf('                 F = %.2f\n', empirical_Fs(FOCAL+1, EMPHASIS+1));
+        fprintf('\n  Simulation Data -------\n');
+        fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+    end
+end
 
 
 if DO_PLOT
@@ -405,10 +408,16 @@ if DO_PLOT
         SEMs = zeros(2);
         for FOCAL = 1:-1:0
             for EMPHASIS = 0:1
-                Ms(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
-                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 10);
-                SEMs(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
-                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 11);
+                M = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 4);
+                SEM = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 5);
+                if s_id == 2
+                    M = M * RT_slope + RT_intercept;
+                    SEM = SEM * RT_slope;
+                end
+                Ms(2 - FOCAL, EMPHASIS + 1) = M;
+                SEMs(2 - FOCAL, EMPHASIS + 1) = SEM;
             end
         end
 
@@ -416,9 +425,9 @@ if DO_PLOT
             titles{s_id}, 'PM Condition');
         if s_id == 1
             legend({'Low Emphasis', 'High Emphasis'});
-            ylabel('PM Hit rate (%)');
+            ylabel('Ongoing RT (msec)');
         end
-        ylim([30 100]);
+        ylim([1000 1700]);
     end
 end
 
