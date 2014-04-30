@@ -46,14 +46,14 @@ classdef Model < handle
 
         % responses
         
-        BIAS_FOR_RESPONSES = -7;
+        BIAS_FOR_RESPONSES = -12;
         RESPONSE_INHIBITION = -5;
         
         PERCEPTION_TO_RESPONSE = 4;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
-        TASK_TO_RESPONSE = 4;
-        TASK_TO_RESPONSE_INHIBITION = -4;
+        TASK_TO_RESPONSE = 8;
+        TASK_TO_RESPONSE_INHIBITION = 0;
         
         % outputs
         
@@ -69,10 +69,10 @@ classdef Model < handle
         TASK_INHIBITION = -2;
         TASK_SELF = -2;
         
-        ATTENTION_TO_TASK = 0;
-        ATTENTION_TO_TASK_INHIBITION = 0;
+        ATTENTION_TO_TASK = -1;
+        ATTENTION_TO_TASK_INHIBITION = -1;
         
-        PERCEPTION_TO_TASK = 2.6;  % EM
+        PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch
         
         % feature attention
         
@@ -80,8 +80,8 @@ classdef Model < handle
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2;
         
-        TASK_TO_ATTENTION = 0;
-        TASK_TO_ATTENTION_INHIBITION = 0;        
+        TASK_TO_ATTENTION = -1;
+        TASK_TO_ATTENTION_INHIBITION = -1;
 
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;

@@ -5,7 +5,7 @@ function [subjects, subjects_extra] = EM2005( params )
 params
 
 % from E&M Experiment 1 methods
-subjects_per_condition = 24; % 24;
+subjects_per_condition = 1; % 24;
 blocks_per_condition = 8; %8;
 pm_blocks = [1 3 6 7];
 trials_per_block = 24;
@@ -14,7 +14,7 @@ subjects = [];
 subjects_extra = [];
 
 for OG_ONLY = 0:1 %0:1
-    for FOCAL = 1:-1:0  % 1:-1:0
+    for FOCAL =  0  % 1:-1:0
         for EMPHASIS = 0:1 %0:1
             sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);
 
@@ -51,7 +51,6 @@ for OG_ONLY = 0:1 %0:1
             % insert one PM target in each of the PM blocks
             if ~OG_ONLY
                 
-                %{
                 for i = 1:length(stimuli)
                     if mod(i,3) == 0
                         target_id = mod(i, size(pm_targets, 1)) + 1;
@@ -62,8 +61,8 @@ for OG_ONLY = 0:1 %0:1
                         is_target(middle) = 1;
                     end
                 end
-                %}
                 
+                %{
                 for i = 1:length(pm_blocks)
                     b = pm_blocks(i);
                     block_start = (b - 1) * trials_per_block + 1;
@@ -76,6 +75,7 @@ for OG_ONLY = 0:1 %0:1
                     og_correct(middle) = pm_og_correct(target_id);
                     is_target(middle) = 1;
                 end
+                %}
                 
             end
             

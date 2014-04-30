@@ -12,11 +12,11 @@ ci = 0; % cross-inhibition
 step = 0.2;
 %}
 
-I = (4 + 20) / 10;
+I = 3;
 li = -2; % lateral inhibition
 se = -2; % self-excitation
-ve = 0; % vertical excitation
-ci = 0; % cross-inhibition
+ve = -1; % vertical excitation
+ci = -1; % cross-inhibition
 step = 0.1;
 
 
@@ -28,7 +28,7 @@ W = [
     0 0 0 0 0;
     ];
 b = [I*1.1 I*1.1 I I I];
-init_a = [0.8 0.9 0.4 0.3 0];
+init_a = [0.9 0.8 0.4 0.3 0];
 
 z = zeros(size(x, 2));
 
@@ -50,9 +50,9 @@ for i = 1:size(x, 2)
             net = a * W + b;
             
             if cyc > 50 && cyc < 90
-                b(2) = (15 + 5*4)/10;
+                b(2) = 4;
             else
-                if cyc == 90
+                if cyc == 90 || cyc == 91
                     a(1:5) = init_a(1:5);
                 end
                 b(2) = I * 1.1;
