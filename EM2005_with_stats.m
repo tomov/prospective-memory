@@ -1,6 +1,7 @@
 %function stat = EM2005_analyze_stats( subjects, subjects_extra)
 % get stats from subjects and analyze so you can fit with fitparam()
 %{
+ subjects[subj_id, :] ==
  samples variable order = 
     1 - OG_ONLY,
     2 - FOCAL, 
@@ -17,48 +18,6 @@
 DO_PLOT = false;
 
 
-PM_hit = subjects(:, 7);
-
-% --- PM hit rate in focal vs. nonfocal ----
-
-PM_hit_focal = PM_hit(subjects(:, 2) == 1);
-PM_hit_nonfocal = PM_hit(subjects(:, 2) == 0);
-%p = anova1([PM_hit_focal PM_hit_nonfocal]);
-
-PM_hit_focal_M = mean(PM_hit_focal(~isnan(PM_hit_focal)));
-PM_hit_focal_SD = std(PM_hit_focal(~isnan(PM_hit_focal)));  % / sqrt(sum(~isnan(PM_hit_focal)))
-PM_hit_nonfocal_M = mean(PM_hit_nonfocal(~isnan(PM_hit_nonfocal)));
-PM_hit_nonfocal_SD = std(PM_hit_nonfocal(~isnan(PM_hit_nonfocal)));  % / sqrt(sum(~isnan(PM_hit_nonfocal)))
-
-
-% --- PM hit rate in high emphasis vs. low emphasis ----
-
-PM_hit_low = PM_hit(subjects(:, 3) == 0);
-PM_hit_high = PM_hit(subjects(:, 3) == 1);
-%p = anova1([PM_hit_high PM_hit_low]);
-
-PM_hit_low_M = mean(PM_hit_low(~isnan(PM_hit_low)));
-PM_hit_low_SD = std(PM_hit_low(~isnan(PM_hit_low)));  %/ sqrt(sum(~isnan(PM_hit_low)));
-PM_hit_high_M = mean(PM_hit_high(~isnan(PM_hit_high)));
-PM_hit_high_SD = std(PM_hit_high(~isnan(PM_hit_high)));  %/ sqrt(sum(~isnan(PM_hit_high)));
-
-% --- PM hit rate in high emph vs. low emph. for different focalities ----
-% anova2? interaction between the two variables
-
-% plot em' -- for each focality, show high emph & low epmoh next to each
-% other
-%p = anovan(PM_hit, {subjects(:, 2) subjects(:, 3)}, 'model','interaction');
-
-barweb([10 50; 60 70], [5 5; 5 5], 1, {'Focal', 'Nonfocal'}, 'title', 'xlabel', 'PM Hit rate (%)');
-
-
-
-
-
-% --------------------------------------------- the big plot -----------------------------------------
-
-
-
 % -------------- define the empirical stats (Table 1 from E&M 2005)
 
 %{
@@ -68,13 +27,13 @@ barweb([10 50; 60 70], [5 5; 5 5], 1, {'Focal', 'Nonfocal'}, 'title', 'xlabel', 
     3 - EMPHASIS
  statistics order = 
     4 - OG_RT_M,
-    5 - OG_RT_SD,
+    5 - OG_RT_SEM,
     6 - OG_Hit_M,
-    7 - OG_Hit_SD,
+    7 - OG_Hit_SEM,
     8 - PM_RT_M,
-    9 - PM_RT_SD
+    9 - PM_RT_SEM
     10 - PM_Hit_M,
-    11 - PM_Hit_SD
+    11 - PM_Hit_SEM
 %}
 SD_cols = [5 7 9 11];
 
@@ -93,6 +52,9 @@ empirical_stats = [
 % convert SD's to SEM's in empirical data
 empirical_stats(:, SD_cols) = empirical_stats(:, SD_cols) / sqrt(subjects_per_condition);
 
+
+
+
 % ------------- calculate simulation stats (Table 1 from E&M 2005)
 
 simulation_stats = [];
@@ -104,6 +66,7 @@ for FOCAL = 1:-1:0
                 samples = subjects(subjects(:, 1) == OG_ONLY & subjects(:, 2) == FOCAL & subjects(:, 3) == EMPHASIS, col);
                 M = mean(samples);
                 SD = std(samples);
+                assert(length(samples) == subjects_per_condition);
                 stat = [stat, M, SD];
             end
             simulation_stats = [simulation_stats; stat];
@@ -113,6 +76,9 @@ end
 
 % convert SD's to SEM's in simulation data
 simulation_stats(:, SD_cols) = simulation_stats(:, SD_cols) / sqrt(subjects_per_condition);
+
+
+
 
 % -------------- run linear regression to find slope and intercept for RT's
 
@@ -138,21 +104,347 @@ if DO_PLOT
     title(sprintf('R^2 = %.4f', rsq));
 end
 
+OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept);
 
-% ------------------ plot the all the good stuff
+
+
+
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% ----------------------------- COMPARE EMPIRICAL AND SIMULATION DATA ----
+% ------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+
+
+
+
+
+% ---------------------------------------------------
+% ----------------------------- PM PERFORMANCE ------
+% ---------------------------------------------------
+
+
+
+
+PM_hit = subjects(:, 7);
+
+% ----------------------- PM hit rate in focal vs. nonfocal ----
+
+PM_hit_focal = PM_hit(subjects(:, 2) == 1);
+PM_hit_nonfocal = PM_hit(subjects(:, 2) == 0);
+[p, table] = anova1([PM_hit_focal PM_hit_nonfocal], {'Focal', 'Nonfocal'}, 'off');
+
+fprintf('\n\n----- PM Performance: Focal vs. Nonfocal ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 20.03\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{2,5}, p(1));
+
+if DO_PLOT
+    Ms = zeros(1, 2);
+    SEMs = zeros(1, 2);
+    for FOCAL = 1:-1:0
+        samples = subjects(subjects(:, 1) == 0 & subjects(:, 2) == FOCAL, 7);
+        M = mean(samples);
+        SD = std(samples);
+        SEM = SD / sqrt(length(samples));
+        Ms(2 - FOCAL) = M;
+        SEMs(2 - FOCAL) = SEM;
+    end
+    
+    figure;
+    
+    subplot(3, 2, 1);
+    barweb([90 67], [16 33]/sqrt(subjects_per_condition), 1, {}, ...
+        'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
+    legend({'Focal', 'Nonfocal'});
+    ylim([30 100]);
+
+    subplot(3, 2, 2);
+    barweb(Ms, SEMs, 1, {}, ...
+        'Simulation Data', 'PM Condition');
+    ylim([30 100]);
+end
+
+
+
+% --------------------- PM hit rate in high emphasis vs. low emphasis ----
+
+PM_hit_low = PM_hit(subjects(:, 3) == 0);
+PM_hit_high = PM_hit(subjects(:, 3) == 1);
+[p, table] = anova1([PM_hit_high PM_hit_low], {'High', 'Low'}, 'off');
+
+fprintf('\n\n----- PM Performance: High vs. Low Emphasis ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 10.41\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{2,5}, p(1));
+
+if DO_PLOT
+    Ms = zeros(1, 2);
+    SEMs = zeros(1, 2);
+    for EMPHASIS = 0:1
+        samples = subjects(subjects(:, 1) == 0 & subjects(:, 3) == EMPHASIS, 7);
+        M = mean(samples);
+        SD = std(samples);
+        SEM = SD / sqrt(length(samples));
+        Ms(EMPHASIS + 1) = M;
+        SEMs(EMPHASIS + 1) = SEM;
+    end
+    
+    subplot(3, 2, 3);
+    barweb([70 87], [32 22]/sqrt(subjects_per_condition), 1, {}, ...
+        'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
+    legend({'Low Emphasis', 'High Emphasis'});
+    ylim([30 100]);
+
+    subplot(3, 2, 4);
+    barweb(Ms, SEMs, 1, {}, ...
+        'Simulation Data', 'PM Condition');
+    ylim([30 100]);
+end
+
+
+% -------------- PM hit rate in high emph vs. low emph. for different focalities 
+
+[p, table] = anovan(PM_hit, {subjects(:, 2) subjects(:, 3)}, 'model','interaction', 'display', 'off');
+
+fprintf('\n\n----- PM Performance: Interaction between Focality and Emphasis ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('    Focality:    F = 20.03\n');
+fprintf('    Emphasis:    F = 10.41\n');
+fprintf('    Interaction: F = 5.73\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('    Focality:    F = %.4f, p = %f\n', table{2,6}, p(1));
+fprintf('    Emphasis:    F = %.4f, p = %f\n', table{3,6}, p(2));
+fprintf('    Interaction: F = %.4f, p = %f\n', table{4,6}, p(3));
+
+if DO_PLOT
+    titles = {'Empirical Data', 'Simulation Data'};
+    sources = {empirical_stats, simulation_stats};
+    for s_id = 1:2
+        subplot(3, 2, s_id + 4);
+
+        stats = sources{s_id};
+        Ms = zeros(2);
+        SEMs = zeros(2);
+        for FOCAL = 1:-1:0
+            for EMPHASIS = 0:1
+                Ms(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 10);
+                SEMs(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 11);
+            end
+        end
+
+        barweb(Ms, SEMs, 1, {'Focal', 'Nonfocal'}, ...
+            titles{s_id}, 'PM Condition');
+        if s_id == 1
+            legend({'Low Emphasis', 'High Emphasis'});
+            ylabel('PM Hit rate (%)');
+        end
+        ylim([30 100]);
+    end
+end
+
+
+
+
+
+
+% ---------------------------------------------------
+% ----------------------------- OG PERFORMANCE ------
+% ---------------------------------------------------
+
+
+% ------------------ OG accuracy
+
+OG_hit = subjects(:, 5);
+
+[p, table] = anovan(OG_hit, {subjects(:, 1) subjects(:, 2) subjects(:, 3)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG accuracy: 2x2x2 ANOVA ------\n');
+table(1:8,6)
+p
+fprintf('===> shit, some of these are significant... oh well....\n');
+
+
+
+% ----------------- OG RT: focal vs. nonfocal
+
+OG_RTs = subjects(:, 4);
+
+[p, table] = anovan(OG_RTs, {subjects(:, 2)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG RTs: Focal vs. Nonfocal ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 22.87\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+
+if true
+    Ms = zeros(1, 2);
+    SEMs = zeros(1, 2);
+    for FOCAL = 1:-1:0
+        samples = subjects(subjects(:, 2) == FOCAL, 4);
+        M = mean(samples);
+        SD = std(samples);
+        SEM = SD / sqrt(length(samples));
+        Ms(2 - FOCAL) = M * RT_slope + RT_intercept;
+        SEMs(2 - FOCAL) = SEM * RT_slope;
+    end
+    
+    figure;
+    
+    subplot(3, 2, 1);
+    barweb([1145.63 1335.73], [0 0]/sqrt(subjects_per_condition), 1, {}, ...
+        'Empirical Data', 'PM Condition', 'Ongoing RT (msec)');
+    legend({'Focal', 'Nonfocal'});
+    ylim([1000 1400]);
+
+    subplot(3, 2, 2);
+    barweb(Ms, SEMs, 1, {}, ...
+        'Simulation Data', 'PM Condition');
+    ylim([1000 1400]);
+end
+
+
+% ----------------- OG RT: high vs. low emphasis
+
+[p, table] = anovan(OG_RTs, {subjects(:, 3)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG RTs: High vs. Low emphasis ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 6.47\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+
+if true
+    Ms = zeros(1, 2);
+    SEMs = zeros(1, 2);
+    for EMPHASIS = 0:1
+        samples = subjects(subjects(:, 3) == EMPHASIS, 4);
+        M = mean(samples);
+        SD = std(samples);
+        SEM = SD / sqrt(length(samples));
+        Ms(EMPHASIS + 1) = M * RT_slope + RT_intercept;
+        SEMs(EMPHASIS + 1) = SEM * RT_slope;
+    end
+    
+    subplot(3, 2, 3);
+    barweb([1190.11 1291.26], [0 0]/sqrt(subjects_per_condition), 1, {}, ...
+        'Empirical Data', 'PM Condition', 'Ongoing RT (msec)');
+    legend({'Low Emphasis', 'High Emphasis'});
+    ylim([1000 1400]);
+
+    subplot(3, 2, 4);
+    barweb(Ms, SEMs, 1, {}, ...
+        'Simulation Data', 'PM Condition');
+    ylim([1000 1400]);
+end
+
+
+% ----------------- OG RT: PM vs. No PM
+
+[p, table] = anovan(OG_RTs, {subjects(:, 1)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG RTs: PM vs. No PM ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 131.66\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+
+
+
+
+% ----------------- OG RT: 2x2x2 ANOVA
+
+
+[p, table] = anovan(OG_RTs, {subjects(:, 1) subjects(:, 2) subjects(:, 3)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG RTs: 2x2x2 ANOVA ------\n');
+table(1:8,6)
+p
+fprintf('===> shit...theyre all significant.. .fuck fuck fuck\n');
+
+% ----------------- OG RT: cost qualified
+
+% cost is implied in figures above, NEXT...
+
+
+
+% ----------------- OG RT: cost, interaction focality & emphasis
+
+M_OG_only = mean(OG_RTs(subjects(:, 1) == 1));
+
+[p, table] = anovan(OG_RTs, {subjects(:, 1) subjects(:, 2) & ~subjects(:, 3)}, 'model','full', 'display', 'off');
+fprintf('\n\n----- OG RT Cost: Focal, Low Emphasis ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 1.73\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{4,6}, p(1));
+fprintf('===> shit... significant.... oh well\n');
+
+[p, table] = anovan(OG_RTs, {subjects(:, 1) subjects(:, 2) & subjects(:, 3)}, 'model','full', 'display', 'on');
+fprintf('\n\n----- OG RT Cost: Focal, High Emphasis ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 6.15\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{4,6}, p(1));
+
+
+
+if DO_PLOT
+    titles = {'Empirical Data', 'Simulation Data'};
+    sources = {empirical_stats, simulation_stats};
+    for s_id = 1:2
+        subplot(3, 2, s_id + 4);
+
+        stats = sources{s_id};
+        Ms = zeros(2);
+        SEMs = zeros(2);
+        for FOCAL = 1:-1:0
+            for EMPHASIS = 0:1
+                Ms(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 10);
+                SEMs(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 11);
+            end
+        end
+
+        barweb(Ms, SEMs, 1, {'Focal', 'Nonfocal'}, ...
+            titles{s_id}, 'PM Condition');
+        if s_id == 1
+            legend({'Low Emphasis', 'High Emphasis'});
+            ylabel('PM Hit rate (%)');
+        end
+        ylim([30 100]);
+    end
+end
+
+
+
+
+
+% ---------------------------------------------------
+% ----------------------------- TABLE 1 -------------
+% ---------------------------------------------------
+
+
+
 
 
 if DO_PLOT
     figure;
 
     subplot(3, 2, 1);
-    title('Empirical Data (Einstein & McDaniel 2005)');
+    title('Empirical Data');
     ylabel('OG RT (msec)');
     plot_all_conditions(empirical_stats(:, [1:3 4 5]), 1000, 1700, 1, 0, true);
 
     subplot(3, 2, 2);
     title('Simulation Data');
-    ylabel(sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept));
+    ylabel(OG_RT_label_cycles_to_msec);
     plot_all_conditions(simulation_stats(:, [1:3 4 5]), 1000, 1700, RT_slope, RT_intercept, false);
 
     subplot(3, 2, 3);
