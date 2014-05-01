@@ -28,7 +28,7 @@ if exp_id == 2
 end
 
 for OG_ONLY = 0 %og_range
-    for FOCAL = 1 %focal_range
+    for FOCAL = 1:-1:0 %focal_range
         for EMPHASIS = 0 %emphasis_range
 
             % init OG trial pool
