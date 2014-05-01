@@ -1,4 +1,4 @@
-function plot_all_conditions( stats, ymin, ymax, slope, intercept, show_legend)
+function plot_all_conditions_exp1( stats, ymin, ymax, slope, intercept, show_legend)
 %UNTITLED9 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -34,6 +34,7 @@ for FOCAL = 1:-1:0
     handles = [handles, handle];
     legend_titles = [legend_titles; focal_titles(FOCAL+1)];
 end
+
 hold off;
 axis([0 x ymin ymax]);
 set(gca, 'XTickLabel', [{''}, xticklabels, {''}]);

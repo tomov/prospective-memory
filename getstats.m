@@ -112,7 +112,7 @@ PM_miss_OG_hit = size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100;
 
 % show figures
 
-if true
+if false
     figure;
 
     t_range = 1:2000;

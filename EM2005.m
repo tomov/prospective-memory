@@ -1,22 +1,28 @@
-function [subjects, subjects_extra] = EM2005( params )
+function [data, extra] = EM2005( params, exp_id )
 % run a simulation of the E&M with certain parameters and spit out the data
 % for all subjects
 
 params
 
-% from E&M Experiment 1 methods
-subjects_per_condition = 1; % 24;
-blocks_per_condition = 8; %8;
-pm_blocks = [1 3 6 7];
-trials_per_block = 24;
+assert(exp_id == 1 || exp_id == 2);
 
-subjects = [];
-subjects_extra = [];
+% from E&M Experiment 1 & 2 methods
+subjects_per_condition = 24; % 24;
+blocks_per_condition = [8 4];  % exp 1, exp 2
+trials_per_block = [24 40]; % exp 1, exp 2
+pm_blocks_exp1 = [1 3 6 7];
+pm_trials_exp2 = [40 80 120 160];
 
-for OG_ONLY = 0 %0:1
-    for FOCAL =  0:1  % 1:-1:0
+% since we're doing only 1 experiment at a time
+blocks_per_condition = blocks_per_condition(exp_id);
+trials_per_block = trials_per_block(exp_id);
+
+data = [];
+extra = [];
+
+for OG_ONLY = 0:1 %0:1
+    for FOCAL = 1:-1:0  % 1:-1:0
         for EMPHASIS = 0:1 %0:1
-            sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);
 
             % init OG trial pool
             og_stimuli = [
@@ -38,9 +44,10 @@ for OG_ONLY = 0 %0:1
             pm_correct = {'PM', 'PM'};
             
             % generate OG block
-            reps = trials_per_block / size(og_stimuli, 1);
-            og_block = repmat(og_stimuli, reps, 1);
-            og_block_correct = repmat(og_correct, reps, 1);
+            og_block = repmat(og_stimuli, trials_per_block, 1);
+            og_block_correct = repmat(og_correct, trials_per_block, 1);
+            og_block = og_block(1:trials_per_block,:);
+            og_block_correct = og_block_correct(1:trials_per_block,:);
             
             % generate trial sequence (all blocks concatenated)
             stimuli = repmat(og_block, blocks_per_condition, 1);
@@ -50,6 +57,9 @@ for OG_ONLY = 0 %0:1
             
             % insert one PM target in each of the PM blocks
             if ~OG_ONLY
+                %{
+                % every third trial is a PM trial -- this is only for
+                % testing; not used in any of E&M's experiments
                 for i = 1:length(stimuli)
                     if mod(i,3) == 0
                         target_id = mod(i, size(pm_targets, 1)) + 1;
@@ -60,32 +70,39 @@ for OG_ONLY = 0 %0:1
                         is_target(middle) = 1;
                     end
                 end
-                
-                %{
-                for i = 1:length(pm_blocks)
-                    b = pm_blocks(i);
-                    block_start = (b - 1) * trials_per_block + 1;
-                    block_end = b * trials_per_block;
-                    middle = int32((block_start + block_end) / 2);
-                    target_id = mod(i, size(pm_targets, 1)) + 1;
-                    
-                    stimuli(middle,:) = pm_targets(target_id, :);
-                    correct(middle) = pm_correct(target_id);
-                    og_correct(middle) = pm_og_correct(target_id);
-                    is_target(middle) = 1;
-                end
                 %}
                 
-                
+                if exp_id == 1
+                    % in experiment 1, there is a target in blocks 1, 3, 6, 7
+                    for i = 1:length(pm_blocks_exp1)
+                        b = pm_blocks_exp1(i);
+                        block_start = (b - 1) * trials_per_block + 1;
+                        block_end = b * trials_per_block;
+                        middle = int32((block_start + block_end) / 2);
+                        target_id = mod(i, size(pm_targets, 1)) + 1;
+
+                        stimuli(middle,:) = pm_targets(target_id, :);
+                        correct(middle) = pm_correct(target_id);
+                        og_correct(middle) = pm_og_correct(target_id);
+                        is_target(middle) = 1;
+                    end
+                elseif exp_id == 2
+                    % in experiment 2, trials 40, 80, 120, and 160 are
+                    % targets
+                    for i = 1:length(pm_trials_exp2)
+                        target_id = mod(i, size(pm_targets, 1)) + 1;
+                        trial = pm_trials_exp2(i);
+                        stimuli(trial,:) = pm_targets(target_id, :);
+                        correct(trial) = pm_correct(target_id);
+                        og_correct(trial) = pm_og_correct(target_id);
+                        is_target(trial) = 1;                        
+                    end
+                end
             end
             
-            if FOCAL
-                sim.instruction('see:tortoise', 'PM Task', 2);
-            else 
-                sim.instruction('see:tor', 'PM Task', 2);
-            end
-
+            
             % randomize order
+            
             %{
             idx = randperm(size(stimuli, 1))';
             stimuli = stimuli(idx, :);
@@ -93,17 +110,50 @@ for OG_ONLY = 0 %0:1
             correct = correct(idx, :);
             %}
 
-            for s = 1:subjects_per_condition
+            % simulate!
+            
+            sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);            
+            if FOCAL
+                sim.instruction('see:tortoise', 'PM Task', 2);
+            else 
+                sim.instruction('see:tor', 'PM Task', 2);
+            end
+
+            for subject_id = 1:subjects_per_condition
                 [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
 
-                [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
-                    responses, RTs, act, acc, onsets, ...
-                    is_target, correct, og_correct);
-                subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
-                subjects = [subjects; subject];
-                extra = {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, nets};
-                subjects_extra = [subjects_extra; extra];
+                if exp_id == 1
+                    % for experiment 1, each subject = 1 sample
+                    [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                        responses, RTs, act, acc, onsets, ...
+                        is_target, correct, og_correct);
+
+                    subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
+                    data = [data; subject];
+                    %extra = {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, nets};
+                    %exp1_extra = [exp1_extra; extra];
+                    
+                elseif exp_id == 2
+                    % for experiment 2, each block = 1 sample (i.e. 4
+                    % samples per subject)
+                    for block_id = 1:blocks_per_condition
+                        block_start = (block_id - 1) * trials_per_block + 1;
+                        block_end = block_id * trials_per_block;                    
+                        [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = ...
+                            getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                            responses(block_start:block_end), RTs, act, acc, onsets, ...
+                            is_target(block_start:block_end), ...
+                            correct(block_start:block_end), ...
+                            og_correct(block_start:block_end));
+
+                        % put subject and block id's at the end to make it
+                        % compatible with the data from experiment 1
+                        block = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, subject_id, block_id];
+                        data = [data; block];
+                    end                    
+                end    
             end
+            
         end
     end
 end
