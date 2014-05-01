@@ -11,10 +11,10 @@ subjects_per_condition = 1; % 24;
 blocks_per_condition = [8 4];  % exp 1, exp 2
 trials_per_block = [24 40]; % exp 1, exp 2
 pm_blocks_exp1 = [1 3 6 7];
-pm_trials_exp2 = [40 80 120 160];
+pm_trials_exp2 = [40 80 120 160]; % 20 60 100 140];
 
 % since we're doing only 1 experiment at a time
-blocks_per_condition = 4; %blocks_per_condition(exp_id);
+blocks_per_condition = blocks_per_condition(exp_id);
 trials_per_block = trials_per_block(exp_id);
 
 data = [];
@@ -29,7 +29,7 @@ end
 
 for OG_ONLY = 0 %og_range
     for FOCAL = 0 %focal_range
-        for EMPHASIS = 0:1 %emphasis_range
+        for EMPHASIS = 0 %emphasis_range
 
             % init OG trial pool
             og_stimuli = [
@@ -66,8 +66,9 @@ for OG_ONLY = 0 %og_range
             if ~OG_ONLY
                 % every third trial is a PM trial -- this is only for
                 % testing; not used in any of E&M's experiments
+                
                 for i = 1:length(stimuli)
-                    if mod(i,3) == 0
+                    if mod(i,6) == 0
                         target_id = mod(i, size(pm_targets, 1)) + 1;
                         middle = i;
                         stimuli(middle,:) = pm_targets(target_id, :);
@@ -132,7 +133,8 @@ for OG_ONLY = 0 %og_range
                     % for experiment 1, each subject = 1 sample
                     [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
                         responses, RTs, act, acc, onsets, offsets, ...
-                        is_target, correct, og_correct);
+                        is_target, correct, og_correct, ...
+                        false);
 
                     subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
                     data = [data; subject];
@@ -150,13 +152,19 @@ for OG_ONLY = 0 %og_range
                             responses(block_start:block_end), RTs(block_start:block_end), [], [], [], [], ...
                             is_target(block_start:block_end), ...
                             correct(block_start:block_end), ...
-                            og_correct(block_start:block_end));
+                            og_correct(block_start:block_end), ...
+                            false);
 
                         % put subject and block id's at the end to make it
                         % compatible with the data from experiment 1
                         block = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, subject_id, block_id];
                         data = [data; block];
-                    end                    
+                    end
+                    % show picture of whole thing (for debugging)
+                    getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                        responses, RTs, act, acc, onsets, offsets, ...
+                        is_target, correct, og_correct, ...
+                        true);
                 end    
             end
             

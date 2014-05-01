@@ -1,7 +1,7 @@
 
 x = [-1:0.2:5];
 x = 1;
-cycs = 100;
+cycs = 30000;
 
 %{
 I = 0;
@@ -12,9 +12,9 @@ ci = 0; % cross-inhibition
 step = 0.2;
 %}
 
-I = 3;
+I = 2;
 li = -2; % lateral inhibition
-se = -2; % self-excitation
+se = -2 + 0.001; % self-excitation
 ve = -1; % vertical excitation
 ci = -1; % cross-inhibition
 step = 0.1;

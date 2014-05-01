@@ -105,6 +105,13 @@ classdef Simulator < Model
             threshold = bottom + q*(top - bottom);
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
+        
+        % converting WM activations to activations for the feedforward
+        % network
+        function adapt_wm_act_to_ffwd_act(self)
+            self.activation(self.wm_ids) = self.wm_act;
+            %self.activation(self.wm_ids) = self.logistic(self.wm_act * 12 - 6);
+        end
 
         function [responses, RTs, activation_log, accumulators_log, onsets, offsets, net_log] = trial(self, stimuli)
             % initialize activations and outputs
@@ -166,8 +173,13 @@ classdef Simulator < Model
                     % trial),
                     % or after a PM switch
                     if cycle < self.INSTRUCTION_CYLCES && (ord == 1 || switched_to_PM_task)
-                        self.wm_act = self.init_wm;
-                        self.activation(self.wm_ids) = self.wm_act;
+                        if ord == 1
+                            self.wm_act = self.init_wm;
+                        else
+                            assert(switched_to_PM_task);
+                            self.wm_act(1:2) = self.init_wm(1:2); % only reset tasks FIXME
+                        end
+                        self.adapt_wm_act_to_ffwd_act();
                     end
 
                     % log activation for plotting
@@ -200,6 +212,13 @@ classdef Simulator < Model
                     self.net_input(self.wm_ids) = self.activation(self.ffwd_ids) * self.weights(self.ffwd_ids, self.wm_ids) ...
                         + self.wm_act * self.weights(self.wm_ids, self.wm_ids) ...
                         + self.bias(self.wm_ids);
+                    
+                    % on instruction, oscillate around initial WM
+                    % activations -- WTF bro
+                    %if cycle < self.INSTRUCTION_CYLCES && (ord == 1 || switched_to_PM_task)
+                    %    self.net_input(self.wm_ids) = self.net_input(self.wm_ids) + (self.init_wm - self.wm_act);
+                    %    self.adapt_wm_act_to_ffwd_act();
+                    %end
                     % for debugging...
                     %if cycles + cycle < 10
                     %    fprintf('%d: %.4f %.4f\n', cycles + cycle, self.activation(1), self.net_input(self.unit_id('PM Task')));
@@ -224,7 +243,7 @@ classdef Simulator < Model
                     self.wm_act = self.wm_act + self.STEP_SIZE * self.net_input(self.wm_ids);
                     self.wm_act = min(self.wm_act, self.MAXIMUM_ACTIVATION);
                     self.wm_act = max(self.wm_act, self.MINIMUM_ACTIVATION);
-                    self.activation(self.wm_ids) = self.wm_act;
+                    self.adapt_wm_act_to_ffwd_act();
                     
                     % update evidence accumulators (after network has
                     % settled)
@@ -253,8 +272,9 @@ classdef Simulator < Model
                 %switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
                 % TODO hacky...
                 assert(length(self.resting_wm) == length(self.wm_act));
+                %switched_to_PM_task = (self.wm_act(2) > self.wm_act(1) - 0.1);
                 switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
-                switched_to_PM_task = true; % FIXME change before push
+                %switched_to_PM_task = true; % FIXME change before push
 
                 % record response and response time
                 output = self.units{output_id};
