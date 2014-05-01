@@ -254,7 +254,7 @@ classdef Simulator < Model
                 % TODO hacky...
                 assert(length(self.resting_wm) == length(self.wm_act));
                 switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
-                switched_to_PM_task = true;
+                switched_to_PM_task = true; % FIXME change before push
 
                 % record response and response time
                 output = self.units{output_id};

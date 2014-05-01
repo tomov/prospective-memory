@@ -15,7 +15,7 @@ classdef Model < handle
         INSTRUCTION_CYLCES = 2/Model.TAU;
         RESET_CYCLES = Model.INSTRUCTION_CYLCES;
         SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
-        EVIDENCE_ACCUM_SIGMA = 0.08;
+        EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
         EVIDENCE_ACCUM_THRESHOLD = 1.5;
         
@@ -60,7 +60,7 @@ classdef Model < handle
         BIAS_FOR_OUTPUTS = 0;
         OUTPUT_INHIBITION = -3;
         
-        RESPONSE_TO_OUTPUT = 2;
+        RESPONSE_TO_OUTPUT = 1;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
                 
         % task representation
@@ -71,7 +71,7 @@ classdef Model < handle
         
         ATTENTION_TO_TASK = -1;
         
-        HIPPO_TO_TASK = 10;
+        HIPPO_TO_TASK = 30;
         %PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch --
         %DEPRECATEd; see hippo
         

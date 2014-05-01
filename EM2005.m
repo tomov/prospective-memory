@@ -14,7 +14,7 @@ pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160];
 
 % since we're doing only 1 experiment at a time
-blocks_per_condition = 2; %blocks_per_condition(exp_id);
+blocks_per_condition = 4; %blocks_per_condition(exp_id);
 trials_per_block = trials_per_block(exp_id);
 
 data = [];
@@ -28,7 +28,7 @@ if exp_id == 2
 end
 
 for OG_ONLY = 0 %og_range
-    for FOCAL = 1 %focal_range
+    for FOCAL = 0 %focal_range
         for EMPHASIS = 0:1 %emphasis_range
 
             % init OG trial pool

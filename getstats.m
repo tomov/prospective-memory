@@ -174,7 +174,7 @@ if true
     ylim(y_lim);
     line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
     line([offset_plot offset_plot],y_lim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5])
-
+%{
     figure;
 
     subplot(1, 2, 1);
@@ -195,5 +195,6 @@ if true
     ylim([0 100]);
     title('Fraction of responses (%)', 'FontWeight','bold');
     ylim([0 100]);
-
+%}
+    
 end
