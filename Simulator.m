@@ -6,6 +6,8 @@ classdef Simulator < Model
     properties (Access = public)
         wm_capacity = 2;
         attention_factor = 0; % obsolete... for now
+        next_available_hippo_id = 1;
+        resting_wm;
         net_input;
         net_input_avg;
         accumulators;
@@ -35,7 +37,19 @@ classdef Simulator < Model
             act = 1 ./ (1 + exp(-net));
         end
         
-        function instruction(self, perceptions, targets, secs)
+        function threewayEM(self, stimulus, context, response)
+            assert(self.next_available_hippo_id <= length(self.hippo_ids));
+            stimulus_id = self.unit_id(stimulus);
+            context_id = self.unit_id(context);
+            response_id = self.unit_id(response);
+            hippo_id = self.hippo_ids(self.next_available_hippo_id);
+            self.weights(stimulus_id, hippo_id) = self.STIMULUS_TO_HIPPO;
+            self.weights(context_id, hippo_id) = self.CONTEXT_TO_HIPPO;
+            self.weights(hippo_id, response_id) = self.HIPPO_TO_TASK;
+            self.next_available_hippo_id = self.next_available_hippo_id + 1;
+        end
+        
+        function instruction_old(self, perceptions, targets, secs)
             from_ids = self.string_to_ids(perceptions);
             to_ids = self.string_to_ids(targets);
             from = zeros(1, self.N);
@@ -83,7 +97,7 @@ classdef Simulator < Model
             self.net_input(ids) = self.net_input(ids) - threshold;
         end
 
-        function [responses, RTs, activation_log, accumulators_log, onsets, net_log] = trial(self, stimuli)
+        function [responses, RTs, activation_log, accumulators_log, onsets, offsets, net_log] = trial(self, stimuli)
             % initialize activations and outputs
             trial_duration = sum(cat(2, stimuli{:, 2})) * self.CYCLES_PER_SEC;
             self.accumulators = zeros(1, self.Nout);
@@ -96,9 +110,11 @@ classdef Simulator < Model
             self.wm_act = zeros(1, size(self.wm_ids, 2));
             self.wm_net = zeros(1, size(self.wm_ids, 2));
             self.net_input_avg = zeros(1, self.N);
+            self.resting_wm = [];
             responses = [];
             RTs = [];
             onsets = [];
+            offsets = [];
             cycles = 0;
             switched_to_PM_task = false;
             
@@ -140,7 +156,7 @@ classdef Simulator < Model
                     % initialize WM at beginning of block (i.e. first
                     % trial),
                     % or after a PM switch
-                    if cycle < 10 && (ord == 1 || switched_to_PM_task)
+                    if cycle < self.INSTRUCTION_CYLCES && (ord == 1 || switched_to_PM_task)
                         self.wm_act = self.init_wm;
                         self.activation(self.wm_ids) = self.wm_act;
                     end
@@ -158,8 +174,12 @@ classdef Simulator < Model
                         m = abs(mean(m, 2));
                         %fprintf('%d -> %.6f, %6f\n', cycle, mean(m), std(m));
                         if mean(m) < self.SETTLE_MEAN_EPS && std(m) < self.SETTLE_STD_EPS
+                            % it has settled
                             is_settled = true;
                             settle_cycles = cycle;
+                            if ord == 1
+                                self.resting_wm = self.wm_act;
+                            end
                             % save stimulus onset
                             onsets = [onsets; cycles + cycle];
                         end
@@ -181,6 +201,8 @@ classdef Simulator < Model
                     noise(self.input_ids) = 0;
                     % TODO no noise... for now
                     %self.net_input = self.net_input + noise;
+                    
+                    %self.bias(self.wm_ids) = self.bias(self.wm_ids) - 0.00001;
                     
                     % update activation levels for feedforward part of the
                     % network
@@ -221,11 +243,13 @@ classdef Simulator < Model
                 
                 %switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
                 % TODO hacky...
-                switched_to_PM_task = (self.wm_act(2) > self.init_wm(2) + 0.01);
+                assert(length(self.resting_wm) == length(self.wm_act));
+                switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
                 %switched_to_PM_task = true;
 
                 % record response and response time
                 output = self.units{output_id};
+                offsets = [offsets; cycles + cycle];
                 responses = [responses; {output}];
                 RTs = [RTs; RT];
                 cycles = cycles + cycle;

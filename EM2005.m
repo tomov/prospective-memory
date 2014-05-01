@@ -14,7 +14,7 @@ pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160];
 
 % since we're doing only 1 experiment at a time
-blocks_per_condition = blocks_per_condition(exp_id);
+blocks_per_condition = 2; %blocks_per_condition(exp_id);
 trials_per_block = trials_per_block(exp_id);
 
 data = [];
@@ -27,9 +27,9 @@ if exp_id == 2
     emphasis_range = 0;
 end
 
-for OG_ONLY = og_range
-    for FOCAL = focal_range
-        for EMPHASIS = emphasis_range
+for OG_ONLY = 0 %og_range
+    for FOCAL = 1 %focal_range
+        for EMPHASIS = 0 %emphasis_range
 
             % init OG trial pool
             og_stimuli = [
@@ -67,7 +67,7 @@ for OG_ONLY = og_range
                 % every third trial is a PM trial -- this is only for
                 % testing; not used in any of E&M's experiments
                 for i = 1:length(stimuli)
-                    if mod(i,3) == 0
+                    if mod(i,5) == 0
                         target_id = mod(i, size(pm_targets, 1)) + 1;
                         middle = i;
                         stimuli(middle,:) = pm_targets(target_id, :);
@@ -120,23 +120,23 @@ for OG_ONLY = og_range
             
             sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);            
             if FOCAL
-                sim.instruction('see:tortoise', 'PM Task', 2);
+                sim.threewayEM('see:tortoise', 'OG Task', 'PM Task');
             else 
-                sim.instruction('see:tor', 'PM Task', 2);
+                sim.threewayEM('see:tor', 'OG Task', 'PM Task');
             end
 
             for subject_id = 1:subjects_per_condition
-                [responses, RTs, act, acc, onsets, nets] = sim.trial(stimuli);
+                [responses, RTs, act, acc, onsets, offsets, nets] = sim.trial(stimuli);
 
                 if exp_id == 1
                     % for experiment 1, each subject = 1 sample
                     [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
-                        responses, RTs, act, acc, onsets, ...
+                        responses, RTs, act, acc, onsets, offsets, ...
                         is_target, correct, og_correct);
 
                     subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
                     data = [data; subject];
-                    %extra = {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, nets};
+                    %extra = {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, offsets, nets};
                     %exp1_extra = [exp1_extra; extra];
                     
                 elseif exp_id == 2
@@ -147,7 +147,7 @@ for OG_ONLY = og_range
                         block_end = block_id * trials_per_block;                    
                         [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = ...
                             getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
-                            responses(block_start:block_end), RTs(block_start:block_end), [], [], [], ...
+                            responses(block_start:block_end), RTs(block_start:block_end), [], [], [], [], ...
                             is_target(block_start:block_end), ...
                             correct(block_start:block_end), ...
                             og_correct(block_start:block_end));

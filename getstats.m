@@ -1,4 +1,4 @@
-function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, is_target, correct, og_correct)
+function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, offsets, is_target, correct, og_correct)
 
 OG_count = 0;
 PM_count = 0;
@@ -112,13 +112,14 @@ PM_miss_OG_hit = size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100;
 
 % show figures
 
-if false
+if true
     figure;
 
     t_range = 1:2000;
     y_lim = [sim.MINIMUM_ACTIVATION - 0.1 sim.MAXIMUM_ACTIVATION + 0.1];
     bar_names = {'OG correct', 'PM hit', 'false alarm', 'OG wrong', 'PM miss', 'PM OG' 'OG timeout', 'PM timeout'};
     onset_plot = onsets(onsets < t_range(end));
+    offset_plot = offsets(offsets < t_range(end));
 
     subplot(4, 2, 1);
     plot(act(t_range, sim.output_ids));
@@ -156,6 +157,7 @@ if false
     title('Task Representation');
     ylim(y_lim);
     line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
+    line([offset_plot offset_plot],y_lim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5])
 
     subplot(4, 2, 6);
     plot(act(t_range, sim.attention_ids));
@@ -163,6 +165,15 @@ if false
     title('Feature Attention');
     ylim(y_lim);
     line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
+    line([offset_plot offset_plot],y_lim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5])
+
+    subplot(4, 2, 8);
+    plot(act(t_range, sim.hippo_ids));
+    legend(sim.units(sim.hippo_ids));
+    title('Hippocampus');
+    ylim(y_lim);
+    line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
+    line([offset_plot offset_plot],y_lim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5])
 
     figure;
 

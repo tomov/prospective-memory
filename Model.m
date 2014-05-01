@@ -17,7 +17,7 @@ classdef Model < handle
         SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
         EVIDENCE_ACCUM_SIGMA = 0.08;
         EVIDENCE_ACCUM_ALPHA = 0.1;
-        EVIDENCE_ACCUM_THRESHOLD = 1.5;
+        EVIDENCE_ACCUM_THRESHOLD = 1.1;
         
         % activation levels
 
@@ -49,7 +49,7 @@ classdef Model < handle
         BIAS_FOR_RESPONSES = -12;
         RESPONSE_INHIBITION = -5;
         
-        PERCEPTION_TO_RESPONSE = 4;
+        PERCEPTION_TO_RESPONSE = 5;
         PERCEPTION_TO_RESPONSE_INHIBITION = 0;
 
         TASK_TO_RESPONSE = 8;
@@ -71,7 +71,9 @@ classdef Model < handle
         
         ATTENTION_TO_TASK = -1;
         
-        PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch
+        HIPPO_TO_TASK = 10;
+        %PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch --
+        %DEPRECATEd; see hippo
         
         % feature attention
         
@@ -80,7 +82,14 @@ classdef Model < handle
         ATTENTION_SELF = -2;
         
         TASK_TO_ATTENTION = -1;
-
+        
+        % hippocampus
+        
+        BIAS_FOR_HIPPO = -15;
+        
+        STIMULUS_TO_HIPPO = 20;
+        CONTEXT_TO_HIPPO = 0;
+        
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;
         
@@ -102,6 +111,7 @@ classdef Model < handle
         output_units
         task_units
         attention_units
+        hippo_units
         
         input_ids
         perception_ids
@@ -109,6 +119,7 @@ classdef Model < handle
         output_ids
         task_ids
         attention_ids
+        hippo_ids
         
         wm_ids
         ffwd_ids
@@ -202,6 +213,11 @@ classdef Model < handle
                 'Monitor tortoise', ...
                 'Monitor tor'
                 };
+            self.hippo_units = {
+                'hippo 1', ...
+                'hippo 2', ...
+                'hippo 3'
+                };
             self.units = [
                 self.input_units, ...
                 self.perception_units, ...
@@ -209,6 +225,7 @@ classdef Model < handle
                 self.output_units, ...
                 self.task_units, ...
                 self.attention_units, ...
+                self.hippo_units, ...
                 {'timeout'}
                 ];
             
@@ -222,8 +239,14 @@ classdef Model < handle
             self.output_ids = cellfun(@self.unit_id, self.output_units);
             self.task_ids = cellfun(@self.unit_id, self.task_units);
             self.attention_ids = cellfun(@self.unit_id, self.attention_units);
+            self.hippo_ids = cellfun(@self.unit_id, self.hippo_units);
             
-            self.ffwd_ids = [self.input_ids self.perception_ids self.response_ids self.output_ids];
+            self.ffwd_ids = [
+                self.input_ids ...
+                self.perception_ids ...
+                self.response_ids ...
+                self.output_ids ...
+                self.hippo_ids];
             self.wm_ids = [self.task_ids self.attention_ids];
 
             % ---==== specify connections between units ====---
@@ -277,7 +300,6 @@ classdef Model < handle
                 self.unit_id('No Match 1')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('No Match 2')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
-                
             ];
         
             % WM LCA vertical mutual inhibition
@@ -349,6 +371,7 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
+            self.bias(self.hippo_ids) = self.BIAS_FOR_HIPPO;
         end
         
         function EM = print_EM(self)
