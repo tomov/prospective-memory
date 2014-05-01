@@ -18,8 +18,8 @@ classdef Simulator < Model
     end
     
     methods
-        function self = Simulator(FOCAL, EMPHASIS, OG_ONLY, params)
-            self = self@Model(FOCAL, EMPHASIS, OG_ONLY, params);
+        function self = Simulator(params)
+            self = self@Model(params);
             self.Nout = size(self.output_ids, 2);
         end
         
@@ -49,13 +49,17 @@ classdef Simulator < Model
             self.next_available_hippo_id = self.next_available_hippo_id + 1;
         end
         
-        function instruction(self, target)
-            target_unit = strcat('see', {' '}, target); % get perception unit name
-            self.threewayEM(target_unit{1}, 'OG Task', 'PM Task');
-            target_monitor_unit = strcat('Monitor ', {' '}, target);
-            target_monitor_id = self.unit_id(target_monitor_unit{1});
-            % make WM unit available
-            self.bias(target_monitor_id) = self.BIAS_FOR_ATTENTION;
+        function instruction(self, targets)
+            for target = targets
+                target_unit = strcat('see', {' '}, target); % get perception unit name
+                self.threewayEM(target_unit{1}, 'OG Task', 'PM Task');
+                target_monitor_unit = strcat('Monitor ', {' '}, target);
+                target_monitor_id = self.unit_id(target_monitor_unit{1});
+                % make WM unit available
+                self.bias(target_monitor_id) = self.BIAS_FOR_ATTENTION;
+                % and give it some initial activation (according to params)
+                self.init_wm(self.wm_ids == target_monitor_id) = self.target_init;
+            end
         end
         
         function instruction_old(self, perceptions, targets, secs)

@@ -67,7 +67,7 @@ classdef Model < handle
         
         BIAS_FOR_TASK = 3;
         TASK_INHIBITION = -2;
-        TASK_SELF = -2 + 0.0006;
+        TASK_SELF = -2 + 0.0005;
         
         ATTENTION_TO_TASK = -1;
         
@@ -80,7 +80,7 @@ classdef Model < handle
         BIAS_WHEN_OFF = -100;
         BIAS_FOR_ATTENTION = 3;
         ATTENTION_INHIBITION = -2;
-        ATTENTION_SELF = -2 + 0.0006;
+        ATTENTION_SELF = -2 + 0.0005;
         
         TASK_TO_ATTENTION = -1;
         
@@ -129,10 +129,7 @@ classdef Model < handle
         weights
         bias
         init_wm
-        
-        FOCAL
-        EMPHASIS
-        OG_ONLY
+        target_init
     end
     
     methods
@@ -180,26 +177,22 @@ classdef Model < handle
             end
         end
         
-        function self = Model(FOCAL, EMPHASIS, OG_ONLY, params)
-            % initialize free parameters
-            self.FOCAL = FOCAL;
-            self.EMPHASIS = EMPHASIS;
-            self.OG_ONLY = OG_ONLY;
-            focal_low_init_wm = params(1:5);
-            focal_high_init_wm = params(6:10);
-            nonfocal_low_init_wm = params(11:15);
-            nonfocal_high_init_wm = params(16:20);
-            self.BIAS_FOR_TASK = params(21);
-            self.BIAS_FOR_ATTENTION = params(22);
-
-            
+        function self = Model(params)
             % specify unit names in each layer
-            self.input_units = {
-                'tortoise', 'physics', 'crocodile', 'math', ... % (focal targets)
+            words = {
+                'tortoise', 'physics', 'crocodile', 'math', ... % words
+                'dog', 'cat', 'panda', 'kiwi', 'monkey', ... % additional words for Exp 3/4
+                };
+            categories = {
                 'a subject', 'an animal', ... % categories
                 };
+            syllables = {
+                'tor'
+                };
+            self.input_units = [words categories];
+            % PERCEPTION MUST BE IN SAME ORDER AS INPUT UNITS
             self.perception_units = strcat('see', {' '}, self.input_units')';
-            self.perception_units = [self.perception_units, 'see tor'];
+            self.perception_units = [self.perception_units, strcat('see', {' '}, syllables')';];
             self.response_units = {
                 'A Subject', 'An Animal', 'No Match 1', 'No Match 2', 'PM Response'
                 };
@@ -210,14 +203,19 @@ classdef Model < handle
                 'OG Task', 'PM Task'
                 };
             self.attention_units = {
-                'OG features', ...
-                'Monitor tortoise', ...
-                'Monitor tor'
+                'OG features'
                 };
+            self.attention_units = [self.attention_units, strcat('Monitor ', {' '}, words')'];
+            self.attention_units = [self.attention_units, strcat('Monitor ', {' '}, syllables')'];
             self.hippo_units = {
                 'hippo 1', ...
                 'hippo 2', ...
-                'hippo 3'
+                'hippo 3', ...
+                'hippo 4', ...
+                'hippo 5', ...
+                'hippo 6', ...
+                'hippo 7', ...
+                'hippo 8'
                 };
             self.units = [
                 self.input_units, ...
@@ -250,6 +248,15 @@ classdef Model < handle
                 self.hippo_ids];
             self.wm_ids = [self.task_ids self.attention_ids];
 
+            % initialize free parameters (based on PM instruction, task, etc)
+            self.init_wm = zeros(1, length(self.wm_ids));
+            self.init_wm(self.wm_ids == self.unit_id('OG Task')) = params(1);
+            self.init_wm(self.wm_ids == self.unit_id('PM Task')) = params(2);
+            self.init_wm(self.wm_ids == self.unit_id('OG features')) = params(3);
+            self.target_init = params(4);
+            self.BIAS_FOR_TASK = params(5);
+            self.BIAS_FOR_ATTENTION = params(6);
+
             % ---==== specify connections between units ====---
             
             self.connections = [
@@ -272,12 +279,22 @@ classdef Model < handle
                 self.unit_id('see math')                   , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see dog')                    , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see cat')                    , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see panda')                  , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see kiwi')                   , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see monkey')                 , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % -- default response is No Match
                 self.unit_id('see physics')                , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see math')                   , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see tortoise')               , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see crocodile')              , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see dog')                    , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see cat')                    , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see panda')                  , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see kiwi')                   , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see monkey')                 , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
 
                 % -- TODO FIXME HACK to make the PM task work, you need to put
                 % it up to baseline (the winning OG response gets x2 inputs)
@@ -287,13 +304,18 @@ classdef Model < handle
                 self.unit_id('see math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see dog')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see cat')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see panda')                  , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see kiwi')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see monkey')                 , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 
-                % raw inputs to perception -- PM targets
+                % raw inputs to perception -- nonfocal PM targets
                 self.unit_id('tortoise')               , self.unit_id('see tor')         , self.INPUT_TO_PERCEPTION;
                 
-                % attention to particular items -- PM targets
-                self.unit_id('Monitor tortoise')       , self.unit_id('see tortoise')         , self.ATTENTION_TO_PERCEPTION;
+                % attention to perception -- nonfocal PM targets
                 self.unit_id('Monitor tor')            , self.unit_id('see tor')              , self.ATTENTION_TO_PERCEPTION;
+                
                 % responses to outputs                
                 self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
@@ -311,35 +333,13 @@ classdef Model < handle
             
             % OG attention to perception
             from = self.unit_id('OG features');
-            to = cellfun(@self.unit_id, strcat('see', {' '}, {
-                'tortoise', 'physics', 'crocodile', 'math', ...
-                'a subject', 'an animal'
-                }')');
+            to = cellfun(@self.unit_id, strcat('see', {' '}, [words categories]')');
             self.forward_all_to_all(from, to, self.ATTENTION_TO_PERCEPTION);
             
-            % PM instructions
-            if OG_ONLY
-                self.init_wm = [1 0 1 0 0];
-            else       
-                if FOCAL
-                    if ~EMPHASIS
-                        % focal, low emphasis
-                        self.init_wm = focal_low_init_wm;
-                    else
-                        % focal, high emphasis
-                        self.init_wm = focal_high_init_wm;
-                    end
-                else
-                    if ~EMPHASIS
-                        % nonfocal, low emphasis
-                        self.init_wm = nonfocal_low_init_wm;
-                    else
-                        % nonfocal, high emphasis
-                        self.init_wm = nonfocal_high_init_wm;
-                    end
-                end
-            end
-            
+            % attention (target monitoring) to perception
+            from = cellfun(@self.unit_id, strcat('Monitor', {' '}, words')');
+            to = cellfun(@self.unit_id, strcat('see', {' '}, words')');
+            self.forward_parallel(from, to, self.ATTENTION_TO_PERCEPTION);
 
             % raw inputs to perception (cont'd)
             self.forward_parallel(self.input_ids, self.perception_ids, self.INPUT_TO_PERCEPTION);
@@ -370,13 +370,9 @@ classdef Model < handle
             self.bias(self.response_ids) = self.BIAS_FOR_RESPONSES;
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
-            self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
-            self.bias(self.hippo_ids) = self.BIAS_FOR_HIPPO;
-            
-            % the target WM units do not exist until PM instruction is
-            % given
-            self.bias(self.unit_id('Monitor tortoise')) = self.BIAS_WHEN_OFF;
-            self.bias(self.unit_id('Monitor tor')) = self.BIAS_WHEN_OFF;
+            self.bias(self.attention_ids) = self.BIAS_WHEN_OFF; % all attention units don't exist by default
+            self.bias(self.unit_id('OG features')) = self.BIAS_FOR_ATTENTION; % ...except for OG features
+            self.bias(self.hippo_ids) = self.BIAS_FOR_HIPPO;            
         end
         
         function EM = print_EM(self)
