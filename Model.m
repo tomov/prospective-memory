@@ -35,13 +35,13 @@ classdef Model < handle
         
         % perception
         
-        BIAS_FOR_PERCEPTION = -20;
+        BIAS_FOR_PERCEPTION = -18;
         PERCEPTION_INHIBITION = 0;
         
         INPUT_TO_PERCEPTION = 15;
         INPUT_TO_PERCEPTION_INHIBITION = 0;
         
-        ATTENTION_TO_PERCEPTION = 10;
+        ATTENTION_TO_PERCEPTION = 8;
         ATTENTION_TO_PERCEPTION_INHIBITION = 0;
 
         % responses
@@ -67,11 +67,11 @@ classdef Model < handle
         
         BIAS_FOR_TASK = 3;
         TASK_INHIBITION = -2;
-        TASK_SELF = -2 + 0.0003;
+        TASK_SELF = -2 + 0.0006;
         
         ATTENTION_TO_TASK = -1;
         
-        HIPPO_TO_TASK = 15;
+        HIPPO_TO_TASK = 10;
         %PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch --
         %DEPRECATEd; see hippo
         
@@ -80,15 +80,15 @@ classdef Model < handle
         BIAS_WHEN_OFF = -100;
         BIAS_FOR_ATTENTION = 3;
         ATTENTION_INHIBITION = -2;
-        ATTENTION_SELF = -2 + 0.0003;  % !!!!!! self-excitation bitches!!! => once you're gone, you're gone (re PM)
+        ATTENTION_SELF = -2 + 0.0006;
         
         TASK_TO_ATTENTION = -1;
         
         % hippocampus
         
-        BIAS_FOR_HIPPO = -13;
+        BIAS_FOR_HIPPO = -12;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
         
-        STIMULUS_TO_HIPPO = 20;
+        STIMULUS_TO_HIPPO = 30;
         CONTEXT_TO_HIPPO = 0;
         
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration

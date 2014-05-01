@@ -28,7 +28,7 @@ if exp_id == 2
 end
 
 for OG_ONLY = 0 %og_range
-    for FOCAL = 0 %focal_range
+    for FOCAL = 1 %focal_range
         for EMPHASIS = 0 %emphasis_range
 
             % init OG trial pool
@@ -68,7 +68,7 @@ for OG_ONLY = 0 %og_range
                 % testing; not used in any of E&M's experiments
                 
                 for i = 1:length(stimuli)
-                    if mod(i,6) == 0
+                    if mod(i,4) == 0
                         target_id = mod(i, size(pm_targets, 1)) + 1;
                         middle = i;
                         stimuli(middle,:) = pm_targets(target_id, :);
@@ -77,6 +77,7 @@ for OG_ONLY = 0 %og_range
                         is_target(middle) = 1;
                     end
                 end
+                
                 
                 %{
                 if exp_id == 1
@@ -106,6 +107,7 @@ for OG_ONLY = 0 %og_range
                     end
                 end
                 %}
+                
             end
             
             % randomize order
