@@ -17,7 +17,7 @@
  (see EM2005 exp 2)
 %}
 
-DO_PLOT = true;
+DO_PLOT = false;
 blocks = data;
 
 
@@ -142,8 +142,6 @@ OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_s
 
 
 
-%{
-
 
 
 % ---------------------------------------------------
@@ -153,17 +151,17 @@ OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_s
 
 
 
-PM_hit = subjects(:, 7);
+PM_hit = blocks(:, 7);
 
 % ----------------------- PM hit rate in focal vs. nonfocal ----
 
-PM_hit_focal = PM_hit(subjects(:, 2) == 1);
-PM_hit_nonfocal = PM_hit(subjects(:, 2) == 0);
+PM_hit_focal = PM_hit(blocks(:, 2) == 1);
+PM_hit_nonfocal = PM_hit(blocks(:, 2) == 0);
 [p, table] = anova1([PM_hit_focal PM_hit_nonfocal], {'Focal', 'Nonfocal'}, 'off');
 
 fprintf('\n\n----- PM Performance: Focal vs. Nonfocal ------\n');
 fprintf('\n  Empirical Data -------\n');
-fprintf('                 F = 20.03\n');
+fprintf('                 F = 18.38\n');
 fprintf('\n  Simulation Data -------\n');
 fprintf('                 F = %.4f, p = %f\n', table{2,5}, p(1));
 
@@ -171,7 +169,7 @@ if DO_PLOT
     Ms = zeros(1, 2);
     SEMs = zeros(1, 2);
     for FOCAL = 1:-1:0
-        samples = subjects(subjects(:, 1) == 0 & subjects(:, 2) == FOCAL, 7);
+        samples = blocks(blocks(:, 1) == 0 & blocks(:, 2) == FOCAL, 7);
         M = mean(samples);
         SD = std(samples);
         SEM = SD / sqrt(length(samples));
@@ -182,7 +180,7 @@ if DO_PLOT
     figure;
     
     subplot(3, 2, 1);
-    barweb([90 67], [16 33]/sqrt(subjects_per_condition), 1, {}, ...
+    barweb([93 61], [16 32]/sqrt(subjects_per_condition), 1, {}, ...
         'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
     legend({'Focal', 'Nonfocal'});
     ylim([30 100]);
@@ -195,83 +193,33 @@ end
 
 
 
-% --------------------- PM hit rate in high emphasis vs. low emphasis ----
+% --------------------- PM hit rate in diff. blocks ----
 
-PM_hit_low = PM_hit(subjects(:, 3) == 0);
-PM_hit_high = PM_hit(subjects(:, 3) == 1);
-[p, table] = anova1([PM_hit_high PM_hit_low], {'High', 'Low'}, 'off');
 
-fprintf('\n\n----- PM Performance: High vs. Low Emphasis ------\n');
+[p, table] = anovan(PM_hit, {blocks(:, 10)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- PM Performance: Blocks ------\n');
 fprintf('\n  Empirical Data -------\n');
-fprintf('                 F = 10.41\n');
+fprintf('                 F = 2.99\n');
 fprintf('\n  Simulation Data -------\n');
-fprintf('                 F = %.4f, p = %f\n', table{2,5}, p(1));
-
-if DO_PLOT
-    Ms = zeros(1, 2);
-    SEMs = zeros(1, 2);
-    for EMPHASIS = 0:1
-        samples = subjects(subjects(:, 1) == 0 & subjects(:, 3) == EMPHASIS, 7);
-        M = mean(samples);
-        SD = std(samples);
-        SEM = SD / sqrt(length(samples));
-        Ms(EMPHASIS + 1) = M;
-        SEMs(EMPHASIS + 1) = SEM;
-    end
-    
-    subplot(3, 2, 3);
-    barweb([70 87], [32 22]/sqrt(subjects_per_condition), 1, {}, ...
-        'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
-    legend({'Low Emphasis', 'High Emphasis'});
-    ylim([30 100]);
-
-    subplot(3, 2, 4);
-    barweb(Ms, SEMs, 1, {}, ...
-        'Simulation Data', 'PM Condition');
-    ylim([30 100]);
-end
+fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 
 
-% -------------- PM hit rate in high emph vs. low emph. for different focalities 
+% --------------------- PM hit rate in diff blocks, split by focal vs. nonfocal
 
-[p, table] = anovan(PM_hit, {subjects(:, 2) subjects(:, 3)}, 'model','interaction', 'display', 'off');
-
-fprintf('\n\n----- PM Performance: Interaction between Focality and Emphasis ------\n');
-fprintf('\n  Empirical Data -------\n');
-fprintf('    Focality:    F = 20.03\n');
-fprintf('    Emphasis:    F = 10.41\n');
-fprintf('    Interaction: F = 5.73\n');
-fprintf('\n  Simulation Data -------\n');
-fprintf('    Focality:    F = %.4f, p = %f\n', table{2,6}, p(1));
-fprintf('    Emphasis:    F = %.4f, p = %f\n', table{3,6}, p(2));
-fprintf('    Interaction: F = %.4f, p = %f\n', table{4,6}, p(3));
-
-if DO_PLOT
-    titles = {'Empirical Data', 'Simulation Data'};
-    sources = {empirical_stats, simulation_stats};
-    for s_id = 1:2
-        subplot(3, 2, s_id + 4);
-
-        stats = sources{s_id};
-        Ms = zeros(2);
-        SEMs = zeros(2);
-        for FOCAL = 1:-1:0
-            for EMPHASIS = 0:1
-                Ms(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
-                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 10);
-                SEMs(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
-                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 11);
-            end
-        end
-
-        barweb(Ms, SEMs, 1, {'Focal', 'Nonfocal'}, ...
-            titles{s_id}, 'PM Condition');
-        if s_id == 1
-            legend({'Low Emphasis', 'High Emphasis'});
-            ylabel('PM Hit rate (%)');
-        end
-        ylim([30 100]);
-    end
+empirical_Fs = [
+    8.76;  % nonfocal
+    0.5;   % focal (F < 1)
+    ];
+focal_titles = {'Nonfocal', 'Focal'};
+for FOCAL = 1:-1:0
+    samples = blocks(blocks(:, 1) == 0 & blocks(:, 2) == FOCAL, :)
+    [p, table] = anovan(samples(:, 7), {samples(:, 10)}, 'model','full', 'display', 'off');
+    fprintf('\n\n----- PM hit rate: %s ------\n', focal_titles{FOCAL+1});
+    fprintf('\n  Empirical Data -------\n');
+    fprintf('                 F = %.2f\n', empirical_Fs(FOCAL+1, EMPHASIS+1));
+    fprintf('\n  Simulation Data -------\n');
+    fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 end
 
 
@@ -284,22 +232,80 @@ end
 % ---------------------------------------------------
 
 
+
+
 % ------------------ OG accuracy
 
-OG_hit = subjects(:, 5);
+OG_hit = blocks(:, 5);
 
-[p, table] = anovan(OG_hit, {subjects(:, 1) subjects(:, 2) subjects(:, 3)}, 'model','full', 'display', 'off');
+[p, table] = anovan(OG_hit, {blocks(:, 1) blocks(:, 2) blocks(:, 10)}, 'model','full', 'display', 'off');
 
-fprintf('\n\n----- OG accuracy: 2x2x2 ANOVA ------\n');
+fprintf('\n\n----- OG accuracy: 2x2x4 ANOVA ------\n');
 table(1:8,6)
 p
-fprintf('===> shit, some of these are significant... oh well....\n');
+fprintf('none of these should be significant (i.e. you SHOULD have F < 1 everywhere)\n');
 
 
 
-% ----------------- OG RT: focal vs. nonfocal
 
-OG_RTs = subjects(:, 4);
+% ----------------- OG RT: PM vs. No PM
+
+
+OG_RTs = blocks(:, 4);
+
+[p, table] = anovan(OG_RTs, {blocks(:, 1)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG RTs: PM vs. No PM ------\n');
+fprintf('\n  Empirical Data -------\n');
+fprintf('                 F = 33.15\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+
+
+% ----------------- OG RT: 2x2x2 ANOVA
+
+
+[p, table] = anovan(OG_RTs, {blocks(:, 1) blocks(:, 2) blocks(:, 10)}, 'model','full', 'display', 'off');
+
+fprintf('\n\n----- OG RTs: 2x2x4 ANOVA ------\n');
+table(1:8,6)
+p
+fprintf(' F(3, 138) = the 3-way interaction => (empirical data) F = 3.71');
+
+% ----------------- OG RT cost: focal vs. nonfocal
+
+
+M_OG_only = mean(OG_RTs(blocks(:, 1) == 1));
+
+empirical_Fs = [
+    50.38; % nonfocal
+    1.08   % focal
+    ];
+empirical_Fs_blocks = [
+    7.08; % nonfocal
+    0.5   % focal ( F < 1)
+    ];
+
+focal_titles = {'Nonfocal', 'Focal'};
+for FOCAL = 1:-1:0
+    samples = blocks(blocks(:, 2) == FOCAL, :);
+    [p, table] = anovan(samples(:,4), {samples(:, 1)}, 'model','full', 'display', 'off');
+    fprintf('\n\n----- OG RT Cost: %s ------\n', focal_titles{FOCAL+1});
+    fprintf('\n  Empirical Data -------\n');
+    fprintf('                 F = %.2f\n', empirical_Fs(FOCAL+1));
+    fprintf('\n  Simulation Data -------\n');
+    fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+
+    [p, table] = anovan(samples(:,4), {samples(:, 1), samples(:, 10)}, 'model','full', 'display', 'off');
+    fprintf('\n\n----- OG RT Cost steady decrease: %s ------\n', focal_titles{FOCAL+1});
+    fprintf('\n  Empirical Data -------\n');
+    fprintf('                 F = %.2f\n', empirical_Fs_blocks(FOCAL+1));
+    fprintf('\n  Simulation Data -------\n');
+    fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
+end
+
+
+%{
 
 [p, table] = anovan(OG_RTs, {subjects(:, 2)}, 'model','full', 'display', 'off');
 
@@ -371,15 +377,7 @@ if DO_PLOT
 end
 
 
-% ----------------- OG RT: PM vs. No PM
 
-[p, table] = anovan(OG_RTs, {subjects(:, 1)}, 'model','full', 'display', 'off');
-
-fprintf('\n\n----- OG RTs: PM vs. No PM ------\n');
-fprintf('\n  Empirical Data -------\n');
-fprintf('                 F = 131.66\n');
-fprintf('\n  Simulation Data -------\n');
-fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 
 
 
@@ -387,12 +385,6 @@ fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 % ----------------- OG RT: 2x2x2 ANOVA
 
 
-[p, table] = anovan(OG_RTs, {subjects(:, 1) subjects(:, 2) subjects(:, 3)}, 'model','full', 'display', 'off');
-
-fprintf('\n\n----- OG RTs: 2x2x2 ANOVA ------\n');
-table(1:8,6)
-p
-fprintf('===> shit...theyre all significant.. .fuck fuck fuck\n');
 
 % ----------------- OG RT: cost qualified
 
