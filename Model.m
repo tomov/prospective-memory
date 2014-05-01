@@ -343,16 +343,6 @@ classdef Model < handle
             self.weights = sparse(self.connections(:,1), self.connections(:,2), self.connections(:,3), ...
                 self.N, self.N);
 
-            % biases
-            if OG_ONLY
-                % turn off PM task and feature units
-                self.bias(self.attention_ids) = 0;
-                self.bias(self.task_ids) = 0;
-            end
-            if FOCAL
-                self.bias(self.attention_ids) = 0;
-            end
-
             self.bias = zeros(1, self.N);
             self.bias(self.perception_ids) = self.BIAS_FOR_PERCEPTION;
             self.bias(self.response_ids) = self.BIAS_FOR_RESPONSES;

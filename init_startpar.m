@@ -15,8 +15,8 @@ where
   ];
 %}
 
-startpar = [1   0   1   0 0, ...    % focal, low emph
-            1   0   1 0.3 0, ...    % focal, high emph
+startpar = [1   0   1 0.1 0, ...    % focal, low emph
+            1   0   1 0.15 0, ...    % focal, high emph
             1 0.2 0.7   0 0.5, ...    % nonfocal, low emph
             1 0.4 0.7   0 0.5, ...    % nonfocal, high emph
             3 3];
