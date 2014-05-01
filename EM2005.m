@@ -7,7 +7,7 @@ params
 assert(exp_id == 1 || exp_id == 2);
 
 % from E&M Experiment 1 & 2 methods
-subjects_per_condition = 24; % 24;
+subjects_per_condition = 1; % 24;
 blocks_per_condition = [8 4];  % exp 1, exp 2
 trials_per_block = [24 40]; % exp 1, exp 2
 pm_blocks_exp1 = [1 3 6 7];
@@ -20,9 +20,16 @@ trials_per_block = trials_per_block(exp_id);
 data = [];
 extra = [];
 
-for OG_ONLY = 0:1 %0:1
-    for FOCAL = 1:-1:0  % 1:-1:0
-        for EMPHASIS = 0:1 %0:1
+og_range = 0:1;
+focal_range = 1:-1:0;
+emphasis_range = 0:1;
+if exp_id == 2
+    emphasis_range = 0;
+end
+
+for OG_ONLY = og_range
+    for FOCAL = focal_range
+        for EMPHASIS = emphasis_range
 
             % init OG trial pool
             og_stimuli = [
@@ -57,7 +64,6 @@ for OG_ONLY = 0:1 %0:1
             
             % insert one PM target in each of the PM blocks
             if ~OG_ONLY
-                %{
                 % every third trial is a PM trial -- this is only for
                 % testing; not used in any of E&M's experiments
                 for i = 1:length(stimuli)
@@ -70,8 +76,8 @@ for OG_ONLY = 0:1 %0:1
                         is_target(middle) = 1;
                     end
                 end
-                %}
                 
+                %{
                 if exp_id == 1
                     % in experiment 1, there is a target in blocks 1, 3, 6, 7
                     for i = 1:length(pm_blocks_exp1)
@@ -98,6 +104,7 @@ for OG_ONLY = 0:1 %0:1
                         is_target(trial) = 1;                        
                     end
                 end
+                %}
             end
             
             

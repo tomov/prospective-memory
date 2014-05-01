@@ -18,7 +18,7 @@
 %}
 
 DO_PLOT = true;
-subjects = data;
+blocks = data;
 
 
 % -------------- define the empirical stats (Table 2 from E&M 2005)
@@ -80,12 +80,15 @@ empirical_stats(:, SD_cols) = empirical_stats(:, SD_cols) / sqrt(subjects_per_co
 % ------------- calculate simulation stats (Table 2 from E&M 2005)
 
 simulation_stats = [];
-for FOCAL = 1:-1:0
-    for OG_ONLY = 1:-1:0
-        for BLOCK = 1:4
+EMPHASIS = 0;
+% order here matters -- must be same as empirical_data above for line
+% regression
+for BLOCK = 1:4
+    for FOCAL = 1:-1:0
+        for OG_ONLY = 1:-1:0
             stat = [OG_ONLY, FOCAL, EMPHASIS];
             for col = 4:7
-                samples = subjects(subjects(:, 1) == OG_ONLY & subjects(:, 2) == FOCAL & subjects(:, 12) == BLOCK, col);
+                samples = blocks(blocks(:, 1) == OG_ONLY & blocks(:, 2) == FOCAL & blocks(:, 10) == BLOCK, col);
                 M = mean(samples);
                 SD = std(samples);
                 assert(length(samples) == subjects_per_condition);
@@ -473,12 +476,12 @@ if DO_PLOT
     subplot(3, 2, 1);
     title('Empirical Data');
     ylabel('OG RT (msec)');
-    plot_all_conditions_exp2(empirical_stats(:, [1:3 4 5 12]), 1000, 1700, 1, 0, true, [0 1]);
+    plot_all_conditions_exp2(empirical_stats(:, [1:3 4 5 12]), 900, 1300, 1, 0, true, [0 1]);
 
     subplot(3, 2, 2);
     title('Simulation Data');
     ylabel(OG_RT_label_cycles_to_msec);
-    plot_all_conditions_exp2(simulation_stats(:, [1:3 4 5 12]), 1000, 1700, RT_slope, RT_intercept, false, [0 1]);
+    plot_all_conditions_exp2(simulation_stats(:, [1:3 4 5 12]), 900, 1300, RT_slope, RT_intercept, false, [0 1]);
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');
