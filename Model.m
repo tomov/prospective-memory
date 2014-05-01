@@ -17,7 +17,7 @@ classdef Model < handle
         SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
         EVIDENCE_ACCUM_SIGMA = 0.08;
         EVIDENCE_ACCUM_ALPHA = 0.1;
-        EVIDENCE_ACCUM_THRESHOLD = 1.1;
+        EVIDENCE_ACCUM_THRESHOLD = 1.5;
         
         % activation levels
 
@@ -77,6 +77,7 @@ classdef Model < handle
         
         % feature attention
         
+        BIAS_WHEN_OFF = -100;
         BIAS_FOR_ATTENTION = 3;
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2;
@@ -197,8 +198,8 @@ classdef Model < handle
                 'tortoise', 'physics', 'crocodile', 'math', ... % (focal targets)
                 'a subject', 'an animal', ... % categories
                 };
-            self.perception_units = strcat('see:', self.input_units')';
-            self.perception_units = [self.perception_units, 'see:tor'];
+            self.perception_units = strcat('see', {' '}, self.input_units')';
+            self.perception_units = [self.perception_units, 'see tor'];
             self.response_units = {
                 'A Subject', 'An Animal', 'No Match 1', 'No Match 2', 'PM Response'
                 };
@@ -261,39 +262,38 @@ classdef Model < handle
                 
                 % perception to response mapping (direct OG pathway)
                 % -- categories to categories
-                self.unit_id('see:a subject')                  , self.unit_id('A Subject')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:an animal')                  , self.unit_id('An Animal')          , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:a subject')                  , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:an animal')                  , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
-                
+                self.unit_id('see a subject')                  , self.unit_id('A Subject')          , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see an animal')                  , self.unit_id('An Animal')          , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see a subject')                  , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see an animal')                  , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
+
                 % -- animals to matching categories
-                self.unit_id('see:physics')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:math')                   , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see physics')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see math')                   , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see tortoise')               , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see crocodile')              , self.unit_id('An Animal')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % -- default response is No Match
-                self.unit_id('see:physics')                , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:math')                   , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:tortoise')               , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:crocodile')              , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see physics')                , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see math')                   , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see tortoise')               , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see crocodile')              , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
 
                 % -- TODO FIXME HACK to make the PM task work, you need to put
                 % it up to baseline (the winning OG response gets x2 inputs)
-                self.unit_id('see:a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see:crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                self.unit_id('see crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 
                 % raw inputs to perception -- PM targets
-                self.unit_id('tortoise')               , self.unit_id('see:tor')         , self.INPUT_TO_PERCEPTION;
+                self.unit_id('tortoise')               , self.unit_id('see tor')         , self.INPUT_TO_PERCEPTION;
                 
                 % attention to particular items -- PM targets
-                self.unit_id('Monitor tortoise')       , self.unit_id('see:tortoise')         , self.ATTENTION_TO_PERCEPTION;
-                self.unit_id('Monitor tor')            , self.unit_id('see:tor')              , self.ATTENTION_TO_PERCEPTION;
-   
+                self.unit_id('Monitor tortoise')       , self.unit_id('see tortoise')         , self.ATTENTION_TO_PERCEPTION;
+                self.unit_id('Monitor tor')            , self.unit_id('see tor')              , self.ATTENTION_TO_PERCEPTION;
                 % responses to outputs                
                 self.unit_id('A Subject')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('An Animal')           , self.unit_id('Yes')            , self.RESPONSE_TO_OUTPUT;
@@ -311,7 +311,7 @@ classdef Model < handle
             
             % OG attention to perception
             from = self.unit_id('OG features');
-            to = cellfun(@self.unit_id, strcat('see:', {
+            to = cellfun(@self.unit_id, strcat('see', {' '}, {
                 'tortoise', 'physics', 'crocodile', 'math', ...
                 'a subject', 'an animal'
                 }')');
@@ -372,6 +372,11 @@ classdef Model < handle
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_FOR_ATTENTION;
             self.bias(self.hippo_ids) = self.BIAS_FOR_HIPPO;
+            
+            % the target WM units do not exist until PM instruction is
+            % given
+            self.bias(self.unit_id('Monitor tortoise')) = self.BIAS_WHEN_OFF;
+            self.bias(self.unit_id('Monitor tor')) = self.BIAS_WHEN_OFF;
         end
         
         function EM = print_EM(self)

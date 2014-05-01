@@ -15,10 +15,10 @@ where
   ];
 %}
 
-startpar = [1  0.4    1  0.4  0, ...    % focal, low emph
-            1  0.6    1  0.6  0, ...    % focal, high emph
+startpar = [1  0.4    1  0  0, ...    % focal, low emph
+            1  0.4    1  0.6  0, ...    % focal, high emph
             1  0.5  0.7  0    0.6, ...    % nonfocal, low emph
             1  0.7  0.8  0    0.7, ...    % nonfocal, high emph
-            3 3];
+            4 4];
         
 [data, ~] = EM2005(startpar, 1)

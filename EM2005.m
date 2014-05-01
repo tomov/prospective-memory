@@ -29,7 +29,7 @@ end
 
 for OG_ONLY = 0 %og_range
     for FOCAL = 1 %focal_range
-        for EMPHASIS = 0 %emphasis_range
+        for EMPHASIS = 0:1 %emphasis_range
 
             % init OG trial pool
             og_stimuli = [
@@ -67,7 +67,7 @@ for OG_ONLY = 0 %og_range
                 % every third trial is a PM trial -- this is only for
                 % testing; not used in any of E&M's experiments
                 for i = 1:length(stimuli)
-                    if mod(i,5) == 0
+                    if mod(i,3) == 0
                         target_id = mod(i, size(pm_targets, 1)) + 1;
                         middle = i;
                         stimuli(middle,:) = pm_targets(target_id, :);
@@ -120,9 +120,9 @@ for OG_ONLY = 0 %og_range
             
             sim = Simulator(FOCAL, EMPHASIS, OG_ONLY, params);            
             if FOCAL
-                sim.threewayEM('see:tortoise', 'OG Task', 'PM Task');
+                sim.instruction('tortoise');
             else 
-                sim.threewayEM('see:tor', 'OG Task', 'PM Task');
+                sim.instruction('tor');
             end
 
             for subject_id = 1:subjects_per_condition

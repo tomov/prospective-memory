@@ -49,6 +49,15 @@ classdef Simulator < Model
             self.next_available_hippo_id = self.next_available_hippo_id + 1;
         end
         
+        function instruction(self, target)
+            target_unit = strcat('see', {' '}, target); % get perception unit name
+            self.threewayEM(target_unit{1}, 'OG Task', 'PM Task');
+            target_monitor_unit = strcat('Monitor ', {' '}, target);
+            target_monitor_id = self.unit_id(target_monitor_unit{1});
+            % make WM unit available
+            self.bias(target_monitor_id) = self.BIAS_FOR_ATTENTION;
+        end
+        
         function instruction_old(self, perceptions, targets, secs)
             from_ids = self.string_to_ids(perceptions);
             to_ids = self.string_to_ids(targets);
@@ -245,7 +254,7 @@ classdef Simulator < Model
                 % TODO hacky...
                 assert(length(self.resting_wm) == length(self.wm_act));
                 switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
-                %switched_to_PM_task = true;
+                switched_to_PM_task = true;
 
                 % record response and response time
                 output = self.units{output_id};
