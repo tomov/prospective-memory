@@ -24,4 +24,4 @@ startpar = [1  0       1    0, ...      % focal, low emph
             1  0.6   0.6    0.5, ...    % nonfocal, high emph
             3 3];
         
-[data, extra] = EM2005(startpar, 2);
+[data, extra] = EM2005(startpar, 5);

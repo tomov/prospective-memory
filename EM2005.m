@@ -12,13 +12,13 @@ nonfocal_high_init_wm = params(13:16);
 bias_for_task = params(17);
 bias_for_attention = params(18);
 
-assert(exp_id == 1 || exp_id == 2 || exp_id == 3);
+assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 5);
 fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
 
 % from E&M Experiment 1 & 2 methods
 subjects_per_condition = 1; % 24;
-blocks_per_condition = [8 4 8];  % exp 1, exp 2, exp 3 (= exp 1 for now)
-trials_per_block = [24 40 24]; % exp 1, exp 2, exp 3 (= exp 1 for now)
+blocks_per_condition = [8 4 8 NaN 100];  % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
+trials_per_block = [24 40 24 NaN 18]; % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
 pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160]; % 20 60 100 140];
 
@@ -41,12 +41,16 @@ elseif exp_id == 2
     emphasis_range = 0;
 elseif exp_id == 3
     focal_range = 1;
+elseif exp_id == 5
+    target_range = [1];
+    emphasis_range = 0;
+    focal_range = 1;
 end
 
-for OG_ONLY = og_range
-    for FOCAL = focal_range
-        for EMPHASIS = emphasis_range
-            for TARGETS = target_range
+for OG_ONLY = 0 %og_range
+    for FOCAL = 1 % focal_range
+        for EMPHASIS = 0 %emphasis_range
+            for TARGETS = 1
 
                 % init OG trial pool
                 og_stimuli = [
@@ -126,6 +130,38 @@ for OG_ONLY = og_range
                     end
 
                 end
+                
+                
+                if exp_id == 5
+                    inter_stimuli = [
+                        {'dog'}, 1;
+                        {'tortoise'}, 1;
+                        {'dog'}, 1;
+                        {'monkey'}, 1;
+                        {'tortoise'}, 1;
+                        {'crocodile'}, 1;
+                        {'kiwi'}, 1;
+                        {'tortoise'}, 1;
+                        {'cat'}, 1;
+                        {'dog'}, 1;
+                    ];
+                    inter_correct = {'Yes'; 'No'; 'Yes'; 'No'; 'No'; 'No'; 'No'; 'No'; 'Yes'; 'Yes'};
+                    inter_is_target = [0; 1; 0; 0; 1; 0; 0; 1; 0; 0];
+
+                    % copy & trim 'em
+                    inter_stimuli = repmat(inter_stimuli, trials_per_block, 1);
+                    inter_correct = repmat(inter_correct, trials_per_block, 1);
+                    inter_is_target = repmat(inter_is_target, trials_per_block, 1);
+                    inter_stimuli = inter_stimuli(1:trials_per_block,:);
+                    inter_correct = inter_correct(1:trials_per_block,:);
+                    inter_is_target = inter_is_target(1:trials_per_block,:);
+                    
+                    stimuli = repmat(inter_stimuli, blocks_per_condition, 1);
+                    correct = repmat(inter_correct, blocks_per_condition, 1);
+                    inter_target = repmat(inter_is_target, blocks_per_condition, 1);
+                    og_correct = correct;
+                    is_target = zeros(blocks_per_condition * trials_per_block, 1);    
+                end
 
                 % randomize order
 
@@ -136,15 +172,13 @@ for OG_ONLY = og_range
                 correct = correct(idx, :);
                 %}
 
-                % simulate!
-                
                 % get appropriate parameters depending on the condition
                 
                 curpar = zeros(1,6);
                 curpar(5) = bias_for_task;
                 curpar(6) = bias_for_attention;
                 if OG_ONLY
-                    curpar(1:4) = [1 0 1 0 ];
+                    curpar(1:4) = [1 0 1 0];
                 else       
                     if FOCAL
                         if ~EMPHASIS
@@ -165,28 +199,51 @@ for OG_ONLY = og_range
                     end
                 end                
 
+                % initialize simulator
                 sim = Simulator(curpar);            
+                
+                % PM instruction
                 if FOCAL
                     if TARGETS == 6
-                        sim.instruction({'tortoise', 'dog', 'cat', 'kiwi', 'panda', 'monkey'});
+                        sim.instruction({'tortoise', 'dog', 'cat', 'kiwi', 'panda', 'monkey'}, true);
                     else
                         assert(TARGETS == 1);
-                        sim.instruction({'tortoise'});
+                        if exp_id == 5
+                            sim.instruction({'tortoise'}, false);
+                        else
+                            sim.instruction({'tortoise'}, true);
+                        end
                     end
-                else 
-                    sim.instruction({'tor'});
+                else
+                    sim.instruction({'tor'}, true);
                 end
 
+                % simulate subjects
                 for subject_id = 1:subjects_per_condition
                     [responses, RTs, act, acc, onsets, offsets, nets] = sim.trial(stimuli);
 
-                    if exp_id == 1 || exp_id == 3
+                    if exp_id == 1 || exp_id == 3 || exp_id == 5
                         % for experiment 1, each subject = 1 sample
                         [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                             responses, RTs, act, acc, onsets, offsets, ...
                             is_target, correct, og_correct, ...
                             false);
 
+                        if exp_id == 5
+                            % extra analysis for experiment 5
+                            IT_TAR_RT = mean(RTs(logical(inter_target)));
+                            IT_TAR_SEM = std(RTs(logical(inter_target))) / sqrt(length(RTs(logical(inter_target))));
+                            IT_NONTAR_RT = mean(RTs(logical(~inter_target)));
+                            IT_NONTAR_SEM = std(RTs(logical(~inter_target))) / sqrt(length(RTs(logical(~inter_target))));
+                            fprintf(' bonus Exp 5: target RT = %.2f (%.2f), nontarget RT = %.2f (%.2f)\n', ...
+                                IT_TAR_RT, IT_TAR_SEM, IT_NONTAR_RT, IT_NONTAR_SEM);
+                            
+                            tar_resp = responses(logical(inter_target));
+                            tar_correct = correct(logical(inter_target));
+                            IT_tar_hit = sum(strcmp(tar_resp, tar_correct)) / length(tar_correct) * 100;
+                            fprintf('            : accuracy on targets = %.2f\n', IT_tar_hit);
+                        end
+                     
                         subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
                         data = [data; subject];
                         subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
@@ -211,8 +268,7 @@ for OG_ONLY = og_range
                             block = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, subject_id, block_id];
                             data = [data; block];
                         end
-                    end    
-                    
+                    end
                     
                     % show picture of whole thing (for debugging)
                     if ~OG_ONLY

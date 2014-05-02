@@ -49,16 +49,18 @@ classdef Simulator < Model
             self.next_available_hippo_id = self.next_available_hippo_id + 1;
         end
         
-        function instruction(self, targets)
+        function instruction(self, targets, include_in_WM)
             for target = targets
                 target_unit = strcat('see', {' '}, target); % get perception unit name
-                self.threewayEM(target_unit{1}, 'OG Task', 'PM Task');
+                self.threewayEM(target_unit{1}, 'Inter Task', 'PM Task');
                 target_monitor_unit = strcat('Monitor ', {' '}, target);
                 target_monitor_id = self.unit_id(target_monitor_unit{1});
-                % make WM unit available
-                self.bias(target_monitor_id) = self.BIAS_FOR_ATTENTION;
-                % and give it some initial activation (according to params)
-                self.init_wm(self.wm_ids == target_monitor_id) = self.target_init;
+                if include_in_WM
+                    % make WM unit available
+                    self.bias(target_monitor_id) = self.BIAS_FOR_ATTENTION;
+                    % and give it some initial activation (according to params)
+                    self.init_wm(self.wm_ids == target_monitor_id) = self.target_init;
+                end
             end
         end
         
@@ -181,7 +183,10 @@ classdef Simulator < Model
                             self.wm_act = self.init_wm;
                         else
                             assert(switched_to_PM_task);
-                            self.wm_act(1:2) = self.init_wm(1:2); % only reset tasks FIXME
+                            % only reset tasks FIXME
+                            self.wm_act(self.wm_ids == self.unit_id('OG Task')) = self.init_wm(self.wm_ids == self.unit_id('OG Task'));
+                            self.wm_act(self.wm_ids == self.unit_id('PM Task')) = self.init_wm(self.wm_ids == self.unit_id('PM Task'));
+                            self.wm_act(self.wm_ids == self.unit_id('Inter Task')) = self.init_wm(self.wm_ids == self.unit_id('Inter Task'));
                         end
                         self.adapt_wm_act_to_ffwd_act();
                     end

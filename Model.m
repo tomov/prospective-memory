@@ -86,7 +86,7 @@ classdef Model < handle
         
         % hippocampus
         
-        BIAS_FOR_HIPPO = -12;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
+        BIAS_FOR_HIPPO = -32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
         
         STIMULUS_TO_HIPPO = 30;
         CONTEXT_TO_HIPPO = 0;
@@ -194,13 +194,15 @@ classdef Model < handle
             self.perception_units = strcat('see', {' '}, self.input_units')';
             self.perception_units = [self.perception_units, strcat('see', {' '}, syllables')';];
             self.response_units = {
-                'A Subject', 'An Animal', 'No Match 1', 'No Match 2', 'PM Response'
+                'A Subject', 'An Animal', 'No Match 1', 'No Match 2', ... % OG task
+                'PM Response', ...   % PM task
+                'Domestic', 'Wild'   % Interleaved task
                 };
             self.output_units = {
                 'Yes', 'No', 'PM'
                 };
             self.task_units = {
-                'OG Task', 'PM Task'
+                'OG Task', 'PM Task', 'Inter Task'
                 };
             self.attention_units = {
                 'OG features'
@@ -250,7 +252,7 @@ classdef Model < handle
 
             % initialize free parameters (based on PM instruction, task, etc)
             self.init_wm = zeros(1, length(self.wm_ids));
-            self.init_wm(self.wm_ids == self.unit_id('OG Task')) = params(1);
+            self.init_wm(self.wm_ids == self.unit_id('Inter Task')) = params(1);
             self.init_wm(self.wm_ids == self.unit_id('PM Task')) = params(2);
             self.init_wm(self.wm_ids == self.unit_id('OG features')) = params(3);
             self.target_init = params(4);
@@ -266,14 +268,19 @@ classdef Model < handle
                 self.unit_id('OG Task')        , self.unit_id('No Match 1')        , self.TASK_TO_RESPONSE;
                 self.unit_id('OG Task')        , self.unit_id('No Match 2')        , self.TASK_TO_RESPONSE;
                 self.unit_id('PM Task')        , self.unit_id('PM Response')       , self.TASK_TO_RESPONSE;
+                self.unit_id('Inter Task')     , self.unit_id('Domestic')          , self.TASK_TO_RESPONSE;
+                self.unit_id('Inter Task')     , self.unit_id('Wild')              , self.TASK_TO_RESPONSE;
                 
                 % perception to response mapping (direct OG pathway)
+                %
+                
                 % -- categories to categories
                 self.unit_id('see a subject')                  , self.unit_id('A Subject')          , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see an animal')                  , self.unit_id('An Animal')          , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see a subject')                  , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see an animal')                  , self.unit_id('No Match 2')         , self.PERCEPTION_TO_RESPONSE;
 
+                
                 % -- animals to matching categories
                 self.unit_id('see physics')                , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see math')                   , self.unit_id('A Subject')         , self.PERCEPTION_TO_RESPONSE;
@@ -295,7 +302,20 @@ classdef Model < handle
                 self.unit_id('see panda')                  , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see kiwi')                   , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see monkey')                 , self.unit_id('No Match 1')         , self.PERCEPTION_TO_RESPONSE;
+                
+                % perception to response mapping (Interleaved task)
+                % notice all is *2 b/c there's only 1 input per response =>
+                % weaker
+                %
 
+                self.unit_id('see tortoise')               , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
+                self.unit_id('see crocodile')              , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
+                self.unit_id('see dog')                    , self.unit_id('Domestic')     , self.PERCEPTION_TO_RESPONSE * 2;
+                self.unit_id('see cat')                    , self.unit_id('Domestic')     , self.PERCEPTION_TO_RESPONSE * 2;
+                self.unit_id('see panda')                  , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
+                self.unit_id('see kiwi')                   , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
+                self.unit_id('see monkey')                 , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
+                
                 % -- TODO FIXME HACK to make the PM task work, you need to put
                 % it up to baseline (the winning OG response gets x2 inputs)
                 self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
@@ -322,6 +342,8 @@ classdef Model < handle
                 self.unit_id('No Match 1')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('No Match 2')          , self.unit_id('No')             , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('PM Response')         , self.unit_id('PM')             , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('Domestic')            , self.unit_id('Yes')              , self.RESPONSE_TO_OUTPUT;
+                self.unit_id('Wild')                , self.unit_id('No')              , self.RESPONSE_TO_OUTPUT;
             ];
         
             % WM LCA vertical mutual inhibition
