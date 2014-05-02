@@ -17,7 +17,7 @@
  (see EM2005 exp 2)
 %}
 
-DO_PLOT = false;
+DO_PLOT = true;
 blocks = data;
 
 
@@ -41,7 +41,7 @@ blocks = data;
 %}
 SD_cols = [5 7 9 11];
 
-subjects_per_condition = 1;
+subjects_per_condition = 24;
 
 empirical_stats = [
     % "trial" (= block) 1
@@ -461,7 +461,6 @@ end
 % ---------------------------------------------------
 
 
-
 if DO_PLOT
     figure;
 
@@ -477,15 +476,15 @@ if DO_PLOT
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');
-    plot_all_conditions_exp2(empirical_stats(:, [1:3 6 7 12]), 40, 100, 1, 0, false, [0 1]);
+    plot_all_conditions_exp2(empirical_stats(:, [1:3 6 7 12]), 20, 100, 1, 0, false, [0 1]);
 
     subplot(3, 2, 4);
-    plot_all_conditions_exp2(simulation_stats(:, [1:3 6 7 12]), 40, 100, 1, 0, false, [0 1]);
+    plot_all_conditions_exp2(simulation_stats(:, [1:3 6 7 12]), 20, 100, 1, 0, false, [0 1]);
 
     subplot(3, 2, 5);
     ylabel('PM Hit Rate (%)');
-    plot_all_conditions_exp2(empirical_stats(:, [1:3 10 11 12]), 40, 100, 1, 0, false, [0]);
+    plot_all_conditions_exp2(empirical_stats(:, [1:3 10 11 12]), 20, 100, 1, 0, false, [0]);
 
     subplot(3, 2, 6);
-    plot_all_conditions_exp2(simulation_stats(:, [1:3 10 11 12]), 40, 100, 1, 0, false, [0]);
+    plot_all_conditions_exp2(simulation_stats(:, [1:3 10 11 12]), 20, 100, 1, 0, false, [0]);
 end

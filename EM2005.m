@@ -16,15 +16,19 @@ assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 5);
 fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
 
 % from E&M Experiment 1 & 2 methods
-subjects_per_condition = 1; % 24;
-blocks_per_condition = [8 4 8 NaN 100];  % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
-trials_per_block = [24 40 24 NaN 18]; % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
+subjects_per_condition = [24 24 32 104 72];
+blocks_per_condition = [8 4 1 NaN 100];
+trials_per_block = [24 40 110 NaN 18];
 pm_blocks_exp1 = [1 3 6 7];
-pm_trials_exp2 = [40 80 120 160]; % 20 60 100 140];
+pm_trials_exp2 = [40 80 120 160];
+pm_trials_exp3 = [26 52 78 104];
 
 % since we're doing only 1 experiment at a time
 blocks_per_condition = blocks_per_condition(exp_id);
 trials_per_block = trials_per_block(exp_id);
+subjects_per_condition = subjects_per_condition(exp_id);
+
+%subjects_per_condition = 2; % FIXME remove
 
 data = [];
 extra = [];
@@ -35,22 +39,22 @@ emphasis_range = 0:1;
 target_range = [1, 6];
 
 if exp_id == 1
-    target_range = [1];
+    target_range = 1;
 elseif exp_id == 2
-    target_range = [1];
     emphasis_range = 0;
+    target_range = 1;
 elseif exp_id == 3
     focal_range = 1;
 elseif exp_id == 5
-    target_range = [1];
-    emphasis_range = 0;
     focal_range = 1;
+    emphasis_range = 0;
+    target_range = 1;
 end
 
-for OG_ONLY = 0 %og_range
-    for FOCAL = 1 % focal_range
-        for EMPHASIS = 0 %emphasis_range
-            for TARGETS = 1
+for OG_ONLY = og_range
+    for FOCAL = focal_range
+        for EMPHASIS = emphasis_range
+            for TARGETS = target_range
 
                 % init OG trial pool
                 og_stimuli = [
@@ -83,6 +87,7 @@ for OG_ONLY = 0 %og_range
                 og_correct = correct;
                 is_target = zeros(blocks_per_condition * trials_per_block, 1);
 
+                
                 % insert one PM target in each of the PM blocks
                 if ~OG_ONLY
                     % every third trial is a PM trial -- this is only for
@@ -102,7 +107,7 @@ for OG_ONLY = 0 %og_range
                     %}
 
 
-                    if exp_id == 1 || exp_id == 3
+                    if exp_id == 1
                         % in experiment 1, there is a target in blocks 1, 3, 6, 7
                         for i = 1:length(pm_blocks_exp1)
                             b = pm_blocks_exp1(i);
@@ -116,12 +121,19 @@ for OG_ONLY = 0 %og_range
                             og_correct(middle) = pm_og_correct(target_id);
                             is_target(middle) = 1;
                         end
-                    elseif exp_id == 2
+                    elseif exp_id == 2 || exp_id == 3
                         % in experiment 2, trials 40, 80, 120, and 160 are
                         % targets
-                        for i = 1:length(pm_trials_exp2)
+                        % experiment 3 also has 4 target trials
+                        if exp_id == 2
+                            pm_trials = pm_trials_exp2;
+                        else
+                            assert(exp_id == 3)
+                            pm_trials = pm_trials_exp3;
+                        end
+                        for i = 1:length(pm_trials)
                             target_id = mod(i, size(pm_targets, 1)) + 1;
-                            trial = pm_trials_exp2(i);
+                            trial = pm_trials(i);
                             stimuli(trial,:) = pm_targets(target_id, :);
                             correct(trial) = pm_correct(target_id);
                             og_correct(trial) = pm_og_correct(target_id);
@@ -200,7 +212,7 @@ for OG_ONLY = 0 %og_range
                 end                
 
                 % initialize simulator
-                sim = Simulator(curpar);            
+                sim = Simulator(curpar, false);            
                 
                 % PM instruction
                 if FOCAL
@@ -244,10 +256,10 @@ for OG_ONLY = 0 %og_range
                             fprintf('            : accuracy on targets = %.2f\n', IT_tar_hit);
                         end
                      
-                        subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
+                        subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, TARGETS];
                         data = [data; subject];
-                        subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
-                        extra = [extra; subject_extra];
+                        %subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
+                        %extra = [extra; subject_extra];
 
                     elseif exp_id == 2
                         % for experiment 2, each block = 1 sample (i.e. 4
@@ -271,12 +283,14 @@ for OG_ONLY = 0 %og_range
                     end
                     
                     % show picture of whole thing (for debugging)
+                    %{
                     if ~OG_ONLY
                         getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                             responses, RTs, act, acc, onsets, offsets, ...
                             is_target, correct, og_correct, ...
                             true);
                     end
+                    %}
                 end
             
                 

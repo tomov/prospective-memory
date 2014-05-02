@@ -20,8 +20,30 @@ where
 
 startpar = [1  0       1    0, ...      % focal, low emph
             1  0       1    0.7, ...    % focal, high emph
-            1  0.4   0.7    0.5, ...    % nonfocal, low emph
+            1  0.3   0.7    0.5, ...    % nonfocal, low emph
             1  0.6   0.6    0.5, ...    % nonfocal, high emph
             3 3];
         
-[data, extra] = EM2005(startpar, 5);
+[data, ~] = EM2005(startpar, 1);
+
+data
+save('rondo-run-data.mat');
+
+EM2005_with_stats_exp1
+
+save('rondo-run-data-with-stats.mat');
+
+%% ----- BIG TODOs ----
+
+%{
+make experiment 5 gather relevant data
+
+
+
+make number of subjects normal
+
+go and make sure there are no hacks left (FIXME) and no hardcoded numbers
+  
+send them all as jobs 
+%}
+

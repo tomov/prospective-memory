@@ -18,8 +18,8 @@ classdef Simulator < Model
     end
     
     methods
-        function self = Simulator(params)
-            self = self@Model(params);
+        function self = Simulator(params, have_third_task)
+            self = self@Model(params, have_third_task);
             self.Nout = size(self.output_ids, 2);
         end
         
@@ -52,7 +52,7 @@ classdef Simulator < Model
         function instruction(self, targets, include_in_WM)
             for target = targets
                 target_unit = strcat('see', {' '}, target); % get perception unit name
-                self.threewayEM(target_unit{1}, 'Inter Task', 'PM Task');
+                self.threewayEM(target_unit{1}, 'OG Task', 'PM Task');
                 target_monitor_unit = strcat('Monitor ', {' '}, target);
                 target_monitor_id = self.unit_id(target_monitor_unit{1});
                 if include_in_WM
@@ -183,7 +183,7 @@ classdef Simulator < Model
                             self.wm_act = self.init_wm;
                         else
                             assert(switched_to_PM_task);
-                            % only reset tasks FIXME
+                            % only reset tasks
                             self.wm_act(self.wm_ids == self.unit_id('OG Task')) = self.init_wm(self.wm_ids == self.unit_id('OG Task'));
                             self.wm_act(self.wm_ids == self.unit_id('PM Task')) = self.init_wm(self.wm_ids == self.unit_id('PM Task'));
                             self.wm_act(self.wm_ids == self.unit_id('Inter Task')) = self.init_wm(self.wm_ids == self.unit_id('Inter Task'));
@@ -283,7 +283,6 @@ classdef Simulator < Model
                 assert(length(self.resting_wm) == length(self.wm_act));
                 %switched_to_PM_task = (self.wm_act(2) > self.wm_act(1) - 0.1);
                 switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
-                %switched_to_PM_task = true; % FIXME change before push
 
                 % record response and response time
                 output = self.units{output_id};

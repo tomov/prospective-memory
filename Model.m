@@ -89,7 +89,7 @@ classdef Model < handle
         BIAS_FOR_HIPPO = -32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
         
         STIMULUS_TO_HIPPO = 30;
-        CONTEXT_TO_HIPPO = 0;
+        CONTEXT_TO_HIPPO = 20;
         
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;
@@ -177,7 +177,7 @@ classdef Model < handle
             end
         end
         
-        function self = Model(params)
+        function self = Model(params, have_third_task)
             % specify unit names in each layer
             words = {
                 'tortoise', 'physics', 'crocodile', 'math', ... % words
@@ -252,7 +252,7 @@ classdef Model < handle
 
             % initialize free parameters (based on PM instruction, task, etc)
             self.init_wm = zeros(1, length(self.wm_ids));
-            self.init_wm(self.wm_ids == self.unit_id('Inter Task')) = params(1);
+            self.init_wm(self.wm_ids == self.unit_id('OG Task')) = params(1);
             self.init_wm(self.wm_ids == self.unit_id('PM Task')) = params(2);
             self.init_wm(self.wm_ids == self.unit_id('OG features')) = params(3);
             self.target_init = params(4);
@@ -316,7 +316,7 @@ classdef Model < handle
                 self.unit_id('see kiwi')                   , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
                 self.unit_id('see monkey')                 , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
                 
-                % -- TODO FIXME HACK to make the PM task work, you need to put
+                % -- TODO HACK to make the PM task work, you need to put
                 % it up to baseline (the winning OG response gets x2 inputs)
                 self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
@@ -395,6 +395,9 @@ classdef Model < handle
             self.bias(self.attention_ids) = self.BIAS_WHEN_OFF; % all attention units don't exist by default
             self.bias(self.unit_id('OG features')) = self.BIAS_FOR_ATTENTION; % ...except for OG features
             self.bias(self.hippo_ids) = self.BIAS_FOR_HIPPO;            
+            if ~have_third_task
+                self.bias(self.unit_id('Inter Task')) = self.BIAS_WHEN_OFF;
+            end
         end
         
         function EM = print_EM(self)
