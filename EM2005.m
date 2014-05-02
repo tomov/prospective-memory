@@ -13,6 +13,7 @@ bias_for_task = params(17);
 bias_for_attention = params(18);
 
 assert(exp_id == 1 || exp_id == 2 || exp_id == 3);
+fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
 
 % from E&M Experiment 1 & 2 methods
 subjects_per_condition = 1; % 24;
@@ -22,7 +23,7 @@ pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160]; % 20 60 100 140];
 
 % since we're doing only 1 experiment at a time
-blocks_per_condition = 8; % blocks_per_condition(exp_id);
+blocks_per_condition = blocks_per_condition(exp_id);
 trials_per_block = trials_per_block(exp_id);
 
 data = [];
@@ -40,12 +41,11 @@ elseif exp_id == 2
     emphasis_range = 0;
 elseif exp_id == 3
     focal_range = 1;
-    emphasis_range = 0;
 end
 
-for OG_ONLY = 0 %og_range
-    for FOCAL = 1 %focal_range
-        for EMPHASIS = 0 %emphasis_range
+for OG_ONLY = og_range
+    for FOCAL = focal_range
+        for EMPHASIS = emphasis_range
             for TARGETS = target_range
 
                 % init OG trial pool
@@ -182,14 +182,14 @@ for OG_ONLY = 0 %og_range
 
                     if exp_id == 1 || exp_id == 3
                         % for experiment 1, each subject = 1 sample
-                        [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                        [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                             responses, RTs, act, acc, onsets, offsets, ...
                             is_target, correct, og_correct, ...
-                            true);
+                            false);
 
                         subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
                         data = [data; subject];
-                        subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, offsets, nets};
+                        subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
                         extra = [extra; subject_extra];
 
                     elseif exp_id == 2
@@ -199,7 +199,7 @@ for OG_ONLY = 0 %og_range
                             block_start = (block_id - 1) * trials_per_block + 1;
                             block_end = block_id * trials_per_block;                    
                             [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = ...
-                                getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                                getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                                 responses(block_start:block_end), RTs(block_start:block_end), [], [], [], [], ...
                                 is_target(block_start:block_end), ...
                                 correct(block_start:block_end), ...
@@ -211,12 +211,16 @@ for OG_ONLY = 0 %og_range
                             block = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, subject_id, block_id];
                             data = [data; block];
                         end
-                        % show picture of whole thing (for debugging)
-                        getstats(sim, OG_ONLY, FOCAL, EMPHASIS, ...
+                    end    
+                    
+                    
+                    % show picture of whole thing (for debugging)
+                    if ~OG_ONLY
+                        getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                             responses, RTs, act, acc, onsets, offsets, ...
                             is_target, correct, og_correct, ...
                             true);
-                    end    
+                    end
                 end
             
                 

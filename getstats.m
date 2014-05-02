@@ -1,4 +1,4 @@
-function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, responses, RTs, act, acc, onsets, offsets, is_target, correct, og_correct, show_pics)
+function [OG_RT, OG_RT_SD, OG_Hit, PM_RT, PM_RT_SD, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, is_target, correct, og_correct, show_pics)
 
 OG_count = 0;
 PM_count = 0;
@@ -65,32 +65,34 @@ PM_count
 %}
 
 
-if OG_ONLY
-    og_string = 'No PM task';
-else
-    og_string = 'PM task';
-end
-if FOCAL
-    if EMPHASIS
-        fprintf('\n ----> focal, high emphasis, %s ----\n', og_string);
+if ~show_pics
+    if OG_ONLY
+        og_string = 'No PM task';
     else
-        fprintf('\n ----> focal, low emphasis, %s ----\n', og_string);
+        og_string = 'PM task';
     end
-else
-    if EMPHASIS
-        fprintf('\n ----> nonfocal, high emphasis, %s ----\n', og_string);
+    if FOCAL
+        if EMPHASIS
+            fprintf('\n ----> focal, high emphasis, %s, %d target(s) ----\n', og_string, TARGETS);
+        else
+            fprintf('\n ----> focal, low emphasis, %s, %d target(s) ----\n', og_string, TARGETS);
+        end
     else
-        fprintf('\n ----> nonfocal, low emphasis, %s ----\n', og_string);
+        if EMPHASIS
+            fprintf('\n ----> nonfocal, high emphasis, %s, %d target(s) ----\n', og_string, TARGETS);
+        else
+            fprintf('\n ----> nonfocal, low emphasis, %s, %d target(s) ----\n', og_string, TARGETS);
+        end
     end
 end
 
-%if ~OG_ONLY
+if ~OG_ONLY && ~show_pics
     fprintf('mean OG correct RTs = %.4f (%.4f)\n', mean(OG_correct_RTs), std(OG_correct_RTs));
     fprintf('mean PM hit RTs = %.4f (%.4f)\n', mean(PM_hit_RTs), std(PM_hit_RTs));
     fprintf('OG accuracy = %.4f%%\n', size(OG_correct_RTs, 1) / OG_count * 100);
     fprintf('PM hit rate = %.4f%% (%.4f%% were OG correct)\n', size(PM_hit_RTs, 1) / PM_count * 100, ...
         size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100);
-%end
+end
 
 
 
