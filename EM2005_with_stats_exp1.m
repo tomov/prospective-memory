@@ -102,6 +102,7 @@ SStotal = (length(empirical_RTs)-1) * var(empirical_RTs);
 rsq = 1 - SSresid/SStotal;
 
 if DO_PLOT
+    figure;
     scatter(simulation_cycles, empirical_RTs);
     clear xlabel ylabel;
     xlabel('Simulation RTs (cycles)');

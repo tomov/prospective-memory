@@ -21,17 +21,66 @@ where
 startpar = [1  0       1    0, ...      % focal, low emph
             1  0       1    0.7, ...    % focal, high emph
             1  0.3   0.7    0.5, ...    % nonfocal, low emph
-            1  0.6   0.6    0.5, ...    % nonfocal, high emph
-            3 3];
+            1  0.4   0.6    0.5, ...    % nonfocal, high emph
+            4 4 4];
+
         
-[data, ~] = EM2005(startpar, 1);
+debug_mode = false;
 
+
+[data, extra] = EM2005(startpar, 1, debug_mode);
 data
-save('rondo-run-data.mat');
 
+if debug_mode
+	m = Model(startpar, false);
+    wm_ids = m.wm_ids;
+    context_ids = m.context_ids;
+    act = extra{1, 8};
+    nets = extra{1, 12};
+   % figure;
+   % plot([act(1:100, context_ids), nets(1:100, context_ids)]);
+else
+    save('rondo-run-data-exp-1.mat');
+    EM2005_with_stats_exp1
+end
+
+
+        
+%{
+[data, ~] = EM2005(startpar, 1);
+data
+save('rondo-run-data-exp-1.mat');
 EM2005_with_stats_exp1
+save('rondo-run-data-exp-1-with-stats.mat');
 
-save('rondo-run-data-with-stats.mat');
+
+data_exp1 = data;
+
+
+[data, ~] = EM2005(startpar, 2);
+data
+save('rondo-run-data-exp-12.mat');
+EM2005_with_stats_exp2
+save('rondo-run-data-exp-12-with-stats.mat');
+
+
+data_exp2 = data;
+
+
+[data, ~] = EM2005(startpar, 3);
+data
+save('rondo-run-data-exp-123.mat');
+%EM2005_with_stats_exp1
+%save('rondo-run-data-exp-123-with-stats.mat');
+
+
+data_exp3 = data;
+
+save('goodmorning.mat');
+            
+            
+%}
+            
 
 %% ----- BIG TODOs ----
 

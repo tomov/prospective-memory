@@ -1,4 +1,4 @@
-function [data, extra] = EM2005( params, exp_id )
+function [data, extra] = EM2005( params, exp_id, debug_mode )
 % run a simulation of the E&M with certain parameters and spit out the data
 % for all subjects
 
@@ -11,6 +11,7 @@ nonfocal_low_init_wm = params(9:12);
 nonfocal_high_init_wm = params(13:16);
 bias_for_task = params(17);
 bias_for_attention = params(18);
+bias_for_context = params(19);
 
 assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 5);
 fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
@@ -50,6 +51,16 @@ elseif exp_id == 5
     emphasis_range = 0;
     target_range = 1;
 end
+
+
+if debug_mode
+    subjects_per_condition = 1;
+    og_range = 0;
+    focal_range = 0;
+    emphasis_range = 0:1;
+    target_range = 1;
+end
+
 
 for OG_ONLY = og_range
     for FOCAL = focal_range
@@ -93,52 +104,55 @@ for OG_ONLY = og_range
                     % every third trial is a PM trial -- this is only for
                     % testing; not used in any of E&M's experiments
 
-                    %{
-                    for i = 1:length(stimuli)
-                        if mod(i,4) == 0
-                            target_id = mod(i, size(pm_targets, 1)) + 1;
-                            middle = i;
-                            stimuli(middle,:) = pm_targets(target_id, :);
-                            correct(middle) = pm_correct(target_id);
-                            og_correct(middle) = pm_og_correct(target_id);
-                            is_target(middle) = 1;
+                    if debug_mode
+                        
+                        for i = 1:length(stimuli)
+                            if mod(i,4) == 0
+                                target_id = mod(i, size(pm_targets, 1)) + 1;
+                                middle = i;
+                                stimuli(middle,:) = pm_targets(target_id, :);
+                                correct(middle) = pm_correct(target_id);
+                                og_correct(middle) = pm_og_correct(target_id);
+                                is_target(middle) = 1;
+                            end
                         end
-                    end
-                    %}
+                    
+                    else
 
+                        if exp_id == 1
+                            % in experiment 1, there is a target in blocks 1, 3, 6, 7
+                            for i = 1:length(pm_blocks_exp1)
+                                b = pm_blocks_exp1(i);
+                                block_start = (b - 1) * trials_per_block + 1;
+                                block_end = b * trials_per_block;
+                                middle = int32((block_start + block_end) / 2);
+                                target_id = mod(i, size(pm_targets, 1)) + 1;
 
-                    if exp_id == 1
-                        % in experiment 1, there is a target in blocks 1, 3, 6, 7
-                        for i = 1:length(pm_blocks_exp1)
-                            b = pm_blocks_exp1(i);
-                            block_start = (b - 1) * trials_per_block + 1;
-                            block_end = b * trials_per_block;
-                            middle = int32((block_start + block_end) / 2);
-                            target_id = mod(i, size(pm_targets, 1)) + 1;
-
-                            stimuli(middle,:) = pm_targets(target_id, :);
-                            correct(middle) = pm_correct(target_id);
-                            og_correct(middle) = pm_og_correct(target_id);
-                            is_target(middle) = 1;
+                                stimuli(middle,:) = pm_targets(target_id, :);
+                                correct(middle) = pm_correct(target_id);
+                                og_correct(middle) = pm_og_correct(target_id);
+                                is_target(middle) = 1;
+                            end
+                        elseif exp_id == 2 || exp_id == 3
+                            % in experiment 2, trials 40, 80, 120, and 160 are
+                            % targets
+                            % experiment 3 also has 4 target trials
+                            if exp_id == 2
+                                pm_trials = pm_trials_exp2;
+                            else
+                                assert(exp_id == 3)
+                                pm_trials = pm_trials_exp3;
+                            end
+                            for i = 1:length(pm_trials)
+                                target_id = mod(i, size(pm_targets, 1)) + 1;
+                                trial = pm_trials(i);
+                                stimuli(trial,:) = pm_targets(target_id, :);
+                                correct(trial) = pm_correct(target_id);
+                                og_correct(trial) = pm_og_correct(target_id);
+                                is_target(trial) = 1;                        
+                            end
                         end
-                    elseif exp_id == 2 || exp_id == 3
-                        % in experiment 2, trials 40, 80, 120, and 160 are
-                        % targets
-                        % experiment 3 also has 4 target trials
-                        if exp_id == 2
-                            pm_trials = pm_trials_exp2;
-                        else
-                            assert(exp_id == 3)
-                            pm_trials = pm_trials_exp3;
-                        end
-                        for i = 1:length(pm_trials)
-                            target_id = mod(i, size(pm_targets, 1)) + 1;
-                            trial = pm_trials(i);
-                            stimuli(trial,:) = pm_targets(target_id, :);
-                            correct(trial) = pm_correct(target_id);
-                            og_correct(trial) = pm_og_correct(target_id);
-                            is_target(trial) = 1;                        
-                        end
+                        
                     end
 
                 end
@@ -189,6 +203,9 @@ for OG_ONLY = og_range
                 curpar = zeros(1,6);
                 curpar(5) = bias_for_task;
                 curpar(6) = bias_for_attention;
+                curpar(7) = 1;
+                curpar(8) = 0;
+                curpar(9) = bias_for_context;
                 if OG_ONLY
                     curpar(1:4) = [1 0 1 0];
                 else       
@@ -258,8 +275,10 @@ for OG_ONLY = og_range
                      
                         subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, TARGETS];
                         data = [data; subject];
-                        %subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
-                        %extra = [extra; subject_extra];
+                        if debug_mode
+                            subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
+                            extra = [extra; subject_extra];
+                        end
 
                     elseif exp_id == 2
                         % for experiment 2, each block = 1 sample (i.e. 4
@@ -279,18 +298,22 @@ for OG_ONLY = og_range
                             % compatible with the data from experiment 1
                             block = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, subject_id, block_id];
                             data = [data; block];
+                            if debug_mode
+                                subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets, subject_id, block};
+                                extra = [extra; subject_extra];
+                            end
                         end
                     end
                     
                     % show picture of whole thing (for debugging)
-                    %{
-                    if ~OG_ONLY
-                        getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
-                            responses, RTs, act, acc, onsets, offsets, ...
-                            is_target, correct, og_correct, ...
-                            true);
+                    if debug_mode
+                        if ~OG_ONLY
+                            getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
+                                responses, RTs, act, acc, onsets, offsets, ...
+                                is_target, correct, og_correct, ...
+                                true);
+                        end
                     end
-                    %}
                 end
             
                 

@@ -52,7 +52,7 @@ classdef Simulator < Model
         function instruction(self, targets, include_in_WM)
             for target = targets
                 target_unit = strcat('see', {' '}, target); % get perception unit name
-                self.threewayEM(target_unit{1}, 'OG Task', 'PM Task');
+                self.threewayEM(target_unit{1}, 'PM Context', 'PM Task');
                 target_monitor_unit = strcat('Monitor ', {' '}, target);
                 target_monitor_id = self.unit_id(target_monitor_unit{1});
                 if include_in_WM
@@ -234,10 +234,10 @@ classdef Simulator < Model
                     %end
                                         
                     % add noise to net inputs (except input units)
-                    noise = normrnd(0, self.NOISE_SIGMA, 1, self.N);
-                    noise(self.input_ids) = 0;
+                    %noise = normrnd(0, 0.05, size(self.net_input));
+                    %noise(self.input_ids) = 0;
+                    %self.net_input(self.context_ids) = normrnd(0, 0.01, 1, length(self.context_ids));
                     % TODO no noise... for now
-                    %self.net_input = self.net_input + noise;
                     
                     %self.bias(self.wm_ids) = self.bias(self.wm_ids) - 0.00001;
                     
@@ -280,6 +280,11 @@ classdef Simulator < Model
                 
                 %switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
                 % TODO hacky...
+                if length(self.resting_wm) ~= length(self.wm_act)
+                    n = self.net_input
+                    l = length(self.resting_wm)
+                    z = length(self.wm_act)
+                end
                 assert(length(self.resting_wm) == length(self.wm_act));
                 %switched_to_PM_task = (self.wm_act(2) > self.wm_act(1) - 0.1);
                 switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
@@ -294,6 +299,7 @@ classdef Simulator < Model
             
             activation_log(cycles:end,:) = [];
             accumulators_log(cycles:end,:) = [];
+            net_log(cycles:end,:) = [];
         end
     end
 end

@@ -62,8 +62,13 @@ classdef Model < handle
         
         RESPONSE_TO_OUTPUT = 1;
         RESPONSE_TO_OUTPUT_INHIBITION = 0;
+        
+        % WM and EM units follow
+        %
+        
+        BIAS_WHEN_OFF = -100;
                 
-        % task representation
+        % task representation (WM)
         
         BIAS_FOR_TASK = 3;
         TASK_INHIBITION = -2;
@@ -75,18 +80,27 @@ classdef Model < handle
         %PERCEPTION_TO_TASK = 1.2;  % EM = speed of task switch --
         %DEPRECATEd; see hippo
         
-        % feature attention
+        % feature attention (WM)
         
-        BIAS_WHEN_OFF = -100;
         BIAS_FOR_ATTENTION = 3;
         ATTENTION_INHIBITION = -2;
         ATTENTION_SELF = -2 + 0.0005;
         
         TASK_TO_ATTENTION = -1;
         
+        % context units
+        
+        BIAS_FOR_CONTEXT = 3;
+        CONTEXT_INHIBITION = -2;
+        CONTEXT_SELF = -2; % + 0.0005;
+        
+        TASK_TO_CONTEXT = -1;
+        ATTENTION_TO_CONTEXT = -1;
+        CONTEXT_TO_TASK_AND_ATTENTION = -1;
+        
         % hippocampus
         
-        BIAS_FOR_HIPPO = -32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
+        BIAS_FOR_HIPPO = -32; %-32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
         
         STIMULUS_TO_HIPPO = 30;
         CONTEXT_TO_HIPPO = 20;
@@ -112,6 +126,7 @@ classdef Model < handle
         output_units
         task_units
         attention_units
+        context_units
         hippo_units
         
         input_ids
@@ -120,6 +135,7 @@ classdef Model < handle
         output_ids
         task_ids
         attention_ids
+        context_ids
         hippo_ids
         
         wm_ids
@@ -204,6 +220,9 @@ classdef Model < handle
             self.task_units = {
                 'OG Task', 'PM Task', 'Inter Task'
                 };
+            self.context_units = {
+                'PM Context', 'Other Context'
+                };
             self.attention_units = {
                 'OG features'
                 };
@@ -226,6 +245,7 @@ classdef Model < handle
                 self.output_units, ...
                 self.task_units, ...
                 self.attention_units, ...
+                self.context_units, ...
                 self.hippo_units, ...
                 {'timeout'}
                 ];
@@ -240,6 +260,7 @@ classdef Model < handle
             self.output_ids = cellfun(@self.unit_id, self.output_units);
             self.task_ids = cellfun(@self.unit_id, self.task_units);
             self.attention_ids = cellfun(@self.unit_id, self.attention_units);
+            self.context_ids = cellfun(@self.unit_id, self.context_units);
             self.hippo_ids = cellfun(@self.unit_id, self.hippo_units);
             
             self.ffwd_ids = [
@@ -248,7 +269,7 @@ classdef Model < handle
                 self.response_ids ...
                 self.output_ids ...
                 self.hippo_ids];
-            self.wm_ids = [self.task_ids self.attention_ids];
+            self.wm_ids = [self.task_ids self.attention_ids self.context_ids];
 
             % initialize free parameters (based on PM instruction, task, etc)
             self.init_wm = zeros(1, length(self.wm_ids));
@@ -258,6 +279,9 @@ classdef Model < handle
             self.target_init = params(4);
             self.BIAS_FOR_TASK = params(5);
             self.BIAS_FOR_ATTENTION = params(6);
+            self.init_wm(self.wm_ids == self.unit_id('PM Context')) = params(7);
+            self.init_wm(self.wm_ids == self.unit_id('Other Context')) = params(8);
+            self.BIAS_FOR_CONTEXT = params(9);
 
             % ---==== specify connections between units ====---
             
@@ -350,6 +374,10 @@ classdef Model < handle
             self.forward_all_to_all(self.attention_ids, self.task_ids, self.ATTENTION_TO_TASK);
             self.forward_all_to_all(self.task_ids, self.attention_ids, self.TASK_TO_ATTENTION);
             
+            self.forward_all_to_all(self.attention_ids, self.context_ids, self.ATTENTION_TO_CONTEXT);
+            self.forward_all_to_all(self.task_ids, self.context_ids, self.TASK_TO_CONTEXT);
+            self.forward_all_to_all(self.context_ids, [self.task_ids self.attention_ids], self.CONTEXT_TO_TASK_AND_ATTENTION);
+            
             % perception to task representation (indirect PM pathway)
             self.forward_all_to_all(self.perception_ids, self.task_ids, 0); % EM!!!
             
@@ -378,10 +406,12 @@ classdef Model < handle
             self.lateral_inhibition(self.output_ids, self.OUTPUT_INHIBITION);
             self.lateral_inhibition(self.task_ids, self.TASK_INHIBITION);
             self.lateral_inhibition(self.attention_ids, self.ATTENTION_INHIBITION);
+            self.lateral_inhibition(self.context_ids, self.CONTEXT_INHIBITION);
 
             % self excitations
             self.self_excitation(self.task_ids, self.TASK_SELF);
             self.self_excitation(self.attention_ids, self.ATTENTION_SELF);
+            self.self_excitation(self.context_ids, self.CONTEXT_SELF);
             
             % generate weight matrix from defined connections
             self.weights = sparse(self.connections(:,1), self.connections(:,2), self.connections(:,3), ...
@@ -393,7 +423,8 @@ classdef Model < handle
             self.bias(self.output_ids) = self.BIAS_FOR_OUTPUTS;
             self.bias(self.task_ids) = self.BIAS_FOR_TASK;
             self.bias(self.attention_ids) = self.BIAS_WHEN_OFF; % all attention units don't exist by default
-            self.bias(self.unit_id('OG features')) = self.BIAS_FOR_ATTENTION; % ...except for OG features
+                self.bias(self.unit_id('OG features')) = self.BIAS_FOR_ATTENTION; % ...except for OG features
+            self.bias(self.context_ids) = self.BIAS_FOR_CONTEXT;
             self.bias(self.hippo_ids) = self.BIAS_FOR_HIPPO;            
             if ~have_third_task
                 self.bias(self.unit_id('Inter Task')) = self.BIAS_WHEN_OFF;
