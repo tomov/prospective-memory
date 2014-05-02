@@ -25,10 +25,10 @@ startpar = [1  0       1    0, ...      % focal, low emph
             4 4 4];
 
         
-debug_mode = false;
+debug_mode = true;
 
 
-[data, extra] = EM2005(startpar, 1, debug_mode);
+[data, extra] = EM2005(startpar, 3, debug_mode);
 data
 
 if debug_mode
@@ -40,8 +40,8 @@ if debug_mode
    % figure;
    % plot([act(1:100, context_ids), nets(1:100, context_ids)]);
 else
-    save('rondo-run-data-exp-1.mat');
-    EM2005_with_stats_exp1
+    save('rondo-run-data.mat');
+    %EM2005_with_stats_exp1
 end
 
 
