@@ -25,10 +25,13 @@ startpar = [1  0       1    0, ...      % focal, low emph
             4 4 4];
 
         
+
 debug_mode = true;
+experiment = 1;
+version = '3'
 
 
-[data, extra] = EM2005(startpar, 3, debug_mode);
+[data, extra] = EM2005(startpar, experiment, debug_mode);
 data
 
 if debug_mode
@@ -40,8 +43,15 @@ if debug_mode
    % figure;
    % plot([act(1:100, context_ids), nets(1:100, context_ids)]);
 else
-    save('rondo-run-data.mat');
-    %EM2005_with_stats_exp1
+    filename = sprintf('/mnt/cd/people/mtomov/data/rondo_data_exp%d_v_%s.mat', experiment, version);
+    save(filename);
+    if experiment == 1
+        EM2005_with_stats_exp1
+    elseif experiment == 2
+        EM2005_with_stats_exp2
+    elseif experiment == 3
+        EM2005_with_stats_exp3
+    end
 end
 
 

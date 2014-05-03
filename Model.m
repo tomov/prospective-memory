@@ -72,7 +72,7 @@ classdef Model < handle
         
         BIAS_FOR_TASK = 3;
         TASK_INHIBITION = -2;
-        TASK_SELF = -2 + 0.0005;
+        TASK_SELF = -2 + 0.0004;
         
         ATTENTION_TO_TASK = -1;
         
@@ -84,7 +84,7 @@ classdef Model < handle
         
         BIAS_FOR_ATTENTION = 3;
         ATTENTION_INHIBITION = -2;
-        ATTENTION_SELF = -2 + 0.0005;
+        ATTENTION_SELF = -2 + 0.0004;
         
         TASK_TO_ATTENTION = -1;
         
@@ -92,7 +92,7 @@ classdef Model < handle
         
         BIAS_FOR_CONTEXT = 3;
         CONTEXT_INHIBITION = -2;
-        CONTEXT_SELF = -2; % + 0.0005;
+        CONTEXT_SELF = -2 + 0.0004;
         
         TASK_TO_CONTEXT = -1;
         ATTENTION_TO_CONTEXT = -1;

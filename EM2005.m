@@ -29,8 +29,6 @@ blocks_per_condition = blocks_per_condition(exp_id);
 trials_per_block = trials_per_block(exp_id);
 subjects_per_condition = subjects_per_condition(exp_id);
 
-%subjects_per_condition = 2; % FIXME remove
-
 data = [];
 extra = [];
 
@@ -56,9 +54,9 @@ end
 if debug_mode
     subjects_per_condition = 1;
     og_range = 0;
-    focal_range = 1;
-    emphasis_range = 0:1;
-    target_range = [1,6];
+    focal_range = 0:1;
+    emphasis_range = 0;
+    %target_range = [1,6];
 end
 
 
