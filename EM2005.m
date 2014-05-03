@@ -13,13 +13,13 @@ bias_for_task = params(17);
 bias_for_attention = params(18);
 bias_for_context = params(19);
 
-assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 5);
+assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 4 || exp_id == 5);
 fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
 
 % from E&M Experiment 1 & 2 methods
 subjects_per_condition = [24 24 32 104 72];
-blocks_per_condition = [8 4 1 NaN 100];
-trials_per_block = [24 40 110 NaN 18];
+blocks_per_condition = [8 4 1 1 100];
+trials_per_block = [24 40 110 110 18];
 pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160];
 pm_trials_exp3 = [26 52 78 104];
@@ -44,6 +44,9 @@ elseif exp_id == 2
     target_range = 1;
 elseif exp_id == 3
     focal_range = 1;
+elseif exp_id == 4
+    focal_range = 1;
+    target_range = 1;
 elseif exp_id == 5
     focal_range = 1;
     emphasis_range = 0;
@@ -53,9 +56,9 @@ end
 
 if debug_mode
     subjects_per_condition = 1;
-    og_range = 0;
-    focal_range = 0:1;
-    emphasis_range = 0;
+    %og_range = 0;
+    %focal_range = 1:-1:0;
+    %emphasis_range = 0;
     %target_range = [1,6];
 end
 
@@ -131,14 +134,14 @@ for OG_ONLY = og_range
                                 og_correct(middle) = pm_og_correct(target_id);
                                 is_target(middle) = 1;
                             end
-                        elseif exp_id == 2 || exp_id == 3
+                        elseif exp_id == 2 || exp_id == 3 || exp_id == 4
                             % in experiment 2, trials 40, 80, 120, and 160 are
                             % targets
                             % experiment 3 also has 4 target trials
                             if exp_id == 2
                                 pm_trials = pm_trials_exp2;
                             else
-                                assert(exp_id == 3)
+                                assert(exp_id == 3 || exp_id == 4)
                                 pm_trials = pm_trials_exp3;
                             end
                             for i = 1:length(pm_trials)
@@ -249,7 +252,7 @@ for OG_ONLY = og_range
                 for subject_id = 1:subjects_per_condition
                     [responses, RTs, act, acc, onsets, offsets, nets] = sim.trial(stimuli);
 
-                    if exp_id == 1 || exp_id == 3 || exp_id == 5
+                    if exp_id == 1 || exp_id == 3 || exp_id == 4 || exp_id == 5
                         % for experiment 1, each subject = 1 sample
                         [OG_RT, ~, OG_Hit, PM_RT, ~, PM_Hit, PM_miss_OG_hit] = getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                             responses, RTs, act, acc, onsets, offsets, ...

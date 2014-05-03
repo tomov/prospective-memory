@@ -120,6 +120,8 @@ SSresid = sum(yresid.^2);
 SStotal = (length(empirical_RTs)-1) * var(empirical_RTs);
 rsq = 1 - SSresid/SStotal;
 
+OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept);
+
 if DO_PLOT
     figure;
     scatter(simulation_cycles, empirical_RTs);
@@ -127,10 +129,9 @@ if DO_PLOT
     xlabel('Simulation RTs (cycles)');
     ylabel('Empirical RTs (msec)');
     lsline
+    text(min(xlim), mean(ylim), OG_RT_label_cycles_to_msec, 'fontsize', 14);
     title(sprintf('R^2 = %.4f', rsq));
 end
-
-OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept);
 
 
 

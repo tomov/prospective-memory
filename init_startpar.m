@@ -18,17 +18,31 @@ where
   ];
 %}
 
-startpar = [1  0       1    0, ...      % focal, low emph
-            1  0       1    0.7, ...    % focal, high emph
-            1  0.3   0.7    0.5, ...    % nonfocal, low emph
-            1  0.4   0.6    0.5, ...    % nonfocal, high emph
-            4 4 4];
 
-        
+debug_mode = false;
+experiment = 4;
+version = 'XX'
 
-debug_mode = true;
-experiment = 1;
-version = '3'
+if experiment == 1 || experiment == 2
+    
+    startpar = [1  0.1     1    0.2, ...      % focal, low emph
+                1  0.3     1    0.5, ...    % focal, high emph
+                1  0.3     1    0.8, ...    % nonfocal, low emph
+                1  0.4     1    0.9, ...    % nonfocal, high emph
+                4 4 4];        
+            
+elseif experiment == 3 || experiment == 4
+    
+    startpar = [1  0.1     1    0.2, ...      % focal, low emph
+                1  0.3     1    0.5, ...    % focal, high emph
+                1  0.3     1    0.8, ...    % nonfocal, low emph
+                1  0.4     1    0.9, ...    % nonfocal, high emph
+                4 4 4];        
+            
+else
+end
+
+
 
 
 [data, extra] = EM2005(startpar, experiment, debug_mode);

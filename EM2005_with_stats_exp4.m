@@ -43,18 +43,13 @@ SD_cols = [5 7 9 11];
 subjects_per_condition = 104;
 
 empirical_stats = [
-    % low emphasis
-    1 1 0, 4791, 618,        70, 11, NaN, NaN, NaN, NaN, 1;  % no-PM, focal,    low emph, 1 targets
-    1 1 0, 4890, 508,        70, 11, NaN, NaN, NaN, NaN, 6;  % no-PM, focal,    low emph, 6 targets
-    0 1 0, 4885, 591,        69, 10, NaN, NaN, 80,   28, 1;  % PM, focal,    low emph, 1 targets
-    0 1 0, 5215, 422,        69, 10, NaN, NaN, 72,   25, 6;  % PM, focal,    low emph, 6 targets
+    % low emphasis = no cost participants (no monitoring)
+    1 1 0, 7201.28,  1520.06,       74, 10, NaN, NaN, NaN, NaN, 1;  % no-PM, focal,    low emph, 1 targets
+    0 1 0, 6706.30,  1337.78,       73, 10, NaN, NaN, 94,   14, 1;  % PM, focal,    low emph, 1 targets
     
-    % high emphasis -- SAME... the two are entagled in Experiment 3,
-    % they only split them up in Experiment 4
-    1 1 1, 4791, 618,        70, 11, NaN, NaN, NaN, NaN, 1;  % no-PM, focal,    low emph, 1 targets
-    1 1 1, 4890, 508,        70, 11, NaN, NaN, NaN, NaN, 6;  % no-PM, focal,    low emph, 6 targets
-    0 1 1, 4885, 591,        69, 10, NaN, NaN, 80,   28, 1;  % PM, focal,    low emph, 1 targets
-    0 1 1, 5215, 422,        69, 10, NaN, NaN, 72,   25, 6;  % PM, focal,    low emph, 6 targets
+    % high emphasis = cost participants (monitoring)
+    1 1 1, 6797.26, 1484.68,        74, 10, NaN, NaN, NaN, NaN, 1;  % no-PM, focal,    high emph, 1 targets
+    0 1 1, 7533.95, 1769.18,        73, 10, NaN, NaN, 95,   17, 1;  % PM, focal,    high emph, 1 targets
 ];
 
 
@@ -69,22 +64,21 @@ empirical_stats(:, SD_cols) = empirical_stats(:, SD_cols) / sqrt(subjects_per_co
 simulation_stats = [];
 EMPHASIS = 1;
 FOCAL = 1;
+TARGETS = 1;
 % order here matters -- must be same as empirical_data above for line
 % regression
 for EMPHASIS = 0:1
     for OG_ONLY = 1:-1:0
-        for TARGETS = [1,6]
-            stat = [OG_ONLY, FOCAL, EMPHASIS];
-            for col = 4:7
-                samples = subjects(subjects(:, 1) == OG_ONLY & subjects(:, 3) == EMPHASIS & subjects(:, 9) == TARGETS, col);
-                M = mean(samples);
-                SD = std(samples);
-                assert(length(samples) == subjects_per_condition);
-                stat = [stat, M, SD];
-            end
-            stat = [stat, TARGETS];
-            simulation_stats = [simulation_stats; stat];
+        stat = [OG_ONLY, FOCAL, EMPHASIS];
+        for col = 4:7
+            samples = subjects(subjects(:, 1) == OG_ONLY & subjects(:, 3) == EMPHASIS & subjects(:, 9) == TARGETS, col);
+            M = mean(samples);
+            SD = std(samples);
+            assert(length(samples) == subjects_per_condition);
+            stat = [stat, M, SD];
         end
+        stat = [stat, TARGETS];
+        simulation_stats = [simulation_stats; stat];
     end
 end
 
@@ -459,12 +453,12 @@ if DO_PLOT
     subplot(3, 2, 1);
     title('Empirical Data');
     ylabel('OG RT (msec)');
-    plot_all_conditions_exp4(empirical_stats(:, [1 12 3 4 5]), 4500, 5500, 1, 0, true);
+    plot_all_conditions_exp4(empirical_stats(:, [1 12 3 4 5]), 5500, 7500, 1, 0, true);
 
     subplot(3, 2, 2);
     title('Simulation Data');
     ylabel(OG_RT_label_cycles_to_msec);
-    plot_all_conditions_exp4(simulation_stats(:, [1 12 3 4 5]), 4500, 5500, RT_slope, RT_intercept, false);
+    plot_all_conditions_exp4(simulation_stats(:, [1 12 3 4 5]), 5500, 7500, RT_slope, RT_intercept, false);
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');

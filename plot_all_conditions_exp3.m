@@ -9,16 +9,16 @@ og_only_titles = {'PM', 'No-PM'};
 handles = [];
 
 legend_titles = {};
-for EMPHASIS = 0:1
+target_idx = 0;
+for TARGETS = [1,6]
+    target_idx = target_idx + 1;
     xticklabels = {};
     values = [];
     errors = [];
     xes = [];
     x = 1;
     for OG_ONLY = 1:-1:0
-        target_idx = 0;
-        for TARGETS = 1
-            target_idx = target_idx + 1;
+        for EMPHASIS = 0
             stat = stats(stats(:, 1) == OG_ONLY & stats(:, 2) == TARGETS & stats(:, 3) == EMPHASIS, :);
             M = stat(4) * slope + intercept;
             SD = stat(5) * slope;
@@ -26,15 +26,15 @@ for EMPHASIS = 0:1
             errors = [errors, SD];
             xes = [xes, x];
             x = x + 1;
-            xlabel = sprintf('%s, %s', target_titles{target_idx}, og_only_titles{OG_ONLY+1});
+            xlabel = sprintf('%s, %s', emphasis_titles{EMPHASIS+1}, og_only_titles{OG_ONLY+1});
             xticklabels = [xticklabels,  {xlabel}];
         end
     end
     hold on;
     errorbar(xes, values, errors);
-    handle = plot(xes, values, markers{EMPHASIS + 1}, 'LineWidth', 2, 'MarkerSize', 6);
+    handle = plot(xes, values, markers{target_idx}, 'LineWidth', 2, 'MarkerSize', 6);
     handles = [handles, handle];
-    legend_titles = [legend_titles; emphasis_titles(EMPHASIS + 1)];
+    legend_titles = [legend_titles; target_titles(target_idx)];
 end
 
 hold off;
