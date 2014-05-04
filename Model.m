@@ -17,7 +17,7 @@ classdef Model < handle
         SETTLE_LEEWAY = 2*Model.INSTRUCTION_CYLCES;
         EVIDENCE_ACCUM_SIGMA = 0.1;
         EVIDENCE_ACCUM_ALPHA = 0.1;
-        EVIDENCE_ACCUM_THRESHOLD = 1.5;
+        EVIDENCE_ACCUM_THRESHOLD = 2;
         
         % activation levels
 
@@ -342,8 +342,8 @@ classdef Model < handle
                 
                 % -- TODO HACK to make the PM task work, you need to put
                 % it up to baseline (the winning OG response gets x2 inputs)
-                self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                %self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                %self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                 self.unit_id('see tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;

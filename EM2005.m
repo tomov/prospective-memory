@@ -18,7 +18,7 @@ fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp
 
 % from E&M Experiment 1 & 2 methods
 subjects_per_condition = [24 24 32 104 72];
-blocks_per_condition = [8 4 1 1 100];
+blocks_per_condition = [8 4 1 1 10];
 trials_per_block = [24 40 110 110 18];
 pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160];
@@ -227,7 +227,7 @@ for OG_ONLY = og_range
                             curpar(1:4) = nonfocal_high_init_wm;
                         end
                     end
-                end                
+                end
 
                 % initialize simulator
                 sim = Simulator(curpar, false);            
@@ -307,6 +307,7 @@ for OG_ONLY = og_range
                     end
                     
                     % show picture of whole thing (for debugging)
+                    %{
                     if debug_mode
                         if ~OG_ONLY
                             getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
@@ -315,6 +316,7 @@ for OG_ONLY = og_range
                                 true);
                         end
                     end
+                    %}
                 end
             
                 

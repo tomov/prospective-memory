@@ -19,25 +19,26 @@ where
 %}
 
 
-debug_mode = false;
-experiment = 4;
-version = 'XX'
 
-if experiment == 1 || experiment == 2
+debug_mode = true;
+experiment = 1;
+
+if experiment == 1 || experiment == 2 || experiment == 5
     
-    startpar = [1  0.1     1    0.2, ...      % focal, low emph
-                1  0.3     1    0.5, ...    % focal, high emph
-                1  0.3     1    0.8, ...    % nonfocal, low emph
-                1  0.4     1    0.9, ...    % nonfocal, high emph
-                4 4 4];        
+    startpar = [1  0.3    1    0.2, ...      % focal, low emph
+                1  0.7    1    0.4, ...    % focal, high emph
+                1  0.8    1    0.8, ...    % nonfocal, low emph
+                1  0.9    1    0.85, ...    % nonfocal, high emph
+                4 4 4];
+            
             
 elseif experiment == 3 || experiment == 4
     
-    startpar = [1  0.1     1    0.2, ...      % focal, low emph
-                1  0.3     1    0.5, ...    % focal, high emph
-                1  0.3     1    0.8, ...    % nonfocal, low emph
+    startpar = [1  0.1     1    0.2, ...    % focal, low emph
+                1  0.25    1    0.5, ...    % focal, high emph
+                1  0.25    1    0.8, ...    % nonfocal, low emph
                 1  0.4     1    0.9, ...    % nonfocal, high emph
-                4 4 4];        
+                4 4 4];      
             
 else
 end
@@ -49,7 +50,7 @@ end
 data
 
 if debug_mode
-	m = Model(startpar, false);
+	m = Model([startpar(1:4) startpar(17:18) 1 0 startpar(19)], false);
     wm_ids = m.wm_ids;
     context_ids = m.context_ids;
     act = extra{1, 8};
@@ -57,7 +58,7 @@ if debug_mode
    % figure;
    % plot([act(1:100, context_ids), nets(1:100, context_ids)]);
 else
-    filename = sprintf('/mnt/cd/people/mtomov/data/rondo_data_exp%d_v_%s.mat', experiment, version);
+    filename = sprintf('/mnt/cd/people/mtomov/data/%s.mat', mfilename());
     save(filename);
     if experiment == 1
         EM2005_with_stats_exp1

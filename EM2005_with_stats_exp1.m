@@ -101,6 +101,8 @@ SSresid = sum(yresid.^2);
 SStotal = (length(empirical_RTs)-1) * var(empirical_RTs);
 rsq = 1 - SSresid/SStotal;
 
+OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept);
+
 if DO_PLOT
     figure;
     scatter(simulation_cycles, empirical_RTs);
@@ -108,10 +110,9 @@ if DO_PLOT
     xlabel('Simulation RTs (cycles)');
     ylabel('Empirical RTs (msec)');
     lsline
+    text(min(xlim), mean(ylim), OG_RT_label_cycles_to_msec, 'fontsize', 14);
     title(sprintf('R^2 = %.4f', rsq));
 end
-
-OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept);
 
 
 
@@ -465,10 +466,10 @@ if DO_PLOT
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');
-    plot_all_conditions_exp1(empirical_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
+    plot_all_conditions_exp1(empirical_stats(:, [1:3 6 7]), 90, 100, 1, 0, false);
 
     subplot(3, 2, 4);
-    plot_all_conditions_exp1(simulation_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
+    plot_all_conditions_exp1(simulation_stats(:, [1:3 6 7]), 90, 100, 1, 0, false);
 
     subplot(3, 2, 5);
     ylabel('PM Hit Rate (%)');
