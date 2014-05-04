@@ -56,7 +56,7 @@ end
 
 if debug_mode
     subjects_per_condition = 1;
-    %og_range = 0;
+    og_range = 0;
     %focal_range = 1:-1:0;
     %emphasis_range = 0;
     %target_range = [1,6];
@@ -161,11 +161,13 @@ for OG_ONLY = og_range
                 
                 if exp_id == 5
                     inter_stimuli = [
+                        {'switch to Inter Task'}, 1;
                         {'dog'}, 1;
                         {'tortoise'}, 1;
                         {'dog'}, 1;
                         {'monkey'}, 1;
                         {'tortoise'}, 1;
+                        {'switch back to OG and PM'}, 1;
                         {'crocodile'}, 1;
                         {'kiwi'}, 1;
                         {'tortoise'}, 1;
@@ -204,8 +206,13 @@ for OG_ONLY = og_range
                 curpar = zeros(1,6);
                 curpar(5) = bias_for_task;
                 curpar(6) = bias_for_attention;
-                curpar(7) = 1;
-                curpar(8) = 0;
+                if exp_id == 5
+                    curpar(7) = 0;
+                    curpar(8) = 1;
+                else
+                    curpar(7) = 1;
+                    curpar(8) = 0;
+                end
                 curpar(9) = bias_for_context;
                 if OG_ONLY
                     curpar(1:4) = [1 0 1 0];
@@ -230,7 +237,12 @@ for OG_ONLY = og_range
                 end
 
                 % initialize simulator
-                sim = Simulator(curpar, false);            
+                if exp_id == 5
+                    have_third_task = true;
+                else
+                    have_third_task = false;
+                end
+                sim = Simulator(curpar, have_third_task);
                 
                 % PM instruction
                 if FOCAL
@@ -307,7 +319,6 @@ for OG_ONLY = og_range
                     end
                     
                     % show picture of whole thing (for debugging)
-                    %{
                     if debug_mode
                         if ~OG_ONLY
                             getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
@@ -316,7 +327,6 @@ for OG_ONLY = og_range
                                 true);
                         end
                     end
-                    %}
                 end
             
                 

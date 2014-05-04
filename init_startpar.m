@@ -21,27 +21,13 @@ where
 
 
 debug_mode = true;
-experiment = 1;
+experiment = 5;
 
-if experiment == 1 || experiment == 2 || experiment == 5
-    
-    startpar = [1  0.3    1    0.2, ...      % focal, low emph
-                1  0.7    1    0.4, ...    % focal, high emph
-                1  0.8    1    0.8, ...    % nonfocal, low emph
-                1  0.9    1    0.85, ...    % nonfocal, high emph
-                4 4 4];
-            
-            
-elseif experiment == 3 || experiment == 4
-    
-    startpar = [1  0.1     1    0.2, ...    % focal, low emph
-                1  0.25    1    0.5, ...    % focal, high emph
-                1  0.25    1    0.8, ...    % nonfocal, low emph
-                1  0.4     1    0.9, ...    % nonfocal, high emph
-                4 4 4];      
-            
-else
-end
+startpar = [1  0.35   1    0.3, ...      % focal, low emph     % exp1_v16, exp2_v19
+            1  0.6    1    0.4, ...     % focal, high emph      % exp1_v16
+            1  0.8    1    0.78, ...    % nonfocal, low emph   % exp2_v11
+            1  0.9    1    0.83, ...    % nonfocal, high emph  % exp1_v16 -- sorta
+            4 4 4];
 
 
 

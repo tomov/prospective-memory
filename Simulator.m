@@ -280,11 +280,6 @@ classdef Simulator < Model
                 
                 %switched_to_PM_task = (self.activation(self.unit_id('PM Task')) > self.activation(self.unit_id('OG Task')));
                 % TODO hacky...
-                if length(self.resting_wm) ~= length(self.wm_act)
-                    n = self.net_input
-                    l = length(self.resting_wm)
-                    z = length(self.wm_act)
-                end
                 assert(length(self.resting_wm) == length(self.wm_act));
                 %switched_to_PM_task = (self.wm_act(2) > self.wm_act(1) - 0.1);
                 switched_to_PM_task = (self.wm_act(2) > self.resting_wm(2) + 0.01);
