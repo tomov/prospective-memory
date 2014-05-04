@@ -12,6 +12,8 @@ nonfocal_high_init_wm = params(13:16);
 bias_for_task = params(17);
 bias_for_attention = params(18);
 bias_for_context = params(19);
+param_noise_sigma_1 = params(20);
+param_noise_sigma_2 = params(21);
 
 assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 4 || exp_id == 5);
 fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
@@ -235,6 +237,8 @@ for OG_ONLY = og_range
                         end
                     end
                 end
+                curpar(2) = curpar(2) + normrnd(0, param_noise_sigma_1, 1, 1);
+                curpar(4) = curpar(4) + normrnd(0, param_noise_sigma_2, 1, 1);
 
                 % initialize simulator
                 if exp_id == 5
@@ -289,8 +293,10 @@ for OG_ONLY = og_range
                         subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, TARGETS];
                         data = [data; subject];
                         if debug_mode
-                            subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
+                            subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets, curpar};
                             extra = [extra; subject_extra];
+                        else
+                            extra = [extra; curpar];
                         end
 
                     elseif exp_id == 2
@@ -312,14 +318,17 @@ for OG_ONLY = og_range
                             block = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, subject_id, block_id];
                             data = [data; block];
                             if debug_mode
-                                subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets, subject_id, block};
+                                subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets, subject_id, block, curpar};
                                 extra = [extra; subject_extra];
+                            else
+                                extra = [extra; curpar];
                             end
                         end
                     end
                     
                     % show picture of whole thing (for debugging)
                     if debug_mode
+                        fprintf('   curpar(1:4) = %.3f %.3f %.3f %.3f', curpar(1), curpar(2), curpar(3), curpar(4));
                         if ~OG_ONLY
                             getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                                 responses, RTs, act, acc, onsets, offsets, ...

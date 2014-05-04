@@ -20,15 +20,17 @@ where
 
 
 
-debug_mode = true;
-experiment = 5;
+debug_mode = false;
+experiment = 1;
 
+
+% YES!!! this is experiment -- with supersubjects
 startpar = [1  0.35   1    0.3, ...      % focal, low emph     % exp1_v16, exp2_v19
-            1  0.6    1    0.4, ...     % focal, high emph      % exp1_v16
-            1  0.8    1    0.78, ...    % nonfocal, low emph   % exp2_v11
+            1  0.6    1    0.4, ...    % focal, high emph      % exp1_v16
+            1  0.8    1    0.75, ...    % nonfocal, low emph   % exp2_v11
             1  0.9    1    0.83, ...    % nonfocal, high emph  % exp1_v16 -- sorta
-            4 4 4];
-
+            4 4 4, ...
+            0.1 0.0];
 
 
 
