@@ -9,8 +9,8 @@ classdef Model < handle
         STEP_SIZE = 0.05;
         DECAY = 0.01;
         CYCLES_PER_SEC = 500;
-        SETTLE_MEAN_EPS = 1e-4; % adjust these when you add noise to the model
-        SETTLE_STD_EPS = 1e-5; % ...this too
+        SETTLE_MEAN_EPS = 1e-3; % adjust these when you add noise to the model
+        SETTLE_STD_EPS = 1e-4; % ...this too
         TAU = 0.1; % rate constant from Jon's paper
         INSTRUCTION_CYLCES = 2/Model.TAU;
         RESET_CYCLES = Model.INSTRUCTION_CYLCES;
@@ -100,10 +100,12 @@ classdef Model < handle
         
         % hippocampus
         
-        BIAS_FOR_HIPPO = -32; %-32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
+        % FUTURE -20
+        BIAS_FOR_HIPPO = -23; %-32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
         
-        STIMULUS_TO_HIPPO = 30;
-        CONTEXT_TO_HIPPO = 20;
+        % FUTURE 20, 12
+        STIMULUS_TO_HIPPO = 16; % 30
+        CONTEXT_TO_HIPPO = 16;  % 20
         
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;
@@ -193,7 +195,7 @@ classdef Model < handle
             end
         end
         
-        function self = Model(params, have_third_task)
+        function self = Model(FOCAL, params, have_third_task)
             % specify unit names in each layer
             words = {
                 'tortoise', 'physics', 'crocodile', 'math', ... % words
@@ -340,20 +342,6 @@ classdef Model < handle
                 self.unit_id('see kiwi')                   , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
                 self.unit_id('see monkey')                 , self.unit_id('Wild')         , self.PERCEPTION_TO_RESPONSE * 2;
                 
-                % -- TODO HACK to make the PM task work, you need to put
-                % it up to baseline (the winning OG response gets x2 inputs)
-                %self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                %self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see dog')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see cat')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see panda')                  , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see kiwi')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                self.unit_id('see monkey')                 , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                
                 % raw inputs to perception -- nonfocal PM targets
                 self.unit_id('tortoise')               , self.unit_id('see tor')         , self.INPUT_TO_PERCEPTION;
                 
@@ -369,6 +357,33 @@ classdef Model < handle
                 self.unit_id('Domestic')            , self.unit_id('Yes')              , self.RESPONSE_TO_OUTPUT;
                 self.unit_id('Wild')                , self.unit_id('No')              , self.RESPONSE_TO_OUTPUT;
             ];
+        
+        
+            % -- TODO HACK to make the PM task work, you need to put
+            % it up to baseline (the winning OG response gets x2 inputs)
+            %if FOCAL
+            % FUTURE
+                self.connections = [self.connections;
+                    self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see crocodile')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see dog')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see cat')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see panda')                  , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see kiwi')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                    self.unit_id('see monkey')                 , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                ];
+            %else
+            %FUTURE
+            
+                self.connections = [self.connections;
+                   % self.unit_id('see tor')                    , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                ];
+            
+            %end
         
             % WM LCA vertical mutual inhibition
             self.forward_all_to_all(self.attention_ids, self.task_ids, self.ATTENTION_TO_TASK);

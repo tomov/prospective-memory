@@ -246,7 +246,7 @@ for OG_ONLY = og_range
                 else
                     have_third_task = false;
                 end
-                sim = Simulator(curpar, have_third_task);
+                sim = Simulator(FOCAL, curpar, have_third_task);
                 
                 % PM instruction
                 if FOCAL

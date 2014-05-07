@@ -18,8 +18,8 @@ classdef Simulator < Model
     end
     
     methods
-        function self = Simulator(params, have_third_task)
-            self = self@Model(params, have_third_task);
+        function self = Simulator(FOCAL, params, have_third_task)
+            self = self@Model(FOCAL, params, have_third_task);
             self.Nout = size(self.output_ids, 2);
         end
         
@@ -217,10 +217,10 @@ classdef Simulator < Model
                     
                     % calculate net inputs for all units
                     self.net_input(self.ffwd_ids) = self.activation * self.weights(:, self.ffwd_ids) ...
-                        + self.bias(self.ffwd_ids);
+                        + self.bias(self.ffwd_ids) + normrnd(0, 0.1, size(self.ffwd_ids));
                     self.net_input(self.wm_ids) = self.activation(self.ffwd_ids) * self.weights(self.ffwd_ids, self.wm_ids) ...
                         + self.wm_act * self.weights(self.wm_ids, self.wm_ids) ...
-                        + self.bias(self.wm_ids);
+                        + self.bias(self.wm_ids) + normrnd(0, 0.01, size(self.wm_ids));
                     
                     % on instruction, oscillate around initial WM
                     % activations -- WTF bro
@@ -232,13 +232,7 @@ classdef Simulator < Model
                     %if cycles + cycle < 10
                     %    fprintf('%d: %.4f %.4f\n', cycles + cycle, self.activation(1), self.net_input(self.unit_id('PM Task')));
                     %end
-                                        
-                    % add noise to net inputs (except input units)
-                    %noise = normrnd(0, 0.05, size(self.net_input));
-                    %noise(self.input_ids) = 0;
-                    %self.net_input(self.context_ids) = normrnd(0, 0.01, 1, length(self.context_ids));
-                    % TODO no noise... for now
-                    
+                                                            
                     %self.bias(self.wm_ids) = self.bias(self.wm_ids) - 0.00001;
                     
                     % update activation levels for feedforward part of the

@@ -20,17 +20,18 @@ where
 
 
 
-debug_mode = false;
+debug_mode = true;
 experiment = 1;
 
 
-% YES!!! this is experiment -- with supersubjects
-startpar = [1  0.35   1    0.3, ...      % focal, low emph     % exp1_v16, exp2_v19
-            1  0.6    1    0.4, ...    % focal, high emph      % exp1_v16
-            1  0.8    1    0.75, ...    % nonfocal, low emph   % exp2_v11
-            1  0.9    1    0.83, ...    % nonfocal, high emph  % exp1_v16 -- sorta
+
+% YES!!! this is experiment 1 -- with supersubjects
+startpar = [1  0.1   1    0.1, ...      % focal, low emph     % exp1_v16, exp2_v19
+            1  0.4    1    0.4, ...    % focal, high emph      % exp1_v16
+            1  0.7    1    0.7, ...    % nonfocal, low emph   % exp2_v11
+            1  0.8    1    0.8, ...    % nonfocal, high emph  % exp1_v16 -- sorta
             4 4 4, ...
-            0.1 0.0];
+            0.0 0.0];
 
 
 
@@ -38,7 +39,7 @@ startpar = [1  0.35   1    0.3, ...      % focal, low emph     % exp1_v16, exp2_
 data
 
 if debug_mode
-	m = Model([startpar(1:4) startpar(17:18) 1 0 startpar(19)], false);
+	m = Model(true, [startpar(1:4) startpar(17:18) 1 0 startpar(19)], false);
     wm_ids = m.wm_ids;
     context_ids = m.context_ids;
     act = extra{1, 8};

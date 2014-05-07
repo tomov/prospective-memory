@@ -219,7 +219,7 @@ empirical_Fs = [
     ];
 focal_titles = {'Nonfocal', 'Focal'};
 for FOCAL = 1:-1:0
-    samples = blocks(blocks(:, 1) == 0 & blocks(:, 2) == FOCAL, :)
+    samples = blocks(blocks(:, 1) == 0 & blocks(:, 2) == FOCAL, :);
     [p, table] = anovan(samples(:, 7), {samples(:, 10)}, 'model','full', 'display', 'off');
     fprintf('\n\n----- PM hit rate: %s ------\n', focal_titles{FOCAL+1});
     fprintf('\n  Empirical Data -------\n');
