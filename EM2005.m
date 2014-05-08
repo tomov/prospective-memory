@@ -16,9 +16,9 @@ assert(exp_id == 1 || exp_id == 2 || exp_id == 3 || exp_id == 5);
 fprintf('\n\n--------========= RUNNING E&M EXPERIMENT %d ======-------\n\n', exp_id);
 
 % from E&M Experiment 1 & 2 methods
-subjects_per_condition = 1; % 24;
-blocks_per_condition = [8 4 8 NaN 100];  % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
-trials_per_block = [24 40 24 NaN 18]; % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
+subjects_per_condition = 200; % 24;
+blocks_per_condition = [8 4 8 NaN 1];  % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
+trials_per_block = [24 40 24 NaN 52]; % exp 1, exp 2, exp 3 (= exp 1 for now), exp 4 TBD, exp 5
 pm_blocks_exp1 = [1 3 6 7];
 pm_trials_exp2 = [40 80 120 160]; % 20 60 100 140];
 
@@ -42,6 +42,7 @@ elseif exp_id == 2
 elseif exp_id == 3
     focal_range = 1;
 elseif exp_id == 5
+    og_only_range = 0;
     target_range = [1];
     emphasis_range = 0;
     focal_range = 1;
@@ -135,18 +136,19 @@ for OG_ONLY = 0 %og_range
                 if exp_id == 5
                     inter_stimuli = [
                         {'dog'}, 1;
-                        {'tortoise'}, 1;
                         {'dog'}, 1;
                         {'monkey'}, 1;
-                        {'tortoise'}, 1;
                         {'crocodile'}, 1;
                         {'kiwi'}, 1;
-                        {'tortoise'}, 1;
                         {'cat'}, 1;
+                        {'crocodile'}, 1;
                         {'dog'}, 1;
+                        {'crocodile'}, 1;
+                        {'tortoise'}, 1;
                     ];
-                    inter_correct = {'Yes'; 'No'; 'Yes'; 'No'; 'No'; 'No'; 'No'; 'No'; 'Yes'; 'Yes'};
-                    inter_is_target = [0; 1; 0; 0; 1; 0; 0; 1; 0; 0];
+                    inter_correct = {'Yes'; 'Yes'; 'No'; 'No'; 'No'; 
+                        'Yes'; 'No'; 'Yes'; 'No'; 'No'};
+                    inter_is_target = [0; 0; 0; 0; 0; 0; 0; 0; 0; 1];
 
                     % copy & trim 'em
                     inter_stimuli = repmat(inter_stimuli, trials_per_block, 1);
@@ -244,7 +246,7 @@ for OG_ONLY = 0 %og_range
                             fprintf('            : accuracy on targets = %.2f\n', IT_tar_hit);
                         end
                      
-                        subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit];
+                        subject = [OG_ONLY, FOCAL, EMPHASIS, OG_RT, OG_Hit, PM_RT, PM_Hit, PM_miss_OG_hit, IT_TAR_RT, IT_NONTAR_RT, IT_tar_hit];
                         data = [data; subject];
                         subject_extra = {sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, responses, RTs, act, acc, onsets, offsets, nets};
                         extra = [extra; subject_extra];
@@ -271,12 +273,14 @@ for OG_ONLY = 0 %og_range
                     end
                     
                     % show picture of whole thing (for debugging)
+                    %{
                     if ~OG_ONLY
                         getstats(sim, OG_ONLY, FOCAL, EMPHASIS, TARGETS, ...
                             responses, RTs, act, acc, onsets, offsets, ...
                             is_target, correct, og_correct, ...
                             true);
                     end
+                    %}
                 end
             
                 

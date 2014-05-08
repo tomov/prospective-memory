@@ -25,3 +25,6 @@ startpar = [1  0       1    0, ...      % focal, low emph
             3 3];
         
 [data, extra] = EM2005(startpar, 5);
+
+filename = sprintf('/mnt/cd/people/mtomov/data/%s.mat', mfilename());
+save(filename);
