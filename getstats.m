@@ -92,6 +92,7 @@ if ~OG_ONLY && ~show_pics
     fprintf('OG accuracy = %.4f%%\n', size(OG_correct_RTs, 1) / OG_count * 100);
     fprintf('PM hit rate = %.4f%% (%.4f%% were OG correct)\n', size(PM_hit_RTs, 1) / PM_count * 100, ...
         size(PM_miss_correct_OG_RTs, 1) / size(PM_miss_RTs, 1) * 100);
+    fprintf('mean PM miss RTs = %.4f (%.4f)\n', mean(PM_miss_correct_OG_RTs) * 12.5 + 63, std(PM_miss_correct_OG_RTs) * 12.5 / sqrt(length(PM_miss_correct_OG_RTs)));
 end
 
 
@@ -188,7 +189,8 @@ if show_pics
     ylim(y_lim);
     line([onset_plot onset_plot],y_lim,'Color',[0.5 0.5 0.5])
     line([offset_plot offset_plot],y_lim, 'LineStyle', '--', 'Color',[0.5 0.5 0.5])
-%{
+
+    %{
     figure;
 
     subplot(1, 2, 1);
@@ -209,6 +211,6 @@ if show_pics
     ylim([0 100]);
     title('Fraction of responses (%)', 'FontWeight','bold');
     ylim([0 100]);
-%}
+    %}
     
 end

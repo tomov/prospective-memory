@@ -74,7 +74,13 @@ for EMPHASIS = 0:1
             samples = subjects(subjects(:, 1) == OG_ONLY & subjects(:, 3) == EMPHASIS & subjects(:, 9) == TARGETS, col);
             M = mean(samples);
             SD = std(samples);
+            SEM = SD / sqrt(length(samples));
             assert(length(samples) == subjects_per_condition);
+            if col == 4
+                fprintf('OG RT: emphasis = %d, og only = %d: $%.2f \\pm %.2f$\n', EMPHASIS, OG_ONLY,  M * RT_slope + RT_intercept, SEM * RT_slope);
+            elseif col == 7
+                fprintf('PM hit rate: emphasis = %d, og only = %d: $%.2f \\pm %.2f$\n', EMPHASIS, OG_ONLY,  M, SEM);
+            end
             stat = [stat, M, SD];
         end
         stat = [stat, TARGETS];
@@ -107,13 +113,20 @@ OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_s
 
 if DO_PLOT
     figure;
-    scatter(simulation_cycles, empirical_RTs);
+    scatter(simulation_cycles, empirical_RTs, 'fill');
     clear xlabel ylabel;
     xlabel('Simulation RTs (cycles)');
     ylabel('Empirical RTs (msec)');
-    text(72, 5150, OG_RT_label_cycles_to_msec, 'fontsize', 14);
+    text(73.4, 7400, OG_RT_label_cycles_to_msec, 'fontsize', 14);
     lsline
     title(sprintf('R^2 = %.4f', rsq));
+    
+    h = get(gca, 'xlabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'ylabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'title');
+    set(h, 'FontSize', 15);    
 end
 
 
@@ -453,12 +466,12 @@ if DO_PLOT
     subplot(3, 2, 1);
     title('Empirical Data');
     ylabel('OG RT (msec)');
-    plot_all_conditions_exp4(empirical_stats(:, [1 12 3 4 5]), 5500, 7500, 1, 0, true);
+    plot_all_conditions_exp4(empirical_stats(:, [1 12 3 4 5]), 6000, 8000, 1, 0, false);
 
     subplot(3, 2, 2);
     title('Simulation Data');
-    ylabel(OG_RT_label_cycles_to_msec);
-    plot_all_conditions_exp4(simulation_stats(:, [1 12 3 4 5]), 5500, 7500, RT_slope, RT_intercept, false);
+    %ylabel(OG_RT_label_cycles_to_msec);
+    plot_all_conditions_exp4(simulation_stats(:, [1 12 3 4 5]), 6000, 8000, RT_slope, RT_intercept, true);
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');

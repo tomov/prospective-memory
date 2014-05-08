@@ -2,11 +2,11 @@ function plot_all_conditions_exp2( stats, ymin, ymax, slope, intercept, show_leg
 %UNTITLED9 Summary of this function goes here
 %   Detailed explanation goes here
 
-focal_titles = {'Nonfocal', 'Focal'};
-markers = {'b-o', 'r-*', 'g-o', 'm-*'};
+focal_titles = {'Nonfoc', 'Focal'};
+markers = {'b-*', 'r-*', 'g-*', 'm-*'};
 emphasis_titles = {'Low', 'High'};
 block_titles = {'Block #1', 'Block #2', 'Block #3', 'Block #4'};
-og_only_titles = {'PM', 'No-PM'};
+og_only_titles = {'PM', 'NPM'};
 handles = [];
 
 legend_titles = {};
@@ -26,8 +26,8 @@ for OG_ONLY = og_only_range
             errors = [errors, SD];
             xes = [xes, x];
             x = x + 1;
-            xlabel = sprintf('%s', block_titles{BLOCK});
-            xticklabels = [xticklabels,  {xlabel}];
+            xticklabel = sprintf('%s', block_titles{BLOCK});
+            xticklabels = [xticklabels,  {xticklabel}];
         end
         hold on;
         errorbar(xes, values, errors);
@@ -43,9 +43,17 @@ hold off;
 axis([0 x ymin ymax]);
 set(gca, 'XTickLabel', [{''}, xticklabels, {''}]);
 if show_legend
-    legend(handles, legend_titles);
+    h = legend(handles, legend_titles);
+    set(h, 'FontSize', 9);
 end
 
+
+h = get(gca, 'xlabel');
+set(h, 'FontSize', 15);
+h = get(gca, 'ylabel');
+set(h, 'FontSize', 15);
+h = get(gca, 'title');
+set(h, 'FontSize', 15);
 
 
 

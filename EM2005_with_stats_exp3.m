@@ -105,13 +105,20 @@ OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_s
 
 if DO_PLOT
     figure;
-    scatter(simulation_cycles, empirical_RTs);
+    scatter(simulation_cycles, empirical_RTs, 'fill');
     clear xlabel ylabel;
     xlabel('Simulation RTs (cycles)');
     ylabel('Empirical RTs (msec)');
-    text(72, 5150, OG_RT_label_cycles_to_msec, 'fontsize', 14);
+    text(73, 5150, OG_RT_label_cycles_to_msec, 'fontsize', 12);
     lsline
     title(sprintf('R^2 = %.4f', rsq));
+
+    h = get(gca, 'xlabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'ylabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'title');
+    set(h, 'FontSize', 15);
 end
 
 
@@ -160,12 +167,12 @@ if DO_PLOT
     subplot(3, 2, 1);
     barweb([80 72], [28 25]/sqrt(subjects_per_condition), 1, {}, ...
         'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
-    legend({'1 Target', '6 Targets'});
     ylim([40 100]);
 
     subplot(3, 2, 2);
     barweb(Ms, SEMs, 1, {}, ...
         'Simulation Data', 'PM Condition');
+    legend({'1 Target', '6 Targets'});
     ylim([40 100]);
 end
 
@@ -204,13 +211,13 @@ if DO_PLOT
     
     subplot(3, 2, 3);
     barweb([69 70], [10 11]/sqrt(subjects_per_condition), 1, {}, ...
-        'Empirical Data', 'PM Condition', 'OG Accuracy (%)');
-    legend({'1 Target', '6 Targets'});
+        '', 'PM Condition', 'OG Accuracy (%)');
     ylim([40 100]);
     
     subplot(3, 2, 4);
     barweb(Ms, SEMs, 1, {}, ...
-        'Simulation Data', 'PM Condition');
+        '', 'PM Condition');
+    legend({'1 Target', '6 Targets'});
     ylim([40 100]);
 end
 
@@ -244,7 +251,7 @@ fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 
 
 if DO_PLOT
-    titles = {'Empirical Data', 'Simulation Data'};
+    titles = {'', ''};
     sources = {empirical_stats, simulation_stats};
     for s_id = 1:2
         subplot(3, 2, s_id + 4);
@@ -266,14 +273,19 @@ if DO_PLOT
                 end
                 Ms(2 - OG_ONLY, targets_idx) = M;
                 SEMs(2 - OG_ONLY, targets_idx) = SEM;
+                
+                if s_id == 2
+                    fprintf('targets = %d, og only = %d: $%.2f \\pm %.2f$\n', TARGETS, OG_ONLY,  M, SEM);
+                end
             end
         end
 
         barweb(Ms, SEMs, 1, {'1 Target', '6 Targets'}, ...
             titles{s_id}, 'PM Condition');
         if s_id == 1
-            legend({'No-PM', 'PM'});
             ylabel('Ongoing RT (msec)');
+        else
+            legend({'No-PM', 'PM'});
         end
         ylim([4500 5500]);
     end
@@ -293,12 +305,12 @@ if DO_PLOT
     subplot(3, 2, 1);
     title('Empirical Data');
     ylabel('OG RT (msec)');
-    plot_all_conditions_exp3(empirical_stats(:, [1 12 3 4 5]), 4500, 5500, 1, 0, true);
+    plot_all_conditions_exp3(empirical_stats(:, [1 12 3 4 5]), 4500, 5500, 1, 0, false);
 
     subplot(3, 2, 2);
     title('Simulation Data');
-    ylabel(OG_RT_label_cycles_to_msec);
-    plot_all_conditions_exp3(simulation_stats(:, [1 12 3 4 5]), 4500, 5500, RT_slope, RT_intercept, false);
+    %ylabel(OG_RT_label_cycles_to_msec);
+    plot_all_conditions_exp3(simulation_stats(:, [1 12 3 4 5]), 4500, 5500, RT_slope, RT_intercept, true);
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');

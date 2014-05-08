@@ -21,18 +21,25 @@ where
 
 
 debug_mode = true;
-experiment = 1;
+experiment = 5;
 
 
 
 % YES!!! this is experiment 1 -- with supersubjects
+%{
 startpar = [1  0.1   1    0.1, ...      % focal, low emph     % exp1_v16, exp2_v19
             1  0.4    1    0.4, ...    % focal, high emph      % exp1_v16
             1  0.7    1    0.7, ...    % nonfocal, low emph   % exp2_v11
             1  0.8    1    0.8, ...    % nonfocal, high emph  % exp1_v16 -- sorta
             4 4 4, ...
+            0.5 0.5];
+%}
+startpar = [1  0.35   1    0.3, ...      % focal, low emph     % exp1_v16, exp2_v19
+            1  0.6    1    0.4, ...    % focal, high emph      % exp1_v16
+            1  0.8    1    0.75, ...    % nonfocal, low emph   % exp2_v11
+            1  0.9    1    0.83, ...    % nonfocal, high emph  % exp1_v16 -- sorta
+            4 4 4, ...
             0.0 0.0];
-
 
 
 [data, extra] = EM2005(startpar, experiment, debug_mode);

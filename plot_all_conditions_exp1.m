@@ -3,9 +3,9 @@ function plot_all_conditions_exp1( stats, ymin, ymax, slope, intercept, show_leg
 %   Detailed explanation goes here
 
 focal_titles = {'Nonfocal', 'Focal'};
-markers = {'b-o', 'r-*'};
-emphasis_titles = {'Low', 'High'};
-og_only_titles = {'PM', 'No-PM'};
+markers = {'b-*', 'r-*'};
+emphasis_titles = {'Lo', 'Hi'};
+og_only_titles = {'PM', 'NPM'};
 handles = [];
 
 legend_titles = {};
@@ -24,7 +24,7 @@ for FOCAL = 1:-1:0
             errors = [errors, SD];
             xes = [xes, x];
             x = x + 1;
-            xlabel = sprintf('%s, %s', emphasis_titles{EMPHASIS+1}, og_only_titles{OG_ONLY+1});
+            xlabel = sprintf('%s,%s', emphasis_titles{EMPHASIS+1}, og_only_titles{OG_ONLY+1});
             xticklabels = [xticklabels,  {xlabel}];
         end
     end
@@ -36,11 +36,19 @@ for FOCAL = 1:-1:0
 end
 
 hold off;
-axis([0 x ymin ymax]);
-set(gca, 'XTickLabel', [{''}, xticklabels, {''}]);
+axis([0.5 x-0.5 ymin ymax]);
+set(gca, 'XTickLabel', [xticklabels, {''}]);
 if show_legend
-    legend(handles, legend_titles);
+    h = legend(handles, legend_titles);
+    set(h, 'FontSize', 13);
 end
+
+h = get(gca, 'xlabel');
+set(h, 'FontSize', 15);
+h = get(gca, 'ylabel');
+set(h, 'FontSize', 15);
+h = get(gca, 'title');
+set(h, 'FontSize', 15);
 
 
 

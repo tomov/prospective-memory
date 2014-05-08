@@ -128,14 +128,22 @@ OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_s
 
 if DO_PLOT
     figure;
-    scatter(simulation_cycles, empirical_RTs);
+    scatter(simulation_cycles, empirical_RTs, 'fill');
     clear xlabel ylabel;
     xlabel('Simulation RTs (cycles)');
     ylabel('Empirical RTs (msec)');
     lsline
-    text(min(xlim), mean(ylim), OG_RT_label_cycles_to_msec, 'fontsize', 14);
+    text(min(xlim) + 1, 1220, OG_RT_label_cycles_to_msec, 'fontsize', 14);
     title(sprintf('R^2 = %.4f', rsq));
-end
+    h = get(gca, 'xlabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'ylabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'title');
+    set(h, 'FontSize', 15);
+
+end    
+
 
 
 
@@ -185,13 +193,13 @@ if DO_PLOT
     
     figure;
     
-    subplot(3, 2, 1);
+    subplot(1, 2, 1);
     barweb([93 61], [16 32]/sqrt(subjects_per_condition), 1, {}, ...
         'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
     legend({'Focal', 'Nonfocal'});
     ylim([30 100]);
 
-    subplot(3, 2, 2);
+    subplot(1, 2, 2);
     barweb(Ms, SEMs, 1, {}, ...
         'Simulation Data', 'PM Condition');
     ylim([30 100]);
@@ -473,12 +481,11 @@ if DO_PLOT
     subplot(3, 2, 1);
     title('Empirical Data');
     ylabel('OG RT (msec)');
-    plot_all_conditions_exp2(empirical_stats(:, [1:3 4 5 12]), 900, 1300, 1, 0, true, [0 1]);
+    plot_all_conditions_exp2(empirical_stats(:, [1:3 4 5 12]), 900, 1300, 1, 0, false, [0 1]);
 
     subplot(3, 2, 2);
     title('Simulation Data');
-    ylabel(OG_RT_label_cycles_to_msec);
-    plot_all_conditions_exp2(simulation_stats(:, [1:3 4 5 12]), 900, 1300, RT_slope, RT_intercept, false, [0 1]);
+    plot_all_conditions_exp2(simulation_stats(:, [1:3 4 5 12]), 900, 1300, RT_slope, RT_intercept, true, [0 1]);
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');

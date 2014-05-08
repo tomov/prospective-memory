@@ -46,6 +46,7 @@ elseif exp_id == 2
     target_range = 1;
 elseif exp_id == 3
     focal_range = 1;
+    emphasis_range = 0;
 elseif exp_id == 4
     focal_range = 1;
     target_range = 1;
@@ -163,13 +164,11 @@ for OG_ONLY = og_range
                 
                 if exp_id == 5
                     inter_stimuli = [
-                        {'switch to Inter Task'}, 1;
                         {'dog'}, 1;
                         {'tortoise'}, 1;
                         {'dog'}, 1;
                         {'monkey'}, 1;
                         {'tortoise'}, 1;
-                        {'switch back to OG and PM'}, 1;
                         {'crocodile'}, 1;
                         {'kiwi'}, 1;
                         {'tortoise'}, 1;
@@ -237,8 +236,8 @@ for OG_ONLY = og_range
                         end
                     end
                 end
-                curpar(2) = curpar(2) + normrnd(0, param_noise_sigma_1, 1, 1);
-                curpar(4) = curpar(4) + normrnd(0, param_noise_sigma_2, 1, 1);
+                %curpar(2) = curpar(2) + normrnd(0, param_noise_sigma_1, 1, 1);
+                %curpar(4) = curpar(4) + normrnd(0, param_noise_sigma_2, 1, 1);
 
                 % initialize simulator
                 if exp_id == 5

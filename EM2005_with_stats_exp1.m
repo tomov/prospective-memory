@@ -15,7 +15,7 @@
  (see EM2005)
 %}
 
-DO_PLOT = true;
+DO_PLOT = false;
 subjects = data;
 
 % note that you can run this with the data returned from experiment 2
@@ -70,9 +70,10 @@ for FOCAL = 1:-1:0
             stat = [OG_ONLY, FOCAL, EMPHASIS];
             for col = 4:7
                 samples = subjects(subjects(:, 1) == OG_ONLY & subjects(:, 2) == FOCAL & subjects(:, 3) == EMPHASIS, col);
+                samples = samples(~isnan(samples));
                 M = mean(samples);
                 SD = std(samples);
-                assert(length(samples) == subjects_per_condition);
+                %assert(length(samples) == subjects_per_condition);
                 stat = [stat, M, SD];
             end
             simulation_stats = [simulation_stats; stat];
@@ -101,17 +102,24 @@ SSresid = sum(yresid.^2);
 SStotal = (length(empirical_RTs)-1) * var(empirical_RTs);
 rsq = 1 - SSresid/SStotal;
 
-OG_RT_label_cycles_to_msec = sprintf('OG RT (msec = cycles * %.1f + %.1f)', RT_slope, RT_intercept);
+OG_RT_label_cycles_to_msec = sprintf('OG RT (msec) = cycles * %.1f + %.1f', RT_slope, RT_intercept);
 
 if DO_PLOT
     figure;
-    scatter(simulation_cycles, empirical_RTs);
+    scatter(simulation_cycles, empirical_RTs, 'fill');
     clear xlabel ylabel;
     xlabel('Simulation RTs (cycles)');
     ylabel('Empirical RTs (msec)');
     lsline
-    text(min(xlim), mean(ylim), OG_RT_label_cycles_to_msec, 'fontsize', 14);
+    text(86, 1550, OG_RT_label_cycles_to_msec, 'fontsize', 12);
     title(sprintf('R^2 = %.4f', rsq));
+    
+    h = get(gca, 'xlabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'ylabel');
+    set(h, 'FontSize', 15);
+    h = get(gca, 'title');
+    set(h, 'FontSize', 15);
 end
 
 
@@ -158,6 +166,7 @@ if DO_PLOT
         SEM = SD / sqrt(length(samples));
         Ms(2 - FOCAL) = M;
         SEMs(2 - FOCAL) = SEM;
+        fprintf('focal = %d, %.3f +- %.3f\n', FOCAL, M, SEM);
     end
     
     figure;
@@ -165,7 +174,8 @@ if DO_PLOT
     subplot(3, 2, 1);
     barweb([90 67], [16 33]/sqrt(subjects_per_condition), 1, {}, ...
         'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
-    legend({'Focal', 'Nonfocal'});
+    h = legend({'Foc', 'Nonfoc'});
+    set(h, 'FontSize', 10);
     ylim([30 100]);
 
     subplot(3, 2, 2);
@@ -198,17 +208,19 @@ if DO_PLOT
         SEM = SD / sqrt(length(samples));
         Ms(EMPHASIS + 1) = M;
         SEMs(EMPHASIS + 1) = SEM;
+        fprintf('emphasis = %d, %.3f +- %.3f\n', EMPHASIS, M, SEM);
     end
     
     subplot(3, 2, 3);
     barweb([70 87], [32 22]/sqrt(subjects_per_condition), 1, {}, ...
-        'Empirical Data', 'PM Condition', 'PM Hit rate (%)');
-    legend({'Low Emphasis', 'High Emphasis'});
+        '', 'PM Condition', 'PM Hit rate (%)');
+    h =legend({'Low', 'High'});
+    set(h, 'FontSize', 10);
     ylim([30 100]);
 
     subplot(3, 2, 4);
     barweb(Ms, SEMs, 1, {}, ...
-        'Simulation Data', 'PM Condition');
+        '', 'PM Condition');
     ylim([30 100]);
 end
 
@@ -228,7 +240,7 @@ fprintf('    Emphasis:    F = %.4f, p = %f\n', table{3,6}, p(2));
 fprintf('    Interaction: F = %.4f, p = %f\n', table{4,6}, p(3));
 
 if DO_PLOT
-    titles = {'Empirical Data', 'Simulation Data'};
+    titles = {'', ''};
     sources = {empirical_stats, simulation_stats};
     for s_id = 1:2
         subplot(3, 2, s_id + 4);
@@ -238,22 +250,84 @@ if DO_PLOT
         SEMs = zeros(2);
         for FOCAL = 1:-1:0
             for EMPHASIS = 0:1
-                Ms(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
+                M = stats(stats(:,1) == 0 & ...
                     stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 10);
-                SEMs(2 - FOCAL, EMPHASIS + 1) = stats(stats(:,1) == 0 & ...
+                SEM = stats(stats(:,1) == 0 & ...
                     stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 11);
+                Ms(2 - FOCAL, EMPHASIS + 1) = M;
+                SEMs(2 - FOCAL, EMPHASIS + 1) = SEM;
+                fprintf('focal = %d, emphasis = %d, %.3f +- %.3f\n', FOCAL, EMPHASIS, M, SEM);
             end
         end
 
         barweb(Ms, SEMs, 1, {'Focal', 'Nonfocal'}, ...
             titles{s_id}, 'PM Condition');
         if s_id == 1
-            legend({'Low Emphasis', 'High Emphasis'});
+            h = legend({'Low', 'High'});
+            set(h, 'FontSize', 10);
             ylabel('PM Hit rate (%)');
         end
         ylim([30 100]);
     end
 end
+
+
+
+
+
+
+
+
+
+
+%%% ----------------- PM RT's ----------------------------------
+
+PM_RTs = subjects(:, 6);
+
+[p, table] = anovan(PM_RTs, {subjects(:, 2) subjects(:, 3)}, 'model','interaction', 'display', 'off');
+
+fprintf('\n\n----- PM RTs NEW: Interaction between Focality and Emphasis ------\n');
+fprintf('\n  Simulation Data -------\n');
+fprintf('    Focality:    F = %.4f, p = %f\n', table{2,6}, p(1));
+fprintf('    Emphasis:    F = %.4f, p = %f\n', table{3,6}, p(2));
+fprintf('    Interaction: F = %.4f, p = %f\n', table{4,6}, p(3));
+
+if true
+    titles = {'', 'Simulation Data'};
+    sources = {empirical_stats, simulation_stats};
+    for s_id = 2:2
+
+        figure;
+
+        stats = sources{s_id};
+        Ms = zeros(2);
+        SEMs = zeros(2);
+        for FOCAL = 1:-1:0
+            for EMPHASIS = 0:1
+                M = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 8);
+                SEM = stats(stats(:,1) == 0 & ...
+                    stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 9);
+                M = M * RT_slope + RT_intercept;
+                SEM = SEM * RT_slope;
+                Ms(2 - FOCAL, EMPHASIS + 1) = M;
+                SEMs(2 - FOCAL, EMPHASIS + 1) = SEM;
+                fprintf('focal = %d, emphasis = %d, %.3f +- %.3f\n', FOCAL, EMPHASIS, M, SEM);
+            end
+        end
+
+        barweb(Ms, SEMs, 1, {'Focal', 'Nonfocal'}, ...
+            titles{s_id}, 'PM Condition');
+        if s_id == 2
+            h = legend({'Low', 'High'});
+            set(h, 'FontSize', 10);
+            ylabel('PM hit RT (ms)');
+        end
+        %ylim([30 100]);
+    end
+end
+
+
 
 
 
@@ -298,8 +372,11 @@ if DO_PLOT
         M = mean(samples);
         SD = std(samples);
         SEM = SD / sqrt(length(samples));
-        Ms(2 - FOCAL) = M * RT_slope + RT_intercept;
-        SEMs(2 - FOCAL) = SEM * RT_slope;
+        M = M * RT_slope + RT_intercept;
+        SEM = SEM * RT_slope;
+        Ms(2 - FOCAL) = M;
+        SEMs(2 - FOCAL) = SEM;
+        fprintf('focal = %d, %.3f +- %.3f\n', FOCAL, M, SEM);
     end
     
     figure;
@@ -307,7 +384,8 @@ if DO_PLOT
     subplot(3, 2, 1);
     barweb([1145.63 1335.73], [0 0]/sqrt(subjects_per_condition), 1, {}, ...
         'Empirical Data', 'PM Condition', 'Ongoing RT (msec)');
-    legend({'Focal', 'Nonfocal'});
+    h = legend({'Focal', 'Nonfoc'});
+    set(h, 'FontSize', 10);
     ylim([1000 1400]);
 
     subplot(3, 2, 2);
@@ -335,24 +413,30 @@ if DO_PLOT
         M = mean(samples);
         SD = std(samples);
         SEM = SD / sqrt(length(samples));
-        Ms(EMPHASIS + 1) = M * RT_slope + RT_intercept;
-        SEMs(EMPHASIS + 1) = SEM * RT_slope;
+        M = M * RT_slope + RT_intercept;
+        SEM = SEM * RT_slope;
+        Ms(EMPHASIS + 1) = M;
+        SEMs(EMPHASIS + 1) = SEM;
+        fprintf('emphasis = %d, %.3f +- %.3f\n', EMPHASIS, M, SEM);
     end
     
     subplot(3, 2, 3);
     barweb([1190.11 1291.26], [0 0]/sqrt(subjects_per_condition), 1, {}, ...
-        'Empirical Data', 'PM Condition', 'Ongoing RT (msec)');
-    legend({'Low Emphasis', 'High Emphasis'});
+        '', 'PM Condition', 'Ongoing RT (msec)');
+    h = legend({'Low', 'High'});
+    set(h, 'FontSize', 10);
     ylim([1000 1400]);
 
     subplot(3, 2, 4);
     barweb(Ms, SEMs, 1, {}, ...
-        'Simulation Data', 'PM Condition');
+        '', 'PM Condition');
     ylim([1000 1400]);
 end
 
 
 % ----------------- OG RT: PM vs. No PM
+
+
 
 [p, table] = anovan(OG_RTs, {subjects(:, 1)}, 'model','full', 'display', 'off');
 
@@ -362,6 +446,18 @@ fprintf('                 F = 131.66\n');
 fprintf('\n  Simulation Data -------\n');
 fprintf('                 F = %.4f, p = %f\n', table{2,6}, p(1));
 
+
+for OG_ONLY = 0:1
+    samples = subjects(subjects(:, 1) == OG_ONLY, 4);
+    M = mean(samples);
+    SD = std(samples);
+    SEM = SD / sqrt(length(samples));
+    M = M * RT_slope + RT_intercept;
+    SEM = SEM * RT_slope;
+    Ms(EMPHASIS + 1) = M;
+    SEMs(EMPHASIS + 1) = SEM;
+    fprintf('og only = %d, %.3f +- %.3f\n', OG_ONLY, M, SEM);
+end
 
 
 
@@ -406,7 +502,7 @@ end
 
 
 if DO_PLOT
-    titles = {'Empirical Data', 'Simulation Data'};
+    titles = {'', ''};
     sources = {empirical_stats, simulation_stats};
     for s_id = 1:2
         subplot(3, 2, s_id + 4);
@@ -426,13 +522,17 @@ if DO_PLOT
                 end
                 Ms(2 - FOCAL, EMPHASIS + 1) = M;
                 SEMs(2 - FOCAL, EMPHASIS + 1) = SEM;
+                M_ogonly = stats(stats(:,1) == 1 & stats(:, 2) == FOCAL & stats(:, 3) == EMPHASIS, 4);
+                M_ogonly = M_ogonly * RT_slope + RT_intercept; 
+                fprintf('focal = %d, emphasis = %d, %.3f +- %.3f, cost = %.3f\n', FOCAL, EMPHASIS, M, SEM, M - M_ogonly);
             end
         end
 
         barweb(Ms, SEMs, 1, {'Focal', 'Nonfocal'}, ...
             titles{s_id}, 'PM Condition');
         if s_id == 1
-            legend({'Low Emphasis', 'High Emphasis'});
+            h = legend({'Low', 'High'});
+            set(h, 'FontSize', 10);
             ylabel('Ongoing RT (msec)');
         end
         ylim([1000 1700]);
@@ -461,15 +561,15 @@ if DO_PLOT
 
     subplot(3, 2, 2);
     title('Simulation Data');
-    ylabel(OG_RT_label_cycles_to_msec);
+    %ylabel(OG_RT_label_cycles_to_msec);
     plot_all_conditions_exp1(simulation_stats(:, [1:3 4 5]), 1000, 1700, RT_slope, RT_intercept, false);
 
     subplot(3, 2, 3);
     ylabel('OG Accuracy (%)');
-    plot_all_conditions_exp1(empirical_stats(:, [1:3 6 7]), 90, 100, 1, 0, false);
+    plot_all_conditions_exp1(empirical_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
 
     subplot(3, 2, 4);
-    plot_all_conditions_exp1(simulation_stats(:, [1:3 6 7]), 90, 100, 1, 0, false);
+    plot_all_conditions_exp1(simulation_stats(:, [1:3 6 7]), 40, 100, 1, 0, false);
 
     subplot(3, 2, 5);
     ylabel('PM Hit Rate (%)');

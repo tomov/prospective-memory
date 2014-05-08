@@ -101,11 +101,11 @@ classdef Model < handle
         % hippocampus
         
         % FUTURE -20
-        BIAS_FOR_HIPPO = -23; %-32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
+        BIAS_FOR_HIPPO = -32; %-23; %-32;  % must be < -10, o/w tasks drift b/c of (super small) input current from hippo
         
         % FUTURE 20, 12
-        STIMULUS_TO_HIPPO = 16; % 30
-        CONTEXT_TO_HIPPO = 16;  % 20
+        STIMULUS_TO_HIPPO = 30; % 30
+        CONTEXT_TO_HIPPO = 20;  % 20
         
         %OUTPUT_TO_SELF = 0; % makes response->output more like copying rather than integration
         %RESPONSE_TO_SELF = 0;
@@ -364,8 +364,8 @@ classdef Model < handle
             %if FOCAL
             % FUTURE
                 self.connections = [self.connections;
-                    self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
-                    self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                %    self.unit_id('see a subject')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
+                %    self.unit_id('see an animal')              , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                     self.unit_id('see physics')                , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                     self.unit_id('see math')                   , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
                     self.unit_id('see tortoise')               , self.unit_id('PM Response')         , self.PERCEPTION_TO_RESPONSE;
